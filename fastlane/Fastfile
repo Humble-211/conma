@@ -1,0 +1,33 @@
+default_platform(:ios)
+
+platform :ios do
+  before_all do
+    setup_ci if ENV["CI"]
+    app_store_connect_api_key(
+      key_id: ENV["ASC_KEY_ID"],
+      issuer_id: ENV["ASC_ISSUER_ID"],
+      key_content: ENV["ASC_KEY_CONTENT"],
+      is_key_content_base64: true,
+      in_house: false
+    )
+  end
+
+  desc "One-time: create distribution certificate and App Store profile in the match repo"
+  lane :setup_signing do
+    match(type: "appstore", readonly: false)
+  end
+
+  desc "Build and upload to TestFlight (the workflow runs `xcodegen generate` before this lane)"
+  lane :beta do
+    match(type: "appstore", readonly: true)
+    build_app(
+      project: "ConstructionManagement.xcodeproj",
+      scheme: "ConstructionManagement",
+      configuration: "Release",
+      export_method: "app-store",
+      output_directory: "build",
+      xcargs: "-skipPackagePluginValidation CURRENT_PROJECT_VERSION=#{ENV['BUILD_NUMBER']}"
+    )
+    upload_to_testflight(skip_waiting_for_build_processing: true)
+  end
+end
