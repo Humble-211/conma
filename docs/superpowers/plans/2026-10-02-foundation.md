@@ -24,7 +24,7 @@
 - Không `try!`, `fatalError`, force-unwrap trong code production (được phép trong test).
 - Không gọi `Date()` trong `Domain`; `today`/`now` luôn là tham số.
 - Repo public: không secret nào trong repo; chứng chỉ ở repo private riêng; workflow có secret không chạy cho PR từ fork.
-- Commit message tiếng Anh, dạng `type: summary`, kết thúc bằng dòng `Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>`.
+- Commit message tiếng Anh, dạng `type(scope): summary`. Không thêm trailer `Co-Authored-By`.
 
 ## Review Focus
 
@@ -270,9 +270,7 @@ jobs:
 
 ```bash
 git add .gitignore README.md Packages/Domain .github/workflows/domain.yml
-git commit -m "chore: scaffold Domain package and Linux CI
-
-Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>"
+git commit -m "chore: scaffold Domain package and Linux CI"
 ```
 
 ---
@@ -473,9 +471,7 @@ Expected: tất cả `MoneyTests` pass. Nếu `testRoundingHalfAwayFromZero` fai
 
 ```bash
 git add Packages/Domain
-git commit -m "feat(domain): add Money with single rounding point
-
-Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>"
+git commit -m "feat(domain): add Money with single rounding point"
 ```
 
 ---
@@ -654,9 +650,7 @@ Expected: pass toàn bộ.
 
 ```bash
 git add Packages/Domain
-git commit -m "feat(domain): add Percentage and schedule splitting with residual
-
-Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>"
+git commit -m "feat(domain): add Percentage and schedule splitting with residual"
 ```
 
 ---
@@ -809,9 +803,7 @@ Expected: pass. Nếu `testFromDateUsesGivenTimeZone` fail trên Linux với l�
 
 ```bash
 git add Packages/Domain
-git commit -m "feat(domain): add CalendarDate for time-free dates
-
-Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>"
+git commit -m "feat(domain): add CalendarDate for time-free dates"
 ```
 
 ---
@@ -965,9 +957,7 @@ Expected: pass.
 
 ```bash
 git add Packages/Domain
-git commit -m "feat(domain): add status, job type and cost taxonomy enums
-
-Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>"
+git commit -m "feat(domain): add status, job type and cost taxonomy enums"
 ```
 
 ---
@@ -1741,9 +1731,7 @@ Expected: pass toàn bộ `ValidationTests`.
 
 ```bash
 git add Packages/Domain
-git commit -m "feat(domain): add MVP entities with validation rules
-
-Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>"
+git commit -m "feat(domain): add MVP entities with validation rules"
 ```
 
 ---
@@ -1991,9 +1979,7 @@ Expected: pass. `testSpecExample` kiểm tra đúng số của yêu cầu gốc:
 
 ```bash
 git add Packages/Domain
-git commit -m "feat(domain): add FinancialCalculator with cost groups and margins
-
-Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>"
+git commit -m "feat(domain): add FinancialCalculator with cost groups and margins"
 ```
 
 ---
@@ -2193,9 +2179,7 @@ Expected: pass.
 
 ```bash
 git add Packages/Domain
-git commit -m "feat(domain): add progress and payment status rules
-
-Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>"
+git commit -m "feat(domain): add progress and payment status rules"
 ```
 
 ---
@@ -2327,9 +2311,7 @@ Expected: pass.
 
 ```bash
 git add Packages/Domain
-git commit -m "feat(domain): add budget alert rule per cost group
-
-Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>"
+git commit -m "feat(domain): add budget alert rule per cost group"
 ```
 
 ---
@@ -2526,9 +2508,7 @@ Expected: pass.
 
 ```bash
 git add Packages/Domain
-git commit -m "feat(domain): add rule-based project health evaluator
-
-Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>"
+git commit -m "feat(domain): add rule-based project health evaluator"
 ```
 
 ---
@@ -2597,9 +2577,7 @@ Expected: build sạch, mọi test pass.
 
 ```bash
 git add Packages/Domain
-git commit -m "feat(domain): define repository protocols and activity actor
-
-Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>"
+git commit -m "feat(domain): define repository protocols and activity actor"
 ```
 
 ---
@@ -2890,7 +2868,7 @@ public final class AppDatabase: Sendable {
     }
 
     public static func onDisk(at url: URL) throws -> AppDatabase {
-        try FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
+        try FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true, attributes: nil)
         return try AppDatabase(DatabasePool(path: url.path, configuration: configuration))
     }
 
@@ -3290,9 +3268,7 @@ Expected: pass toàn bộ `SchemaTests` và `ForeignKeyTests`. Lỗi hay gặp: 
 
 ```bash
 git add Packages/Data
-git commit -m "feat(data): add GRDB database with initial schema per spec appendix A
-
-Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>"
+git commit -m "feat(data): add GRDB database with initial schema per spec appendix A"
 ```
 
 ---
@@ -3310,7 +3286,7 @@ Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>"
   - `public final class GRDBCompanyRepository: CompanyRepository { public init(database: AppDatabase, clock: Clock) }`
   - `public final class GRDBCustomerRepository: CustomerRepository { public init(database: AppDatabase, clock: Clock) }`
   - `enum RecordSupport { static func uuid(_: String, table:, id:, column:) throws -> UUID; static func money(_: String, currency:, table:, id:, column:) throws -> Money; static func date(_: String, ...) throws -> Date; static func calendarDate(_: String?, ...) throws -> CalendarDate? }`
-  - `struct ActivityLogRecord` + `static func insert(_ db: Database, entry: ActivityLogEntry) throws`
+  - `struct ActivityLogRecord` + `static func append(_ db: Database, companyId: UUID, actor: ActivityActor, action: ActivityAction, entityType: String, entityId: UUID, projectId: UUID?, details: [String: String], at now: Date) throws` (append-only, gọi trong transaction của repository)
 
 - [ ] **Step 1: Viết test fail**
 
@@ -3790,9 +3766,7 @@ Expected: pass. Nếu `.collating(.localizedCaseInsensitiveCompare)` không có 
 
 ```bash
 git add Packages/Data
-git commit -m "feat(data): add company and customer repositories with records
-
-Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>"
+git commit -m "feat(data): add company and customer repositories with records"
 ```
 
 ---
@@ -4227,9 +4201,7 @@ Expected: pass. Nếu `testSaveAndGetRoundTripIncludingScopeFields` fail vì `up
 
 ```bash
 git add Packages/Data
-git commit -m "feat(data): add project repository with audit log and cascading soft delete
-
-Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>"
+git commit -m "feat(data): add project repository with audit log and cascading soft delete"
 ```
 
 ---
@@ -4327,9 +4299,7 @@ Expected: pass.
 
 ```bash
 git add Packages/Data
-git commit -m "feat(data): add debug sample data seeder
-
-Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>"
+git commit -m "feat(data): add debug sample data seeder"
 ```
 
 ---
@@ -4456,9 +4426,7 @@ public enum DSTypography {
 
 ```bash
 git add Packages/DesignSystem
-git commit -m "feat(design-system): add color, spacing and typography tokens
-
-Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>"
+git commit -m "feat(design-system): add color, spacing and typography tokens"
 ```
 
 ---
@@ -4858,9 +4826,7 @@ public struct ComponentGalleryView: View {
 
 ```bash
 git add Packages/DesignSystem
-git commit -m "feat(design-system): add core components and component gallery
-
-Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>"
+git commit -m "feat(design-system): add core components and component gallery"
 ```
 
 ---
@@ -5173,6 +5139,9 @@ import json, pathlib, re, sys
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 CATALOG = ROOT / "App/Resources/Localizable.xcstrings"
 VIEW_DIRS = [ROOT / "App", ROOT / "Packages/Features/Sources", ROOT / "Packages/DesignSystem/Sources/DesignSystem/Gallery"]
+# Only SwiftUI view files are checked; LaunchOptions.swift, AppContainer.swift and other
+# non-view files carry CLI flags, paths and defaults keys that are not user-facing strings.
+VIEW_MARKER = "import SwiftUI"
 KEY_RE = re.compile(r"^[a-z][A-Za-z0-9]*(\.[A-Za-z0-9]+)+$")
 LITERAL_RE = re.compile(r'"((?:[^"\\]|\\.)*)"')
 ALLOW_MARKERS = ["verbatim:", "systemImage", "systemName", "accessibilityIdentifier", "identifier", "forKey", "UserDefaults", "#Preview",
@@ -5190,12 +5159,15 @@ def main() -> int:
         for path in directory.rglob("*.swift"):
             if "Tests" in path.parts or path.name.endswith("Tests.swift"):
                 continue
-            for lineno, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+            source = path.read_text(encoding="utf-8")
+            if VIEW_MARKER not in source:
+                continue
+            for lineno, line in enumerate(source.splitlines(), 1):
                 stripped = line.strip()
                 if stripped.startswith("//") or any(marker in line for marker in ALLOW_MARKERS):
                     continue
                 for literal in LITERAL_RE.findall(line):
-                    if literal == "" or literal.startswith("\\("):
+                    if literal == "" or literal.startswith("\\(") or literal.startswith("--"):
                         continue
                     if KEY_RE.match(literal):
                         if literal not in strings:
@@ -5210,6 +5182,8 @@ def main() -> int:
 if __name__ == "__main__":
     sys.exit(main())
 ```
+
+Script chỉ quét file có `import SwiftUI`; file không phải View (`LaunchOptions.swift`, `AppContainer.swift`, ViewModel) không bị kiểm tra literal.
 
 Quy ước cho View: chuỗi không cần dịch (ví dụ tên công ty mẫu trong preview) phải viết `Text(verbatim: ...)`; identifier dùng `.accessibilityIdentifier("...")`; dòng nào cố ý có literal khác thì thêm `// lint:allow-string`.
 
@@ -5272,9 +5246,7 @@ Expected: cả hai in `0 error(s)` và exit 0. (Gallery dùng key `gallery.*` đ
 
 ```bash
 git add Packages/Features App/Resources scripts .github/workflows/domain.yml
-git commit -m "feat(features): add settings, status styling, en/vi string catalog and lint scripts
-
-Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>"
+git commit -m "feat(features): add settings, status styling, en/vi string catalog and lint scripts"
 ```
 
 ---
@@ -5679,9 +5651,7 @@ Expected: `0 error(s)`. Mọi key dùng trong 4 bước trên đã có trong cat
 
 ```bash
 git add Packages/Features
-git commit -m "feat(features): add setup, home list, placeholder tabs and settings screens
-
-Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>"
+git commit -m "feat(features): add setup, home list, placeholder tabs and settings screens"
 ```
 
 ---
@@ -5691,7 +5661,8 @@ Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>"
 **Files:**
 - Create: `project.yml`
 - Create: `App/ConstructionApp.swift`, `AppContainer.swift`, `LaunchOptions.swift`, `RootView.swift`, `RootTabView.swift`, `DatabaseErrorView.swift`
-- Create: `App/Resources/Assets.xcassets/Contents.json`, `App/Resources/Assets.xcassets/AppIcon.appiconset/Contents.json`
+- Create: `App/Resources/Assets.xcassets/Contents.json`, `App/Resources/Assets.xcassets/AppIcon.appiconset/Contents.json`, `App/Resources/Assets.xcassets/AppIcon.appiconset/AppIcon-1024.png` (sinh bằng `scripts/make_app_icon.py`)
+- Create: `scripts/make_app_icon.py`
 - Create: `App/Info.plist`
 - Create: `.github/workflows/ios.yml`
 
@@ -5753,6 +5724,7 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: BUNDLE_ID_PLACEHOLDER
         TARGETED_DEVICE_FAMILY: "1"
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         ENABLE_USER_SCRIPT_SANDBOXING: false
       configs:
         Debug:
@@ -5808,14 +5780,62 @@ schemes:
 { "info" : { "author" : "xcode", "version" : 1 } }
 ```
 
-`App/Resources/Assets.xcassets/AppIcon.appiconset/Contents.json` (icon thật thêm sau; TestFlight chấp nhận thiếu icon trong build nội bộ nhưng App Store Connect sẽ cảnh báo):
+App icon: App Store Connect từ chối upload không có icon 1024×1024. Tạo icon tạm bằng script Python thuần (không cần Pillow), chạy một lần và commit PNG:
+
+`scripts/make_app_icon.py`:
+
+```python
+#!/usr/bin/env python3
+"""Writes a 1024x1024 placeholder app icon (orange field, white beam-and-post mark) without Pillow."""
+import pathlib, struct, zlib
+
+SIZE = 1024
+BG = (0xD9, 0x65, 0x1F)
+FG = (0xFF, 0xFF, 0xFF)
+OUT = pathlib.Path(__file__).resolve().parents[1] / "App/Resources/Assets.xcassets/AppIcon.appiconset/AppIcon-1024.png"
+
+def inside_mark(x, y):
+    # Horizontal beam
+    if 192 <= x < 832 and 300 <= y < 420:
+        return True
+    # Two posts
+    if (272 <= x < 392 or 632 <= x < 752) and 420 <= y < 760:
+        return True
+    return False
+
+def png_chunk(tag, data):
+    body = tag + data
+    return struct.pack(">I", len(data)) + body + struct.pack(">I", zlib.crc32(body) & 0xFFFFFFFF)
+
+def main():
+    rows = bytearray()
+    for y in range(SIZE):
+        rows.append(0)  # filter: none
+        for x in range(SIZE):
+            rows.extend(FG if inside_mark(x, y) else BG)
+    ihdr = struct.pack(">IIBBBBB", SIZE, SIZE, 8, 2, 0, 0, 0)
+    png = b"\x89PNG\r\n\x1a\n" + png_chunk(b"IHDR", ihdr) + png_chunk(b"IDAT", zlib.compress(bytes(rows), 9)) + png_chunk(b"IEND", b"")
+    OUT.parent.mkdir(parents=True, exist_ok=True)
+    OUT.write_bytes(png)
+    print(f"wrote {OUT} ({len(png)} bytes)")
+
+if __name__ == "__main__":
+    main()
+```
+
+Run: `python scripts/make_app_icon.py`
+Expected: file `AppIcon-1024.png` khoảng 10–20 KB, mở ra là nền cam với hình dầm trắng. Icon không có alpha (RGB, color type 2) đúng yêu cầu App Store.
+
+`App/Resources/Assets.xcassets/AppIcon.appiconset/Contents.json`:
 
 ```json
 {
-  "images" : [ { "idiom" : "universal", "platform" : "ios", "size" : "1024x1024" } ],
+  "images" : [ { "filename" : "AppIcon-1024.png", "idiom" : "universal", "platform" : "ios", "size" : "1024x1024" } ],
   "info" : { "author" : "xcode", "version" : 1 }
 }
 ```
+
+Trong `project.yml`, target `ConstructionManagement` → `settings.base` thêm `ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon`. Icon thật (do designer làm) thay file PNG này sau, không đổi cấu hình.
 
 - [ ] **Step 2: `LaunchOptions.swift`**
 
@@ -6108,7 +6128,7 @@ jobs:
 
 - [ ] **Step 7: Push và xem CI**
 
-Run: `git add project.yml App .github/workflows/ios.yml && git commit -m "feat(app): add XcodeGen app target, composition root and iOS CI" -m "Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>" && git push`
+Run: `git add project.yml App scripts/make_app_icon.py .github/workflows/ios.yml && git commit -m "feat(app): add XcodeGen app target, composition root and iOS CI" && git push`
 Expected: job `ios / build-and-test` xanh. Lỗi biên dịch SwiftUI chỉ lộ ở đây; sửa và push lại cho tới khi xanh (giữ mỗi lần sửa là một commit nhỏ, tiền tố `fix(app):`). Nếu `Pick simulator` không tìm thấy `iPhone 16`: đổi tiền tố thành `iPhone` để lấy máy đầu tiên.
 
 Lưu ý: repo GitHub phải tồn tại trước bước này — xem Task 22 Step 1 (tạo repo public) và làm bước đó trước nếu chưa có remote.
@@ -6260,7 +6280,7 @@ final class ScreenshotTests: XCTestCase {
 
 - [ ] **Step 4: Push, xem CI, tải artifact `screenshots`**
 
-Run: `git add UITests .github/workflows/ios.yml && git commit -m "test(app): add UI smoke tests and screenshot capture" -m "Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>" && git push`
+Run: `git add UITests .github/workflows/ios.yml && git commit -m "test(app): add UI smoke tests and screenshot capture" && git push`
 Expected: job xanh; artifact có 24 ảnh (6 màn × en/vi × light/dark). Mở vài ảnh để kiểm tra: tab bản vi là "Trang chủ, Dự án, Lịch, Chi phí, Thêm"; dark mode nền tối; card Home có badge + progress bar.
 
 Nếu `testLanguageSwitchUpdatesOpenScreenAndTabsImmediately` fail vì `Text` không đổi theo `\.locale`: chuyển localization sang cách tường minh — thêm vào `FeatureSupport` một `LocalizedBundle` chọn `Bundle.main.path(forResource: code, ofType: "lproj")` theo `settings.resolvedLocale`, và tạo `extension Text { init(key: String, bundle: Bundle) }`; thay mọi `Text("a.b")` trong Features/App bằng `Text(key:bundle:)` đọc bundle từ environment. Ghi lại thay đổi này trong plan trước khi làm.
@@ -6326,10 +6346,9 @@ platform :ios do
     match(type: "appstore", readonly: false)
   end
 
-  desc "Build and upload to TestFlight"
+  desc "Build and upload to TestFlight (the workflow runs `xcodegen generate` before this lane)"
   lane :beta do
     match(type: "appstore", readonly: true)
-    sh("cd .. && xcodegen generate")
     build_app(
       project: "ConstructionManagement.xcodeproj",
       scheme: "ConstructionManagement",
@@ -6376,6 +6395,8 @@ jobs:
           bundler-cache: true
       - name: Install tools
         run: brew install xcodegen
+      - name: Generate Xcode project
+        run: xcodegen generate
       - name: Run fastlane
         env:
           APP_BUNDLE_ID: ${{ secrets.APP_BUNDLE_ID }}
@@ -6457,13 +6478,11 @@ Actions → **testflight** → Run workflow → lane `beta` (hoặc push tag `v0
 
 ```bash
 git add Gemfile fastlane .github/workflows/testflight.yml docs/SETUP.md
-git commit -m "ci: add fastlane match/TestFlight pipeline and setup guide
-
-Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>"
+git commit -m "ci: add fastlane match/TestFlight pipeline and setup guide"
 git push
 ```
 
-Expected: lane `setup_signing` xanh (repo chứng chỉ có nội dung), lane `beta` xanh, build hiện trên TestFlight, cài lên iPhone, qua màn hình setup, thấy 5 tab, đổi ngôn ngữ và giao diện trong Settings có hiệu lực ngay. Đó là tiêu chí hoàn thành 1–5 của spec mục 12.
+Expected: lane `setup_signing` xanh (repo chứng chỉ có nội dung), lane `beta` xanh (archive có icon, bước `upload_to_testflight` không báo `Missing app icon`), build hiện trên TestFlight, cài lên iPhone, qua màn hình setup, thấy 5 tab, đổi ngôn ngữ và giao diện trong Settings có hiệu lực ngay. Đó là tiêu chí hoàn thành 1–5 của spec mục 12.
 
 ---
 
