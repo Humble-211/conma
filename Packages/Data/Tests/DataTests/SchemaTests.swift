@@ -72,7 +72,7 @@ final class SchemaTests: XCTestCase {
     func testTimestampsRoundTrip() {
         let date = Date(timeIntervalSince1970: 1_790_000_000.25)
         let text = Timestamps.string(date)
-        XCTAssertEqual(text, "2026-09-21T06:13:20.250Z")
+        XCTAssertEqual(text, "2026-09-21T14:13:20.250Z")
         XCTAssertEqual(Timestamps.date(text), date)
         XCTAssertNil(Timestamps.date("yesterday"))
     }
