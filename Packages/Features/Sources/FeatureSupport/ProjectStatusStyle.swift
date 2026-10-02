@@ -3,7 +3,7 @@ import Domain
 import DesignSystem
 
 public extension ProjectStatus {
-    var titleKey: LocalizedStringKey { LocalizedStringKey("status.\(rawValue)") }
+    var titleKey: LocalizedStringKey { LocalizedStringKey("status." + rawValue) }
 
     var tone: DSTone {
         switch self {
