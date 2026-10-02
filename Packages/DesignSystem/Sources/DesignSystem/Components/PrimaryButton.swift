@@ -14,14 +14,14 @@ public struct PrimaryButton: View {
         Button(action: action) {
             HStack(spacing: DSSpacing.sm) {
                 if isLoading {
-                    ProgressView().tint(.white)
+                    ProgressView().tint(DSColor.onAccent)
                 } else if let systemImage {
                     Image(systemName: systemImage)
                 }
                 Text(title).font(DSTypography.headline)
             }
             .frame(maxWidth: .infinity, minHeight: DSSpacing.primaryButtonHeight)
-            .foregroundStyle(.white)
+            .foregroundStyle(DSColor.onAccent)
             .background(DSColor.accent, in: RoundedRectangle(cornerRadius: DSSpacing.cardRadius, style: .continuous))
         }
         .buttonStyle(.plain)

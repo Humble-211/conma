@@ -13,7 +13,7 @@ public struct FloatingActionButton: View {
         Button(action: action) {
             Image(systemName: systemImage)
                 .font(.system(size: 24, weight: .bold))
-                .foregroundStyle(.white)
+                .foregroundStyle(DSColor.onAccent)
                 .frame(width: 60, height: 60)
                 .background(DSColor.accent, in: Circle())
                 .shadow(color: .black.opacity(0.2), radius: 8, y: 4)
