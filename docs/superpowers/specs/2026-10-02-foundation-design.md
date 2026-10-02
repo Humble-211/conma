@@ -107,7 +107,7 @@ Quy tắc làm tròn (một hàm duy nhất `Money.rounded`, mọi nơi khác g�
 
 `Percentage`: bọc `Decimal` theo **điểm phần trăm**: `Percentage(10)` nghĩa là 10%, không phải 10 lần. Thuộc tính `fraction` = value / 100. `Money × Percentage` = `rounded(amount × fraction)`. Percentage do người dùng nhập (deposit, payment schedule) phải trong `0...100`, tối đa 2 chữ số thập phân; ngoài khoảng ném `DomainError.invalidPercentage`. Percentage là kết quả tính (margin, budget used) không bị giới hạn khoảng, làm tròn half-up về 1 chữ số thập phân khi tạo.
 
-Chia contract theo phần trăm (payment schedule): mỗi dòng = `rounded(contract × fraction)`; nếu tổng phần trăm = 100 thì dòng cuối nhận phần dư (`contract − tổng các dòng trước`) để tổng schedule khớp contract từng cent.
+Chia contract theo phần trăm (payment schedule): mỗi dòng = `rounded(contract × fraction)`; nếu tổng phần trăm = 100 thì dòng cuối nhận phần dư (`contract − tổng các dòng trước`) để tổng schedule khớp contract từng cent. Sau khi tạo, `PaymentScheduleItem.amount` là giá trị thanh toán **có thẩm quyền**; `percentage` chỉ là nguồn sinh dòng và để hiển thị, có thể lệch `amount` vài cent ở dòng nhận phần dư. Mọi tính toán dùng `amount`.
 
 `CalendarDate`: ngày lịch không kèm giờ (`YYYY-MM-DD`), dùng cho due date, start date, completion date. Mốc thời gian thực (createdAt, timestamp ảnh) dùng `Date` UTC. `daysUntil(other)` trả số ngày lịch nguyên, âm nếu đã qua.
 
@@ -143,8 +143,11 @@ Enums (lưu bằng raw value dạng chuỗi camelCase, không đổi sau khi ph�
 - `TaskStatus` (6): notStarted, scheduled, inProgress, blocked, waiting, completed.
 - `PaymentMethod` (6): cash, cheque, eTransfer, creditCard, bankTransfer, other.
 - `PhotoCategory` (6): before, progress, issues, inspection, completed, receipts.
-- `JobType` (20, gồm other kèm tên tự nhập).
+- `JobType` (20): generalRenovation, basementRenovation, kitchen, bathroom, landscaping, roofing, plumbing, electrical, hvac, flooring, painting, drywall, concrete, deckFence, framing, windowsDoors, exterior, demolition, commercial, other. `other` bắt buộc kèm `customJobType`.
+- Scope-field catalog (danh sách `field_key` theo từng `JobType`, ví dụ `squareFootage`, `roofType`, `fenceLength`) thuộc sub-project 2 (wizard). Ở Foundation, `field_key` là chuỗi không ràng buộc, chỉ cần khác rỗng; Domain không biết catalog.
 - `CostGroup` (6): material, labour, subcontractor, equipment, permit, other. Đây là taxonomy chi phí **duy nhất**, dùng chung cho estimate, actual cost và budget alert.
+- Mỗi `Expense` mang `costGroup` riêng (snapshot lúc tạo, lưu cột `cost_group`): category mặc định thì bằng giá trị trong bảng dưới (Domain từ chối nếu lệch); category custom thì chép từ `CustomExpenseCategory.costGroup` tại thời điểm tạo. `FinancialCalculator` chỉ đọc `expense.costGroup`, không cần biết bảng category.
+- `CustomExpenseCategory.costGroup` bất biến sau khi đã có expense (kể cả expense đã soft-delete) dùng category đó; đổi group khi đã dùng ném `DomainError.categoryInUse`. Chi phí lịch sử vì thế không bao giờ đổi nhóm.
 - `ExpenseCategory` (13 mặc định + custom). Mỗi category thuộc đúng một `CostGroup`:
 
 | ExpenseCategory | CostGroup |
@@ -168,7 +171,7 @@ Chưa build: Estimate/Quote, Invoice, ChangeOrder, Vendor, Subcontractor, TimeEn
 | Giá trị | Công thức |
 |---|---|
 | `adjustedContract` | contractValue + approvedChangeOrders |
-| `actualByGroup[g]` | với mỗi `CostGroup` g: tổng (`amount + tax`) của các Expense có category thuộc g; riêng `labour` cộng thêm tổng `LabourEntry` |
+| `actualByGroup[g]` | với mỗi `CostGroup` g: tổng (`amount + tax`) của các Expense có `costGroup = g`; riêng `labour` cộng thêm tổng `LabourEntry` |
 | `estimateByGroup[g]` | tổng `amount` các `ProjectEstimateLine` thuộc g; g không có dòng nào thì `nil` (khác với có dòng mà tổng = 0) |
 | `totalCost` | tổng `actualByGroup` của cả 6 nhóm |
 | `estimatedCost` | tổng mọi `ProjectEstimateLine` |
@@ -330,12 +333,12 @@ Tên tab bản Việt: Trang chủ, Dự án, Lịch, Chi phí, Thêm.
 - `DomainTests` (viết theo TDD):
   - Làm tròn: `0.005`, `0.004`, `2.675`, `-0.005`; `Money` khởi tạo từ số 3 chữ số thập phân; tổng các dòng đã làm tròn.
   - `Percentage`: `Percentage(10)` của $30,000 = $3,000; 20% của $30,000 = $6,000; input `-1`, `100.01` bị từ chối; chia 33.33/33.33/33.34 của $100.00 và 3 × 33.33% (tổng khác 100, không có dòng nhận phần dư); schedule 20/30/30/20 của $30,000.01 khớp từng cent.
-  - Financial engine với số từ yêu cầu gốc; expense có tax; margin khi contract = 0; trộn currency; record soft-delete bị bỏ qua; mapping từng `ExpenseCategory` sang `CostGroup`.
+  - Financial engine với số từ yêu cầu gốc; expense có tax; margin khi contract = 0; trộn currency; record soft-delete bị bỏ qua; mapping từng `ExpenseCategory` mặc định sang `CostGroup`; expense custom lấy `costGroup` snapshot (đổi category sau đó không đổi chi phí lịch sử); tạo expense mặc định với `costGroup` lệch mapping bị từ chối; đổi `costGroup` của category đã dùng ném `categoryInUse`.
   - Payment status: từng dòng bảng mục 5.4, biên `today` = dueDate − 4, − 3, − 1, 0, + 1; trả một phần rồi quá hạn; không dueDate; payment không gắn item vào `collected` nhưng không vào `paidForItem`; trả dư.
   - Progress có và không có override; không task.
   - Budget alert ở 89%, 90%, 100%, 101%; estimate `nil`; estimate $0 với actual $0 và > $0.
   - Health: từng phase; `awaitingFinalPayment` quá completion date không Delayed; còn 0, 7, 8, −1 ngày; thứ tự ưu tiên và danh sách lý do; `terminal` trả `nil`.
-- `DataTests`: migration từ DB trống tạo đúng bảng, cột, index của Phụ lục A; round-trip record (đặc biệt `Decimal`, `CalendarDate`); soft delete và cascade soft delete của project; unique index bỏ qua dòng đã xóa; vi phạm khóa ngoại bị từ chối; transaction ghi kèm `activity_log`; rollback khi lỗi.
+- `DataTests`: migration từ DB trống tạo đúng bảng, cột, index của Phụ lục A; round-trip record (đặc biệt `Decimal`, `CalendarDate`); soft delete và cascade soft delete của project (gồm notifications); unique index bỏ qua dòng đã xóa; vi phạm khóa ngoại bị từ chối; record company B trỏ vào project company A bị DB từ chối (khóa ngoại tổ hợp); CHECK `job_type`, `cost_group` từ chối giá trị lạ; transaction ghi kèm `activity_log`; rollback khi lỗi.
 - UI smoke test: mở app, qua setup, đi 5 tab, đổi sang Tiếng Việt, kiểm tra tiêu đề tab; chụp screenshot.
 - Script: key thiếu bản vi; lint cấm `Double`/`Float` cho tiền trong `Domain` và `Data`.
 
@@ -375,6 +378,7 @@ Contract này là nguồn duy nhất cho migration SQLite đầu tiên và cho s
 - **Cột chung** của mọi bảng: `id` PK, `company_id` NOT NULL FK → `companies.id`, `created_at` NOT NULL, `updated_at` NOT NULL, `deleted_at` NULL, `sync_state` NOT NULL DEFAULT `'pending'`. Ngoại lệ: `companies` không có `company_id`.
 - Các bảng dưới đây chỉ liệt kê cột riêng. Cột không ghi "NULL" là NOT NULL.
 - Mọi khóa ngoại là `ON DELETE RESTRICT` và `PRAGMA foreign_keys = ON`. Xóa vật lý không xảy ra trong vận hành bình thường; RESTRICT là lưới an toàn.
+- **Khóa ngoại cùng company**: mọi bảng có `company_id` khai báo thêm `UNIQUE (id, company_id)`. Mọi tham chiếu tới bảng cha (trừ tới `companies`) là khóa ngoại tổ hợp `FOREIGN KEY (<parent>_id, company_id) REFERENCES <parent>(id, company_id)`. Nhờ vậy DB tự chặn record company B trỏ vào project của company A; quy tắc này mang nguyên sang Postgres và làm nền cho RLS. Trong tài liệu này, "`x_id` FK → bảng" luôn hiểu là khóa ngoại tổ hợp kiểu trên.
 - Mọi cột khóa ngoại có index. Mọi bảng có index `(company_id)`.
 - Unique index luôn là partial: `WHERE deleted_at IS NULL`.
 - `sort_order` là INTEGER, thứ tự hiển thị trong cha.
@@ -385,13 +389,13 @@ Repository thực hiện trong một transaction:
 
 | Xóa | Hành vi |
 |---|---|
-| Project | Soft delete project và mọi bản ghi con: scope fields, estimate lines, tasks (kéo theo checklist items, assignees), project workers, schedule items, payments, expenses (kéo theo receipt images), labour entries, daily logs, photos. `activity_log` giữ nguyên. |
+| Project | Soft delete project và mọi bản ghi con: scope fields, estimate lines, tasks (kéo theo checklist items, assignees), project workers, schedule items, payments, expenses (kéo theo receipt images), labour entries, daily logs, photos, và mọi `notifications` có `project_id` trỏ tới project (kể cả chưa tới `fire_at`). `activity_log` giữ nguyên. Phòng vệ thêm: truy vấn notification luôn join loại project đã xóa. |
 | Customer | Từ chối nếu còn project chưa xóa (`DomainError.customerHasProjects`). |
 | Employee | Soft delete employee. Labour entries, task assignees, project workers cũ giữ nguyên để giữ lịch sử và chi phí; khi hiển thị lịch sử, truy vấn employee kể cả đã xóa. |
 | Task | Kéo theo checklist items và assignees. |
 | Expense | Kéo theo receipt images. File ảnh giữ trên đĩa cho tới khi sync xác nhận (sub-project 5 quyết định dọn dẹp). |
 | Payment schedule item | Payments gắn với item được giữ, đặt `schedule_item_id = NULL` (vẫn tính vào `collected`). |
-| Custom expense category | Từ chối nếu còn expense chưa xóa đang dùng. |
+| Custom expense category | Từ chối nếu còn expense chưa xóa đang dùng. Đổi `cost_group` bị từ chối nếu đã từng có expense dùng (kể cả đã xóa); đổi `name` luôn được phép. |
 | Company, User | Không có thao tác xóa trong MVP. |
 
 `activity_log` là append-only: không sửa, không xóa.
@@ -404,9 +408,9 @@ Repository thực hiện trong một transaction:
 
 **customers** — `name`; `phone` NULL; `email` NULL; `preferred_contact` NULL CHECK (`phone`, `text`, `email`); `company_name` NULL; `secondary_contact` NULL; `notes` NULL. Index `(company_id, name)`.
 
-**projects** — `customer_id` FK → customers; `name`; `job_type`; `custom_job_type` NULL (bắt buộc khi `job_type = other`); `status`; `address_line`; `unit` NULL; `city` NULL; `region` NULL; `postal_code` NULL; `scope_description` NULL; `start_date` NULL; `estimated_completion_date` NULL; `working_days` INTEGER NULL; `hours_per_day` NULL; `workers_per_day` INTEGER NULL; `contract_value` DEFAULT `'0.00'`; `manual_progress` INTEGER NULL CHECK 0–100; `deposit_required_to_start` DEFAULT 0. Index `(company_id, status)`, `(customer_id)`.
+**projects** — `customer_id` FK → customers; `name`; `job_type` CHECK 20 giá trị `JobType`; `custom_job_type` NULL (bắt buộc khi `job_type = other`); `status`; `address_line`; `unit` NULL; `city` NULL; `region` NULL; `postal_code` NULL; `scope_description` NULL; `start_date` NULL; `estimated_completion_date` NULL; `working_days` INTEGER NULL; `hours_per_day` NULL; `workers_per_day` INTEGER NULL; `contract_value` DEFAULT `'0.00'`; `manual_progress` INTEGER NULL CHECK 0–100; `deposit_required_to_start` DEFAULT 0. Index `(company_id, status)`, `(customer_id)`.
 
-**project_scope_fields** — `project_id` FK → projects; `field_key` (khóa từ catalog theo job type, ví dụ `squareFootage`, `roofType`; trường tự thêm dùng tiền tố `custom:`); `value_text`; `sort_order`. Unique `(project_id, field_key)`.
+**project_scope_fields** — `project_id` FK → projects; `field_key` (TEXT khác rỗng, không CHECK; catalog theo job type do sub-project 2 định nghĩa, trường tự thêm dùng tiền tố `custom:`); `value_text`; `sort_order`. Unique `(project_id, field_key)`.
 
 **project_estimate_lines** — `project_id` FK; `cost_group` CHECK 6 giá trị `CostGroup`; `label`; `amount`; `quantity` NULL; `unit_rate` NULL (khi có cả hai, `amount = rounded(quantity × unit_rate)`; labour: quantity là số ngày công); `sort_order`. Index `(project_id, cost_group)`.
 
@@ -420,13 +424,13 @@ Repository thực hiện trong một transaction:
 
 **project_workers** — `project_id` FK; `employee_id` FK; `work_date`. Unique `(project_id, employee_id, work_date)`. Index `(company_id, work_date)`. Một employee được phép ở hai project cùng ngày (là dữ liệu cho cảnh báo trùng lịch sau này).
 
-**payment_schedule_items** — `project_id` FK; `label`; `amount`; `percentage` NULL; `due_date` NULL; `trigger_text` NULL; `is_deposit` DEFAULT 0; `notes` NULL; `sort_order`. Index `(project_id, sort_order)`, `(company_id, due_date)`.
+**payment_schedule_items** — `project_id` FK; `label`; `amount` (giá trị có thẩm quyền); `percentage` NULL (chỉ là nguồn sinh và hiển thị); `due_date` NULL; `trigger_text` NULL; `is_deposit` DEFAULT 0; `notes` NULL; `sort_order`. Index `(project_id, sort_order)`, `(company_id, due_date)`.
 
 **payments** — `project_id` FK; `schedule_item_id` NULL FK → payment_schedule_items; `amount` (> 0); `paid_on`; `method` CHECK 6 giá trị `PaymentMethod`; `notes` NULL. Index `(project_id, paid_on)`, `(schedule_item_id)`.
 
-**custom_expense_categories** — `name`; `cost_group` DEFAULT `other`. Unique `(company_id, name)`.
+**custom_expense_categories** — `name`; `cost_group` CHECK 6 giá trị `CostGroup`, DEFAULT `other`, bất biến sau khi đã có expense dùng (repository kiểm tra). Unique `(company_id, name)`.
 
-**expenses** — `project_id` FK (bắt buộc: MVP không có chi phí ngoài project); `category` CHECK 13 giá trị mặc định + `custom`; `custom_category_id` NULL FK → custom_expense_categories (bắt buộc khi và chỉ khi `category = custom`); `vendor_name` NULL; `amount`; `tax` DEFAULT `'0.00'`; `spent_on`; `payment_method` NULL; `notes` NULL. Index `(project_id, spent_on)`, `(company_id, spent_on)`.
+**expenses** — `project_id` FK (bắt buộc: MVP không có chi phí ngoài project); `category` CHECK 13 giá trị mặc định + `custom`; `custom_category_id` NULL FK → custom_expense_categories (bắt buộc khi và chỉ khi `category = custom`); `cost_group` CHECK 6 giá trị `CostGroup` (snapshot lúc tạo theo mục 5.2, không đổi theo category sau này); `vendor_name` NULL; `amount`; `tax` DEFAULT `'0.00'`; `spent_on`; `payment_method` NULL; `notes` NULL. Index `(project_id, spent_on)`, `(company_id, spent_on)`.
 
 **receipt_images** — `expense_id` FK → expenses; `file_path` (tương đối trong thư mục app); `remote_path` NULL (sub-project 5); `page_index`. Unique `(expense_id, page_index)`.
 
