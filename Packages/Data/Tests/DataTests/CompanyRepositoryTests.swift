@@ -25,7 +25,7 @@ final class CompanyRepositoryTests: XCTestCase {
 
     func testCurrentIsNilWhenCompanyExistsWithoutOwner() async throws {
         let db = try AppDatabase.inMemory()
-        try db.writer.write { db in
+        try await db.writer.write { db in
             try db.execute(sql: "INSERT INTO companies (id, name, currency_code, created_at, updated_at) VALUES (?, 'X', 'CAD', ?, ?)", arguments: [UUID().uuidString.lowercased(), "2026-01-01T00:00:00.000Z", "2026-01-01T00:00:00.000Z"])
         }
         let repo = GRDBCompanyRepository(database: db, clock: .fixed(now))

@@ -33,8 +33,9 @@ public final class GRDBCompanyRepository: CompanyRepository {
         try company.validate()
         var stamped = company
         stamped.updatedAt = clock.now()
+        let record = CompanyRecord(stamped)
         try await database.writer.write { db in
-            try CompanyRecord(stamped).update(db)
+            try record.update(db)
         }
     }
 }

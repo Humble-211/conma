@@ -38,7 +38,7 @@ final class CustomerRepositoryTests: XCTestCase {
         try await repo.softDelete(id: ann.id, actor: actor)
         let listed = try await repo.list(companyId: companyId)
         XCTAssertEqual(listed, [])
-        let deletedAt = try db.writer.read { try String.fetchOne($0, sql: "SELECT deleted_at FROM customers WHERE id = ?", arguments: [ann.id.uuidString.lowercased()]) }
+        let deletedAt = try await db.writer.read { try String.fetchOne($0, sql: "SELECT deleted_at FROM customers WHERE id = ?", arguments: [ann.id.uuidString.lowercased()]) }
         XCTAssertNotNil(deletedAt)
         let fetched = try await repo.get(id: ann.id)
         XCTAssertNil(fetched)
@@ -47,11 +47,13 @@ final class CustomerRepositoryTests: XCTestCase {
     func testSoftDeleteRejectedWhenLiveProjectExists() async throws {
         let repo = GRDBCustomerRepository(database: db, clock: .fixed(now))
         let ann = customer("Ann"); try await repo.save(ann)
-        try db.writer.write { db in
+        let companyKey = self.companyId.uuidString.lowercased()
+        let annKey = ann.id.uuidString.lowercased()
+        try await db.writer.write { db in
             try db.execute(sql: """
                 INSERT INTO projects (id, company_id, customer_id, name, job_type, status, address_line, contract_value, deposit_required_to_start, created_at, updated_at)
                 VALUES (?, ?, ?, 'P', 'kitchen', 'inProgress', '1 Main', '0.00', 0, ?, ?)
-                """, arguments: [UUID().uuidString.lowercased(), self.companyId.uuidString.lowercased(), ann.id.uuidString.lowercased(), "2026-01-01T00:00:00.000Z", "2026-01-01T00:00:00.000Z"])
+                """, arguments: [UUID().uuidString.lowercased(), companyKey, annKey, "2026-01-01T00:00:00.000Z", "2026-01-01T00:00:00.000Z"])
         }
         do { try await repo.softDelete(id: ann.id, actor: actor); XCTFail("expected throw") }
         catch { XCTAssertEqual(error as? DomainError, .customerHasProjects) }

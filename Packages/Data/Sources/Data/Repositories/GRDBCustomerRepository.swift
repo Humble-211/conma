@@ -27,8 +27,9 @@ public final class GRDBCustomerRepository: CustomerRepository {
         try customer.validate()
         var stamped = customer
         stamped.updatedAt = clock.now()
+        let record = CustomerRecord(stamped)
         try await database.writer.write { db in
-            try CustomerRecord(stamped).save(db)
+            try record.save(db)
         }
     }
 
