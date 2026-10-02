@@ -1,0 +1,145 @@
+import Foundation
+import GRDB
+import Domain
+
+public final class GRDBProjectRepository: ProjectRepository {
+    private let database: AppDatabase
+    private let clock: Clock
+
+    public init(database: AppDatabase, clock: Clock) {
+        self.database = database; self.clock = clock
+    }
+
+    // MARK: Reads
+
+    public func get(id: UUID) async throws -> Project? {
+        try await database.writer.read { db in
+            guard let record = try ProjectRecord.filter(Column("id") == id.dbKey && Column("deleted_at") == nil).fetchOne(db) else { return nil }
+            let currency = try Self.currency(db, companyId: record.companyId)
+            let fields = try Self.scopeFields(db, projectIds: [record.id])[record.id] ?? []
+            return try record.toDomain(currency: currency, scopeFields: fields)
+        }
+    }
+
+    public func list(companyId: UUID) async throws -> [Project] {
+        try await database.writer.read { db in
+            let records = try ProjectRecord.filter(Column("company_id") == companyId.dbKey && Column("deleted_at") == nil).order(Column("updated_at").desc).fetchAll(db)
+            let currency = try Self.currency(db, companyId: companyId.dbKey)
+            let fields = try Self.scopeFields(db, projectIds: records.map(\.id))
+            return try records.map { try $0.toDomain(currency: currency, scopeFields: fields[$0.id] ?? []) }
+        }
+    }
+
+    public func observeSummaries(companyId: UUID) -> AsyncThrowingStream<[ProjectSummary], Error> {
+        let key = companyId.dbKey
+        let observation = ValueObservation.tracking { db -> [ProjectSummary] in
+            let currency = try Self.currency(db, companyId: key)
+            let rows = try Row.fetchAll(db, sql: """
+                SELECT p.*, c.name AS customer_name
+                FROM projects p JOIN customers c ON c.id = p.customer_id
+                WHERE p.company_id = ? AND p.deleted_at IS NULL
+                ORDER BY p.updated_at DESC, p.name
+                """, arguments: [key])
+            let records = try rows.map { try ProjectRecord(row: $0) }
+            let fields = try Self.scopeFields(db, projectIds: records.map(\.id))
+            return try zip(records, rows).map { record, row in
+                ProjectSummary(project: try record.toDomain(currency: currency, scopeFields: fields[record.id] ?? []), customerName: row["customer_name"])
+            }
+        }
+        let writer = database.writer
+        return AsyncThrowingStream { continuation in
+            let task = Task {
+                do {
+                    for try await value in observation.values(in: writer) { continuation.yield(value) }
+                    continuation.finish()
+                } catch { continuation.finish(throwing: error) }
+            }
+            continuation.onTermination = { _ in task.cancel() }
+        }
+    }
+
+    // MARK: Writes
+
+    public func save(_ project: Project, actor: ActivityActor) async throws {
+        try project.validate()
+        let now = clock.now()
+        var stamped = project
+        stamped.updatedAt = now
+        // Ruling 7: the @Sendable write closure must not capture a mutated `var`.
+        let stampedProject = stamped
+        let record = ProjectRecord(stampedProject)
+        try await database.writer.write { db in
+            let existing = try ProjectRecord.filter(Column("id") == stampedProject.id.dbKey).fetchOne(db)
+            try record.save(db)
+            try Self.replaceScopeFields(db, project: stampedProject, now: now)
+
+            if let old = existing {
+                if old.contractValue != stampedProject.contractValue.storageString {
+                    try ActivityLogRecord.append(db, companyId: stampedProject.companyId, actor: actor, action: .contractValueChanged, entityType: "project", entityId: stampedProject.id, projectId: stampedProject.id,
+                                                 details: ["from": old.contractValue, "to": stampedProject.contractValue.storageString], at: now)
+                }
+                if old.status != stampedProject.status.rawValue {
+                    try ActivityLogRecord.append(db, companyId: stampedProject.companyId, actor: actor, action: .statusChanged, entityType: "project", entityId: stampedProject.id, projectId: stampedProject.id,
+                                                 details: ["from": old.status, "to": stampedProject.status.rawValue], at: now)
+                }
+                if old.manualProgress != stampedProject.manualProgress {
+                    try ActivityLogRecord.append(db, companyId: stampedProject.companyId, actor: actor, action: .progressChanged, entityType: "project", entityId: stampedProject.id, projectId: stampedProject.id,
+                                                 details: ["from": old.manualProgress.map(String.init) ?? "", "to": stampedProject.manualProgress.map(String.init) ?? ""], at: now)
+                }
+            } else {
+                try ActivityLogRecord.append(db, companyId: stampedProject.companyId, actor: actor, action: .projectCreated, entityType: "project", entityId: stampedProject.id, projectId: stampedProject.id,
+                                             details: ["name": stampedProject.name, "contractValue": stampedProject.contractValue.storageString], at: now)
+            }
+        }
+    }
+
+    public func softDelete(id: UUID, actor: ActivityActor) async throws {
+        let now = clock.now()
+        let stamp = Timestamps.string(now)
+        try await database.writer.write { db in
+            guard let record = try ProjectRecord.filter(Column("id") == id.dbKey && Column("deleted_at") == nil).fetchOne(db) else { throw DataError.notFound }
+            let pid = record.id
+            let set = "SET deleted_at = ?, updated_at = ?, sync_state = 'pending'"
+            try db.execute(sql: "UPDATE projects \(set) WHERE id = ?", arguments: [stamp, stamp, pid])
+            for table in ["project_scope_fields", "project_estimate_lines", "project_tasks", "project_workers", "payment_schedule_items", "payments",
+                          "expenses", "labour_entries", "daily_logs", "photos", "notifications"] {
+                try db.execute(sql: "UPDATE \(table) \(set) WHERE project_id = ? AND deleted_at IS NULL", arguments: [stamp, stamp, pid])
+            }
+            try db.execute(sql: "UPDATE task_checklist_items \(set) WHERE deleted_at IS NULL AND task_id IN (SELECT id FROM project_tasks WHERE project_id = ?)", arguments: [stamp, stamp, pid])
+            try db.execute(sql: "UPDATE task_assignees \(set) WHERE deleted_at IS NULL AND task_id IN (SELECT id FROM project_tasks WHERE project_id = ?)", arguments: [stamp, stamp, pid])
+            try db.execute(sql: "UPDATE receipt_images \(set) WHERE deleted_at IS NULL AND expense_id IN (SELECT id FROM expenses WHERE project_id = ?)", arguments: [stamp, stamp, pid])
+            let companyId = try RecordSupport.uuid(record.companyId, table: "projects", id: pid, column: "company_id")
+            try ActivityLogRecord.append(db, companyId: companyId, actor: actor, action: .projectDeleted, entityType: "project", entityId: id, projectId: id, details: ["name": record.name], at: now)
+        }
+    }
+
+    // MARK: Helpers
+
+    private static func currency(_ db: Database, companyId: String) throws -> CurrencyCode {
+        guard let raw = try String.fetchOne(db, sql: "SELECT currency_code FROM companies WHERE id = ?", arguments: [companyId]),
+              let currency = CurrencyCode(rawValue: raw) else { throw DataError.corruptRow(table: "companies", id: companyId, column: "currency_code") }
+        return currency
+    }
+
+    private static func scopeFields(_ db: Database, projectIds: [String]) throws -> [String: [ProjectScopeField]] {
+        guard !projectIds.isEmpty else { return [:] }
+        let records = try ProjectScopeFieldRecord.filter(projectIds.contains(Column("project_id")) && Column("deleted_at") == nil).order(Column("sort_order")).fetchAll(db)
+        var result: [String: [ProjectScopeField]] = [:]
+        for record in records { result[record.projectId, default: []].append(try record.toDomain()) }
+        return result
+    }
+
+    /// Upserts the given fields and soft-deletes live fields that are no longer present.
+    private static func replaceScopeFields(_ db: Database, project: Project, now: Date) throws {
+        let keep = Set(project.scopeFields.map { $0.id.dbKey })
+        let live = try ProjectScopeFieldRecord.filter(Column("project_id") == project.id.dbKey && Column("deleted_at") == nil).fetchAll(db)
+        let stamp = Timestamps.string(now)
+        for record in live where !keep.contains(record.id) {
+            try db.execute(sql: "UPDATE project_scope_fields SET deleted_at = ?, updated_at = ?, sync_state = 'pending' WHERE id = ?", arguments: [stamp, stamp, record.id])
+        }
+        for var field in project.scopeFields {
+            field.updatedAt = now
+            try ProjectScopeFieldRecord(field).save(db)
+        }
+    }
+}
