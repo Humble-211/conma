@@ -95,31 +95,69 @@ Người dùng cần chuẩn bị (plan sẽ hướng dẫn từng bước): rep
 
 ### 5.1 Kiểu nền
 
-`Money`: bọc `Decimal` + `currencyCode` (`CAD` | `USD`). Hỗ trợ cộng, trừ, nhân với số lượng, nhân phần trăm. Làm tròn half-up về 2 chữ số tại một hàm duy nhất. Phép tính giữa hai currency khác nhau ném `DomainError.currencyMismatch`.
+`Money`: bọc `Decimal` + `currencyCode` (`CAD` | `USD`). Phép tính giữa hai currency khác nhau ném `DomainError.currencyMismatch`.
 
-`CalendarDate`: ngày lịch không kèm giờ (`YYYY-MM-DD`), dùng cho due date, start date, completion date. Mốc thời gian thực (createdAt, timestamp ảnh) dùng `Date` UTC.
+Quy tắc làm tròn (một hàm duy nhất `Money.rounded`, mọi nơi khác gọi nó):
 
-Mọi entity có: `id: UUID`, `companyId`, `createdAt`, `updatedAt`, `deletedAt?` (soft delete).
+- Bất biến: giá trị bên trong `Money` luôn có đúng 2 chữ số thập phân. Không tồn tại `Money` chưa làm tròn.
+- Làm tròn xảy ra tại: (a) khởi tạo `Money` từ `Decimal` bất kỳ (input người dùng, đọc DB), (b) kết quả của mọi phép nhân hoặc chia (`Money × Decimal`, `Money × Percentage`). Cộng và trừ hai `Money` là chính xác, không cần làm tròn.
+- Kiểu làm tròn: half-up theo trị tuyệt đối (half away from zero). `0.005 → 0.01`, `0.004 → 0.00`, `2.675 → 2.68`, `-0.005 → -0.01`.
+- Tổng luôn là tổng của các giá trị đã làm tròn (cộng các dòng 2 chữ số), không bao giờ làm tròn sau khi cộng số thô. Nhờ vậy tổng trên màn hình khớp với cộng tay từng dòng.
+- `Money` âm chỉ hợp lệ cho kết quả tính (`cashPosition`, profit, chênh lệch). Input người dùng âm bị từ chối.
+
+`Percentage`: bọc `Decimal` theo **điểm phần trăm**: `Percentage(10)` nghĩa là 10%, không phải 10 lần. Thuộc tính `fraction` = value / 100. `Money × Percentage` = `rounded(amount × fraction)`. Percentage do người dùng nhập (deposit, payment schedule) phải trong `0...100`, tối đa 2 chữ số thập phân; ngoài khoảng ném `DomainError.invalidPercentage`. Percentage là kết quả tính (margin, budget used) không bị giới hạn khoảng, làm tròn half-up về 1 chữ số thập phân khi tạo.
+
+Chia contract theo phần trăm (payment schedule): mỗi dòng = `rounded(contract × fraction)`; nếu tổng phần trăm = 100 thì dòng cuối nhận phần dư (`contract − tổng các dòng trước`) để tổng schedule khớp contract từng cent.
+
+`CalendarDate`: ngày lịch không kèm giờ (`YYYY-MM-DD`), dùng cho due date, start date, completion date. Mốc thời gian thực (createdAt, timestamp ảnh) dùng `Date` UTC. `daysUntil(other)` trả số ngày lịch nguyên, âm nếu đã qua.
+
+Trường chung: mọi entity có `id: UUID`, `createdAt`, `updatedAt`, `deletedAt?` (soft delete). Mọi entity **trừ `Company`** có thêm `companyId`. `Company` là root aggregate, không có `companyId`.
 
 ### 5.2 Entities MVP
 
 Project là entity trung tâm.
 
-- `Company` (name, currencyCode), `User`
-- `Customer` (name, phone, email, preferredContact, companyName?, secondaryContact?, notes)
-- `Project`: name, jobType (20 loại + custom), status, customerId, address (line, unit, city, region, postalCode), scope (mô tả + các trường động theo jobType dạng key-value), startDate, estimatedCompletionDate, workingDays, contractValue, manualProgress?, depositRequiredToStart
-- `ProjectEstimate`: các dòng dự toán theo nhóm labour / material / other
-- `ProjectTask` (name, assignees, startDate, dueDate, status, checklist) và `ProjectWorker` (gán employee vào project theo ngày)
-- `Employee` (name, phone, role, trade, hourlyRate?, dailyRate?, notes)
-- `PaymentScheduleItem` (label, amount, percentage?, dueDate?, trigger?, isDeposit, notes) và `Payment` (scheduleItemId?, amount, date, method, notes)
-- `Expense` (category, vendorName, amount, tax, date, paymentMethod, notes) và `Receipt` (danh sách ảnh)
-- `LabourEntry` simple mode (employeeId, date, days, dailyRate)
-- `DailyLog` (date, workersOnsite, weather, workCompleted, materialDelivered, problems, tomorrow)
-- `Photo` (category, takenAt, latitude?, longitude?, filePath)
-- `ActivityLog` (actor, action, entityType, entityId, summary, occurredAt)
-- `AppNotification`
+Danh sách dưới đây nêu ý nghĩa. Trường, nullability, khóa ngoại, index và hành vi xóa được khóa trong **Phụ lục A**; Phụ lục A là contract duy nhất cho migration và cho schema Postgres sau này.
 
-Enums: `ProjectStatus` (13 giá trị: estimate, awaitingApproval, awaitingDeposit, scheduled, inProgress, onHold, waitingForInspection, waitingForMaterial, waitingForClient, completed, awaitingFinalPayment, closed, cancelled), `TaskStatus` (6), `PaymentMethod` (6), `ExpenseCategory` (13 mặc định + custom), `PhotoCategory` (6), `JobType`.
+- `Company` (name, currencyCode): root aggregate.
+- `User` (displayName, email?, role, authUserId?): setup lần đầu tạo đúng một `User` với `role = owner`, `displayName` lấy từ màn hình setup, `authUserId = nil`. Sub-project 5 gắn `authUserId` khi có login. `User` là actor trong `ActivityLog`.
+- `Customer`
+- `Project`: scope gồm mô tả tự do + các `ProjectScopeField` (key-value theo jobType).
+- `ProjectEstimateLine`: một dòng dự toán, thuộc đúng một `CostGroup`.
+- `ProjectTask` + `TaskChecklistItem` + `TaskAssignee`; `ProjectWorker` (gán employee vào project theo ngày)
+- `Employee` (chỉ là record, không login)
+- `PaymentScheduleItem` và `Payment`
+- `Expense` + `ReceiptImage` (một receipt = các ảnh có thứ tự của một expense; receipt dài thì nhiều ảnh); `CustomExpenseCategory`
+- `LabourEntry` simple mode
+- `DailyLog`, `Photo`
+- `ActivityLog`, `AppNotification`
+
+Enums (lưu bằng raw value dạng chuỗi camelCase, không đổi sau khi phát hành):
+
+- `ProjectStatus` (13): estimate, awaitingApproval, awaitingDeposit, scheduled, inProgress, onHold, waitingForInspection, waitingForMaterial, waitingForClient, completed, awaitingFinalPayment, closed, cancelled.
+- Nhóm status (thuộc tính `phase` của `ProjectStatus`, dùng cho mọi rule):
+  - `preStart`: estimate, awaitingApproval, awaitingDeposit
+  - `inWork`: scheduled, inProgress, onHold, waitingForInspection, waitingForMaterial, waitingForClient
+  - `workDone`: completed, awaitingFinalPayment
+  - `terminal`: closed, cancelled
+- `TaskStatus` (6): notStarted, scheduled, inProgress, blocked, waiting, completed.
+- `PaymentMethod` (6): cash, cheque, eTransfer, creditCard, bankTransfer, other.
+- `PhotoCategory` (6): before, progress, issues, inspection, completed, receipts.
+- `JobType` (20, gồm other kèm tên tự nhập).
+- `CostGroup` (6): material, labour, subcontractor, equipment, permit, other. Đây là taxonomy chi phí **duy nhất**, dùng chung cho estimate, actual cost và budget alert.
+- `ExpenseCategory` (13 mặc định + custom). Mỗi category thuộc đúng một `CostGroup`:
+
+| ExpenseCategory | CostGroup |
+|---|---|
+| materials | material |
+| labour | labour |
+| subcontractor | subcontractor |
+| equipmentRental, toolPurchase | equipment |
+| permit, inspection | permit |
+| delivery, fuel, wasteDisposal, parking, office, other | other |
+| custom | do người dùng chọn khi tạo category; mặc định other |
+
+Các mục "Other Costs" của wizard (bước 8) tạo `ProjectEstimateLine` theo mapping: Subcontractors → subcontractor; Equipment rental, Tool rental → equipment; Permits, Inspection fees → permit; Dumpster, Delivery, Parking, Gas, Waste disposal, Other → other. Bước 6 tạo dòng `labour`, bước 7 tạo dòng `material`.
 
 Chưa build: Estimate/Quote, Invoice, ChangeOrder, Vendor, Subcontractor, TimeEntry.
 
@@ -130,36 +168,91 @@ Chưa build: Estimate/Quote, Invoice, ChangeOrder, Vendor, Subcontractor, TimeEn
 | Giá trị | Công thức |
 |---|---|
 | `adjustedContract` | contractValue + approvedChangeOrders |
-| `totalCost` | material + labour + subcontractor + equipment + permit + other (Expense theo category + LabourEntry) |
-| `estimatedCost` | tổng các dòng `ProjectEstimate` |
+| `actualByGroup[g]` | với mỗi `CostGroup` g: tổng (`amount + tax`) của các Expense có category thuộc g; riêng `labour` cộng thêm tổng `LabourEntry` |
+| `estimateByGroup[g]` | tổng `amount` các `ProjectEstimateLine` thuộc g; g không có dòng nào thì `nil` (khác với có dòng mà tổng = 0) |
+| `totalCost` | tổng `actualByGroup` của cả 6 nhóm |
+| `estimatedCost` | tổng mọi `ProjectEstimateLine` |
 | `projectedProfit` | adjustedContract − estimatedCost |
-| `spentSoFar` | totalCost thực tế đến nay |
-| `collected` | tổng `Payment` |
+| `spentSoFar` | bằng `totalCost` (tên dùng khi hiển thị cho project chưa xong) |
+| `collected` | tổng mọi `Payment` của project, kể cả payment không gắn schedule item |
 | `outstandingBalance` | adjustedContract − collected |
 | `cashPosition` | collected − spentSoFar |
 | `actualProfit` | adjustedContract − totalCost |
-| `margin` | profit / adjustedContract × 100; adjustedContract = 0 thì `nil` |
+| `margin` | `Percentage`(profit / adjustedContract × 100), 1 chữ số thập phân; adjustedContract = 0 thì `nil` |
+
+Quy ước chi phí:
+
+- Chi phí một Expense = `amount + tax` (số tiền contractor thực trả). `amount` là số trước tax. App không tách tax được hoàn.
+- Chi phí một `LabourEntry` = `rounded(days × dailyRate)`. `dailyRate` chụp lại tại thời điểm nhập, đổi rate của employee sau này không đổi entry cũ.
+- Record đã soft-delete không tham gia bất kỳ phép tính nào.
+- Mọi phép tính đi trên `Money` đã làm tròn theo mục 5.1; `ProjectFinancials` không làm tròn thêm lần nào, trừ `margin`.
 
 Quy tắc hiển thị (theo yêu cầu gốc mục 42):
 
 - `cashPosition` mang nhãn "Cash position", không gọi là profit.
-- `actualProfit` chỉ mang nhãn "Actual profit" khi project ở trạng thái completed, awaitingFinalPayment hoặc closed. Trước đó nhãn là "Projected at current spending".
+- `actualProfit` chỉ mang nhãn "Actual profit" khi project ở phase `workDone` hoặc status `closed`. Trước đó nhãn là "Projected at current spending".
 - `margin = nil` hiển thị "—".
 
 Ví dụ kiểm chứng từ yêu cầu gốc: contract $30,000; material $6,000; labour $7,500; other $1,000 → totalCost $14,500, profit $15,500, margin 51.7%. Deposit $5,000 + payments $15,000 → outstanding $10,000.
 
 ### 5.4 Rule khác
 
-- `ProgressCalculator`: phần trăm = task completed / tổng task (làm tròn số nguyên). Không có task thì 0. `manualProgress` nếu có thì thắng.
-- `PaymentStatusResolver`: nhận schedule item, tổng đã trả, `today`. Trả paid (đã trả đủ), partiallyPaid (0 < đã trả < amount), overdue (chưa đủ, quá hạn), dueToday, dueSoon (còn ≤ 3 ngày), upcoming. Overdue ưu tiên hơn partiallyPaid khi đã quá hạn.
-- `BudgetAlertRule`: theo từng nhóm chi phí so với estimate. ≥ 90% là `nearLimit`, > 100% là `exceeded` kèm số tiền vượt. Không có estimate thì không cảnh báo.
-- `ProjectHealthEvaluator`: rule-based, trả trạng thái + danh sách lý do. Over Budget (có nhóm exceeded), Payment Risk (có khoản overdue), Delayed (quá estimatedCompletionDate mà chưa completed), At Risk (budget nearLimit, hoặc còn ≤ 7 ngày mà progress < 80%), còn lại On Track. Nhiều tín hiệu thì lấy mức nặng nhất theo thứ tự trên, giữ đủ lý do.
-
 `today`/`now` luôn được truyền vào, không gọi `Date()` trong Domain.
+
+**`ProgressCalculator`**: phần trăm = task `completed` / tổng task, làm tròn half-up về số nguyên `0...100`. Không có task thì 0. `manualProgress` nếu có thì thắng.
+
+**Payment allocation**
+
+- `paidForItem` = tổng `Payment` có `scheduleItemId` trỏ tới item đó.
+- Payment không gắn schedule item (`scheduleItemId = nil`) tính vào `collected` của project, **không** tính vào `paidForItem` của item nào.
+- Không tự động phân bổ payment dư sang item khác.
+
+**`PaymentStatusResolver`**: nhận schedule item, `paidForItem`, `today`. Xét theo thứ tự, điều kiện đầu tiên đúng thì trả về:
+
+| Thứ tự | Điều kiện | Kết quả |
+|---|---|---|
+| 1 | `paidForItem >= amount` | `paid` |
+| 2 | có dueDate và `today > dueDate` | `overdue` (kể cả khi đã trả một phần) |
+| 3 | `paidForItem > 0` | `partiallyPaid` |
+| 4 | có dueDate và `today == dueDate` | `dueToday` |
+| 5 | có dueDate và còn `1...3` ngày | `dueSoon` |
+| 6 | còn lại (còn ≥ 4 ngày, hoặc không có dueDate) | `upcoming` |
+
+Item không có dueDate chỉ có thể là `paid`, `partiallyPaid` hoặc `upcoming`. Item có `amount = 0` luôn là `paid`.
+
+**`BudgetAlertRule`**: xét từng `CostGroup` g với `estimate = estimateByGroup[g]`, `actual = actualByGroup[g]`:
+
+| Trường hợp | Kết quả |
+|---|---|
+| `estimate = nil` (nhóm không có dòng estimate) | không alert |
+| `actual = 0` | không alert |
+| `estimate = 0` và `actual > 0` | `exceeded`, vượt = actual, phần trăm đã dùng = `nil` |
+| `actual > estimate` | `exceeded`, vượt = actual − estimate |
+| `actual × 100 >= estimate × 90` và `actual <= estimate` | `nearLimit` |
+| còn lại | không alert |
+
+So sánh bằng phép nhân trên `Decimal`, không so phần trăm đã làm tròn. Đúng 100% là `nearLimit`, chưa `exceeded`.
+
+**`ProjectHealthEvaluator`**: rule-based, trả trạng thái + danh sách lý do. Phạm vi theo phase:
+
+| Tín hiệu | Điều kiện | Xét ở phase |
+|---|---|---|
+| Over Budget | có nhóm `exceeded` | `inWork`, `workDone` |
+| Payment Risk | có schedule item `overdue` | mọi phase trừ `terminal`; trong `preStart` chỉ xét ở status `awaitingDeposit` |
+| Delayed | `today > estimatedCompletionDate` | chỉ `inWork` |
+| At Risk | có nhóm `nearLimit` | `inWork`, `workDone` |
+| At Risk | còn `0...7` ngày tới estimatedCompletionDate và progress < 80% | chỉ `inWork` |
+
+- Project `workDone` (completed, awaitingFinalPayment) không bao giờ Delayed, dù completion date đã qua: việc đã xong, chỉ còn chờ tiền.
+- Project đã trễ (số ngày còn lại âm) nhận Delayed, không nhận thêm lý do "sắp đến hạn".
+- Không có estimatedCompletionDate thì bỏ qua hai rule về ngày.
+- Phase `terminal` (closed, cancelled): không đánh giá, health = `nil`.
+- Không tín hiệu nào: On Track.
+- Nhiều tín hiệu: trạng thái là mức nặng nhất theo thứ tự Over Budget, Payment Risk, Delayed, At Risk; danh sách lý do giữ đủ mọi tín hiệu, sắp theo cùng thứ tự.
 
 ### 5.5 Validation
 
-Domain từ chối: số tiền âm, estimatedCompletionDate trước startDate, trộn currency. Tổng payment schedule khác contract value là cảnh báo, không chặn.
+Domain từ chối: số tiền input âm, `Payment.amount <= 0`, percentage input ngoài `0...100`, `manualProgress` ngoài `0...100`, `LabourEntry.days <= 0`, estimatedCompletionDate trước startDate, trộn currency. Tổng payment schedule khác contract value là cảnh báo, không chặn. Payment vượt số còn lại của schedule item được chấp nhận (item thành `paid`).
 
 ### 5.6 Repository protocols
 
@@ -169,9 +262,10 @@ Mỗi aggregate một protocol trong Domain (`ProjectRepository`, `CustomerRepos
 
 - Một file SQLite trong Application Support. Ảnh và receipt lưu thành file trong thư mục app; DB giữ đường dẫn tương đối.
 - Migration đánh số, SQL tường minh. Tên bảng và cột snake_case, trùng với schema Postgres của sub-project 5.
-- Migration đầu tạo đủ bảng cho mọi entity MVP ở mục 5.2.
+- Migration đầu tạo đủ bảng theo **Phụ lục A**, đúng từng cột, ràng buộc và index. Lệch khỏi Phụ lục A là lỗi; cần đổi thì sửa spec trước.
 - `Decimal` lưu TEXT (`"246.50"`). `Date` lưu ISO-8601 UTC. `CalendarDate` lưu `YYYY-MM-DD`.
 - Mỗi bảng có `updated_at`, `deleted_at`, `sync_state` (`pending` | `synced`). Sub-project 1 chưa dùng `sync_state`.
+- Xóa luôn là soft delete (đặt `deleted_at`); app không bao giờ xóa vật lý, vì sync cần tombstone. Mọi truy vấn mặc định lọc `deleted_at IS NULL`.
 - GRDB record tách khỏi Domain entity, có mapper hai chiều.
 - Thay đổi dữ liệu tiền hoặc progress ghi kèm một dòng `activity_log` trong cùng transaction.
 - Sub-project 1 hiện thực repository cho `Company`, `Project`, `Customer`. Phần còn lại làm ở sub-project dùng tới.
@@ -233,8 +327,15 @@ Tên tab bản Việt: Trang chủ, Dự án, Lịch, Chi phí, Thêm.
 
 ## 11. Testing
 
-- `DomainTests` (viết theo TDD): financial engine với số từ yêu cầu gốc; làm tròn half-up; margin khi contract = 0; trộn currency; payment status ở từng mốc ngày; progress có và không có override; budget alert ở 89%, 90%, 100%, 101%; health rules và thứ tự ưu tiên.
-- `DataTests`: migration từ DB trống; round-trip record (đặc biệt `Decimal`, `CalendarDate`); soft delete; transaction ghi kèm `activity_log`; rollback khi lỗi.
+- `DomainTests` (viết theo TDD):
+  - Làm tròn: `0.005`, `0.004`, `2.675`, `-0.005`; `Money` khởi tạo từ số 3 chữ số thập phân; tổng các dòng đã làm tròn.
+  - `Percentage`: `Percentage(10)` của $30,000 = $3,000; 20% của $30,000 = $6,000; input `-1`, `100.01` bị từ chối; chia 33.33/33.33/33.34 của $100.00 và 3 × 33.33% (tổng khác 100, không có dòng nhận phần dư); schedule 20/30/30/20 của $30,000.01 khớp từng cent.
+  - Financial engine với số từ yêu cầu gốc; expense có tax; margin khi contract = 0; trộn currency; record soft-delete bị bỏ qua; mapping từng `ExpenseCategory` sang `CostGroup`.
+  - Payment status: từng dòng bảng mục 5.4, biên `today` = dueDate − 4, − 3, − 1, 0, + 1; trả một phần rồi quá hạn; không dueDate; payment không gắn item vào `collected` nhưng không vào `paidForItem`; trả dư.
+  - Progress có và không có override; không task.
+  - Budget alert ở 89%, 90%, 100%, 101%; estimate `nil`; estimate $0 với actual $0 và > $0.
+  - Health: từng phase; `awaitingFinalPayment` quá completion date không Delayed; còn 0, 7, 8, −1 ngày; thứ tự ưu tiên và danh sách lý do; `terminal` trả `nil`.
+- `DataTests`: migration từ DB trống tạo đúng bảng, cột, index của Phụ lục A; round-trip record (đặc biệt `Decimal`, `CalendarDate`); soft delete và cascade soft delete của project; unique index bỏ qua dòng đã xóa; vi phạm khóa ngoại bị từ chối; transaction ghi kèm `activity_log`; rollback khi lỗi.
 - UI smoke test: mở app, qua setup, đi 5 tab, đổi sang Tiếng Việt, kiểm tra tiêu đề tab; chụp screenshot.
 - Script: key thiếu bản vi; lint cấm `Double`/`Float` cho tiền trong `Domain` và `Data`.
 
@@ -255,3 +356,94 @@ Dashboard summary, wizard tạo project, project detail, mọi form nghiệp v�
 - Vòng feedback UI qua CI 10–20 phút; lỗi compile SwiftUI chỉ lộ trên CI. Giảm thiểu: dựng pipeline đầu tiên, giữ logic trong Domain test được trên Linux/Windows, commit nhỏ.
 - Signing trên CI hay trục trặc lần đầu. Giảm thiểu: làm `testflight.yml` sớm với app gần như trống.
 - Repo public: lộ secrets là sự cố nghiêm trọng. Giảm thiểu: quy tắc mục 4, `.gitignore` chặt, bật secret scanning của GitHub.
+
+## Phụ lục A: Data-model contract
+
+Contract này là nguồn duy nhất cho migration SQLite đầu tiên và cho schema Postgres ở sub-project 5.
+
+### A.1 Quy ước chung
+
+- Tên bảng số nhiều, snake_case. Tên cột snake_case.
+- Kiểu lưu trong SQLite (kiểu Postgres tương ứng trong ngoặc):
+  - UUID: TEXT chữ thường có gạch nối (`uuid`)
+  - Tiền: TEXT đúng 2 chữ số thập phân (`numeric(14,2)`)
+  - Số thập phân khác (days, quantity, percentage): TEXT (`numeric`)
+  - Mốc thời gian: TEXT ISO-8601 UTC (`timestamptz`)
+  - Ngày lịch: TEXT `YYYY-MM-DD` (`date`)
+  - Boolean: INTEGER 0/1 (`boolean`)
+  - Enum: TEXT raw value camelCase, có CHECK liệt kê giá trị
+- **Cột chung** của mọi bảng: `id` PK, `company_id` NOT NULL FK → `companies.id`, `created_at` NOT NULL, `updated_at` NOT NULL, `deleted_at` NULL, `sync_state` NOT NULL DEFAULT `'pending'`. Ngoại lệ: `companies` không có `company_id`.
+- Các bảng dưới đây chỉ liệt kê cột riêng. Cột không ghi "NULL" là NOT NULL.
+- Mọi khóa ngoại là `ON DELETE RESTRICT` và `PRAGMA foreign_keys = ON`. Xóa vật lý không xảy ra trong vận hành bình thường; RESTRICT là lưới an toàn.
+- Mọi cột khóa ngoại có index. Mọi bảng có index `(company_id)`.
+- Unique index luôn là partial: `WHERE deleted_at IS NULL`.
+- `sort_order` là INTEGER, thứ tự hiển thị trong cha.
+
+### A.2 Hành vi soft delete
+
+Repository thực hiện trong một transaction:
+
+| Xóa | Hành vi |
+|---|---|
+| Project | Soft delete project và mọi bản ghi con: scope fields, estimate lines, tasks (kéo theo checklist items, assignees), project workers, schedule items, payments, expenses (kéo theo receipt images), labour entries, daily logs, photos. `activity_log` giữ nguyên. |
+| Customer | Từ chối nếu còn project chưa xóa (`DomainError.customerHasProjects`). |
+| Employee | Soft delete employee. Labour entries, task assignees, project workers cũ giữ nguyên để giữ lịch sử và chi phí; khi hiển thị lịch sử, truy vấn employee kể cả đã xóa. |
+| Task | Kéo theo checklist items và assignees. |
+| Expense | Kéo theo receipt images. File ảnh giữ trên đĩa cho tới khi sync xác nhận (sub-project 5 quyết định dọn dẹp). |
+| Payment schedule item | Payments gắn với item được giữ, đặt `schedule_item_id = NULL` (vẫn tính vào `collected`). |
+| Custom expense category | Từ chối nếu còn expense chưa xóa đang dùng. |
+| Company, User | Không có thao tác xóa trong MVP. |
+
+`activity_log` là append-only: không sửa, không xóa.
+
+### A.3 Bảng
+
+**companies** — `name`; `currency_code` CHECK (`CAD`, `USD`).
+
+**users** — `display_name`; `email` NULL; `role` CHECK (`owner`), mặc định `owner`; `auth_user_id` NULL. Unique `(auth_user_id)` khi khác NULL.
+
+**customers** — `name`; `phone` NULL; `email` NULL; `preferred_contact` NULL CHECK (`phone`, `text`, `email`); `company_name` NULL; `secondary_contact` NULL; `notes` NULL. Index `(company_id, name)`.
+
+**projects** — `customer_id` FK → customers; `name`; `job_type`; `custom_job_type` NULL (bắt buộc khi `job_type = other`); `status`; `address_line`; `unit` NULL; `city` NULL; `region` NULL; `postal_code` NULL; `scope_description` NULL; `start_date` NULL; `estimated_completion_date` NULL; `working_days` INTEGER NULL; `hours_per_day` NULL; `workers_per_day` INTEGER NULL; `contract_value` DEFAULT `'0.00'`; `manual_progress` INTEGER NULL CHECK 0–100; `deposit_required_to_start` DEFAULT 0. Index `(company_id, status)`, `(customer_id)`.
+
+**project_scope_fields** — `project_id` FK → projects; `field_key` (khóa từ catalog theo job type, ví dụ `squareFootage`, `roofType`; trường tự thêm dùng tiền tố `custom:`); `value_text`; `sort_order`. Unique `(project_id, field_key)`.
+
+**project_estimate_lines** — `project_id` FK; `cost_group` CHECK 6 giá trị `CostGroup`; `label`; `amount`; `quantity` NULL; `unit_rate` NULL (khi có cả hai, `amount = rounded(quantity × unit_rate)`; labour: quantity là số ngày công); `sort_order`. Index `(project_id, cost_group)`.
+
+**employees** — `name`; `phone` NULL; `role` NULL; `trade` NULL; `hourly_rate` NULL; `daily_rate` NULL; `certifications` NULL; `emergency_contact` NULL; `notes` NULL. Index `(company_id, name)`.
+
+**project_tasks** — `project_id` FK; `name`; `status` CHECK 6 giá trị `TaskStatus`; `start_date` NULL; `due_date` NULL; `notes` NULL; `sort_order`. Index `(project_id, sort_order)`, `(company_id, due_date)`.
+
+**task_checklist_items** — `task_id` FK → project_tasks; `title`; `is_done` DEFAULT 0; `sort_order`.
+
+**task_assignees** — `task_id` FK; `employee_id` FK → employees. Unique `(task_id, employee_id)`.
+
+**project_workers** — `project_id` FK; `employee_id` FK; `work_date`. Unique `(project_id, employee_id, work_date)`. Index `(company_id, work_date)`. Một employee được phép ở hai project cùng ngày (là dữ liệu cho cảnh báo trùng lịch sau này).
+
+**payment_schedule_items** — `project_id` FK; `label`; `amount`; `percentage` NULL; `due_date` NULL; `trigger_text` NULL; `is_deposit` DEFAULT 0; `notes` NULL; `sort_order`. Index `(project_id, sort_order)`, `(company_id, due_date)`.
+
+**payments** — `project_id` FK; `schedule_item_id` NULL FK → payment_schedule_items; `amount` (> 0); `paid_on`; `method` CHECK 6 giá trị `PaymentMethod`; `notes` NULL. Index `(project_id, paid_on)`, `(schedule_item_id)`.
+
+**custom_expense_categories** — `name`; `cost_group` DEFAULT `other`. Unique `(company_id, name)`.
+
+**expenses** — `project_id` FK (bắt buộc: MVP không có chi phí ngoài project); `category` CHECK 13 giá trị mặc định + `custom`; `custom_category_id` NULL FK → custom_expense_categories (bắt buộc khi và chỉ khi `category = custom`); `vendor_name` NULL; `amount`; `tax` DEFAULT `'0.00'`; `spent_on`; `payment_method` NULL; `notes` NULL. Index `(project_id, spent_on)`, `(company_id, spent_on)`.
+
+**receipt_images** — `expense_id` FK → expenses; `file_path` (tương đối trong thư mục app); `remote_path` NULL (sub-project 5); `page_index`. Unique `(expense_id, page_index)`.
+
+**labour_entries** — `project_id` FK; `employee_id` FK; `work_date`; `days` (> 0, ví dụ `0.5`); `daily_rate`; `notes` NULL. Index `(project_id, work_date)`, `(employee_id, work_date)`.
+
+**daily_logs** — `project_id` FK; `log_date`; `workers_onsite` INTEGER NULL; `weather` NULL; `work_completed` NULL; `material_delivered` NULL; `problems` NULL; `tomorrow_plan` NULL. Unique `(project_id, log_date)`.
+
+**photos** — `project_id` FK; `daily_log_id` NULL FK → daily_logs; `category` CHECK 6 giá trị `PhotoCategory`; `taken_at`; `latitude` REAL NULL; `longitude` REAL NULL (tọa độ không phải tiền, dùng REAL); `file_path`; `remote_path` NULL; `caption` NULL. Index `(project_id, taken_at)`.
+
+**activity_log** — `user_id` NULL FK → users; `actor_name` (chụp lại tên lúc ghi); `action` (mã ổn định, ví dụ `expenseAdded`, `paymentReceived`, `progressChanged`); `entity_type`; `entity_id`; `project_id` NULL FK; `details_json` (tham số để UI dựng câu theo ngôn ngữ đang chọn, ví dụ `{"amount":"450.00"}` hoặc `{"from":40,"to":55}`); `occurred_at`. Index `(project_id, occurred_at)`, `(company_id, occurred_at)`. Không lưu câu đã dịch.
+
+**notifications** — `project_id` NULL FK; `kind` (mã ổn định); `entity_type` NULL; `entity_id` NULL; `details_json`; `fire_at`; `read_at` NULL. Index `(company_id, fire_at)`.
+
+### A.4 Biểu diễn trong Domain
+
+- `ProjectTask.assignees`: danh sách `employeeId`, lưu ở `task_assignees`.
+- `ProjectTask.checklist`: danh sách `TaskChecklistItem` có thứ tự, lưu ở `task_checklist_items`.
+- `Expense.receiptImages`: danh sách có thứ tự, lưu ở `receipt_images`. Khái niệm "Receipt" trong yêu cầu gốc là tập ảnh này cộng các trường vendor/date/amount/tax của chính Expense; không có bảng `receipts` riêng.
+- `Project.scopeFields`: danh sách key-value có thứ tự, lưu ở `project_scope_fields`; giá trị luôn là chuỗi, Features diễn giải theo catalog của job type.
+- Bảng liên kết và bảng con đều là dòng riêng có `id`, `updated_at`, `deleted_at` (không dùng cột JSON hay mảng) để sync theo từng dòng.
