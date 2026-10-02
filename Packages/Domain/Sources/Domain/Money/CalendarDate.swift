@@ -1,6 +1,7 @@
 import Foundation
 
 /// A calendar day without time: due dates, start dates, completion dates.
+/// Supports years 1–9999 only.
 public struct CalendarDate: Hashable, Comparable, Sendable, Codable {
     public let year: Int
     public let month: Int
@@ -14,6 +15,7 @@ public struct CalendarDate: Hashable, Comparable, Sendable, Codable {
     }
 
     public init?(year: Int, month: Int, day: Int) {
+        guard (1...9999).contains(year) else { return nil }
         var components = DateComponents()
         components.year = year; components.month = month; components.day = day
         guard components.isValidDate(in: CalendarDate.calendar) else { return nil }
@@ -23,8 +25,11 @@ public struct CalendarDate: Hashable, Comparable, Sendable, Codable {
     /// Parses exactly `YYYY-MM-DD`.
     public init?(storage: String) {
         let parts = storage.split(separator: "-", omittingEmptySubsequences: false)
-        guard parts.count == 3, parts[0].count == 4, parts[1].count == 2, parts[2].count == 2,
-              let y = Int(parts[0]), let m = Int(parts[1]), let d = Int(parts[2]) else { return nil }
+        guard parts.count == 3, parts[0].count == 4, parts[1].count == 2, parts[2].count == 2 else { return nil }
+        guard parts[0].allSatisfy({ $0.isASCII && $0.isNumber }),
+              parts[1].allSatisfy({ $0.isASCII && $0.isNumber }),
+              parts[2].allSatisfy({ $0.isASCII && $0.isNumber }) else { return nil }
+        guard let y = Int(parts[0]), let m = Int(parts[1]), let d = Int(parts[2]) else { return nil }
         self.init(year: y, month: m, day: d)
     }
 
@@ -61,5 +66,19 @@ public struct CalendarDate: Hashable, Comparable, Sendable, Codable {
 
     public static func < (lhs: CalendarDate, rhs: CalendarDate) -> Bool {
         (lhs.year, lhs.month, lhs.day) < (rhs.year, rhs.month, rhs.day)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        try container.encode(storageString)
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        let storageStr = try container.decode(String.self)
+        guard let value = CalendarDate(storage: storageStr) else {
+            throw DecodingError.dataCorruptedError(in: container, debugDescription: "Invalid CalendarDate format: \(storageStr)")
+        }
+        self = value
     }
 }

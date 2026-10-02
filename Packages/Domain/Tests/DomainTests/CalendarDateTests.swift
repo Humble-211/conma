@@ -47,4 +47,33 @@ final class CalendarDateTests: XCTestCase {
         XCTAssertEqual(CalendarDate(instant, timeZone: TimeZone(identifier: "UTC")!).storageString, "2026-10-05")
         XCTAssertEqual(CalendarDate(instant, timeZone: TimeZone(identifier: "America/Toronto")!).storageString, "2026-10-04")
     }
+
+    func testStorageRejectsLeadingPlus() {
+        XCTAssertNil(CalendarDate(storage: "2026-+1-01"))
+        XCTAssertNil(CalendarDate(storage: "+202-01-01"))
+        XCTAssertNil(CalendarDate(storage: "2026-01-0a"))
+    }
+
+    func testCodableRoundTrip() {
+        let original = CalendarDate(storage: "2026-10-05")!
+        let encoded = try! JSONEncoder().encode(original)
+        let decoded = try! JSONDecoder().decode(CalendarDate.self, from: encoded)
+        XCTAssertEqual(decoded, original)
+
+        let jsonString = String(data: encoded, encoding: .utf8)!
+        XCTAssertEqual(jsonString, "\"2026-10-05\"")
+    }
+
+    func testCodableThrowsOnInvalidDate() {
+        let jsonData = "\"2026-02-30\"".data(using: .utf8)!
+        XCTAssertThrowsError(try JSONDecoder().decode(CalendarDate.self, from: jsonData)) { error in
+            XCTAssertTrue(error is DecodingError)
+        }
+    }
+
+    func testYearRangeValidation() {
+        XCTAssertNil(CalendarDate(year: 0, month: 1, day: 1))
+        XCTAssertNil(CalendarDate(year: 10000, month: 1, day: 1))
+        XCTAssertNotNil(CalendarDate(year: 9999, month: 12, day: 31))
+    }
 }
