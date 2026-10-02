@@ -45,7 +45,7 @@ enum Migration001_InitialSchema {
                 UNIQUE (id, company_id)
             );
             CREATE INDEX idx_users_company ON users(company_id);
-            CREATE UNIQUE INDEX uq_users_auth ON users(auth_user_id) WHERE auth_user_id IS NOT NULL AND deleted_at IS NULL;
+            CREATE UNIQUE INDEX uq_users_auth ON users(auth_user_id) WHERE deleted_at IS NULL AND auth_user_id IS NOT NULL;
 
             CREATE TABLE customers (
                 \(common)
