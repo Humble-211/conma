@@ -381,7 +381,9 @@ Contract này là nguồn duy nhất cho migration SQLite đầu tiên và cho s
 - **Khóa ngoại cùng company**: mọi bảng có `company_id` khai báo thêm `UNIQUE (id, company_id)`. Mọi tham chiếu tới bảng cha (trừ tới `companies`) là khóa ngoại tổ hợp `FOREIGN KEY (<parent>_id, company_id) REFERENCES <parent>(id, company_id)`. Nhờ vậy DB tự chặn record company B trỏ vào project của company A; quy tắc này mang nguyên sang Postgres và làm nền cho RLS. Trong tài liệu này, "`x_id` FK → bảng" luôn hiểu là khóa ngoại tổ hợp kiểu trên.
 - **Khóa ngoại cùng project**: khi một bảng con tham chiếu một bảng khác cũng thuộc project (`payments → payment_schedule_items`, `photos → daily_logs`), bảng được tham chiếu khai báo thêm `UNIQUE (id, project_id, company_id)` và khóa ngoại là `FOREIGN KEY (<ref>_id, project_id, company_id) REFERENCES <ref>(id, project_id, company_id)`, giữ nguyên khóa ngoại tới `projects`. Cột `<ref>_id` NULL thì khóa ngoại tổ hợp không áp dụng (SQLite và Postgres cùng mặc định `MATCH SIMPLE`), nên payment chưa phân bổ và photo không gắn daily log vẫn hợp lệ.
 - Mọi cột khóa ngoại có index. Mọi bảng có index `(company_id)`.
-- Unique index luôn là partial: `WHERE deleted_at IS NULL`.
+- Hai loại unique, không lẫn nhau:
+  - **Đích của khóa ngoại** (`UNIQUE (id, company_id)`, `UNIQUE (id, project_id, company_id)`): unique constraint **đầy đủ**, không có `WHERE`. SQLite và Postgres không cho khóa ngoại tham chiếu partial unique index.
+  - **Business/natural key** cần tái dùng sau soft delete (`(company_id, name)`, `(project_id, log_date)`, `(project_id, field_key)`, `(task_id, employee_id)`, `(project_id, employee_id, work_date)`, `(expense_id, page_index)`, `(auth_user_id)`): partial unique index `WHERE deleted_at IS NULL`. Trong A.3, chữ "Unique" ở các khóa này hiểu là partial.
 - `sort_order` là INTEGER, thứ tự hiển thị trong cha.
 
 ### A.2 Hành vi soft delete
