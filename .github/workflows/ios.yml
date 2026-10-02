@@ -4,6 +4,9 @@ on:
   push:
   pull_request:
 
+permissions:
+  contents: read
+
 concurrency:
   group: ios-${{ github.ref }}
   cancel-in-progress: true
@@ -11,6 +14,9 @@ concurrency:
 jobs:
   build-and-test:
     runs-on: macos-15
+    defaults:
+      run:
+        shell: bash
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
@@ -56,9 +62,8 @@ jobs:
       - name: Export screenshots
         if: always()
         run: |
-          brew install chargepoint/xcparse/xcparse
           mkdir -p build/screenshots
-          xcparse screenshots build/UITests.xcresult build/screenshots || true
+          xcrun xcresulttool export attachments --path build/UITests.xcresult --output-path build/screenshots || echo "attachment export failed"
           ls -R build/screenshots | head -50
       - name: Upload screenshots
         if: always()

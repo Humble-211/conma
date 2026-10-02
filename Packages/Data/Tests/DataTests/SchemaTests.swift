@@ -1,5 +1,6 @@
 import XCTest
 import GRDB
+import Domain
 @testable import Data
 
 final class SchemaTests: XCTestCase {
@@ -14,6 +15,13 @@ final class SchemaTests: XCTestCase {
             "project_scope_fields", "project_tasks", "project_workers", "projects", "receipt_images", "task_assignees",
             "task_checklist_items", "users",
         ])
+    }
+
+    func testFrozenCheckListsMatchCurrentEnums() throws {
+        let db = try AppDatabase.inMemory()
+        let sql = try db.writer.read { try String.fetchOne($0, sql: "SELECT sql FROM sqlite_master WHERE name = 'projects'") ?? "" }
+        for jobType in JobType.allCases { XCTAssertTrue(sql.contains("'\(jobType.rawValue)'"), "Migration001 is frozen; add a new migration for \(jobType)") }
+        for status in ProjectStatus.allCases { XCTAssertTrue(sql.contains("'\(status.rawValue)'"), "Migration001 is frozen; add a new migration for \(status)") }
     }
 
     func testCommonColumnsOnEveryTable() throws {

@@ -8,7 +8,7 @@ options:
   createIntermediateGroups: true
 settings:
   base:
-    SWIFT_VERSION: "5.10"
+    SWIFT_VERSION: "5.0"
     DEVELOPMENT_TEAM: TEAM_ID_PLACEHOLDER
     CODE_SIGN_STYLE: Manual
     SWIFT_STRICT_CONCURRENCY: targeted
@@ -67,6 +67,7 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.humble211.constructionmanagement.uitests
         CODE_SIGNING_ALLOWED: false
+        GENERATE_INFOPLIST_FILE: YES
     dependencies:
       - target: ConstructionManagement
 schemes:

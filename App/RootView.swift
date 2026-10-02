@@ -18,8 +18,7 @@ struct RootView: View {
                 if let setup = ready.setup {
                     RootTabView(ready: ready, setup: setup, settings: container.settings)
                 } else {
-                    SetupView(viewModel: SetupViewModel(companyRepository: ready.companyRepository) { container.completeSetup($0) },
-                              settings: container.settings)
+                    SetupScreen(companyRepository: ready.companyRepository, settings: container.settings) { container.completeSetup($0) }
                 }
             }
         }

@@ -6,7 +6,7 @@ public struct Card<Content: View>: View {
     public init(@ViewBuilder content: () -> Content) { self.content = content() }
 
     public var body: some View {
-        content
+        VStack(alignment: .leading, spacing: DSSpacing.md) { content }
             .padding(DSSpacing.lg)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(DSColor.surface, in: RoundedRectangle(cornerRadius: DSSpacing.cardRadius, style: .continuous))

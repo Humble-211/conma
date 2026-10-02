@@ -48,12 +48,12 @@ public struct ComponentGalleryView: View {
             }
             .padding(.vertical, DSSpacing.lg)
         }
+        .accessibilityIdentifier("component_gallery")
         .background(DSColor.background)
         .overlay(alignment: .bottomTrailing) {
             FloatingActionButton(accessibilityLabel: "gallery.add") { progress = progress >= 100 ? 0 : progress + 10 }
                 .padding(DSSpacing.xl)
         }
-        .accessibilityIdentifier("component_gallery")
         .navigationTitle("gallery.title")
     }
 }

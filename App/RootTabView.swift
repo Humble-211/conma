@@ -15,7 +15,7 @@ struct RootTabView: View {
 
     var body: some View {
         TabView {
-            NavigationStack { HomeView(viewModel: HomeViewModel(projectRepository: ready.projectRepository, companyId: setup.company.id)) }
+            NavigationStack { HomeScreen(projectRepository: ready.projectRepository, companyId: setup.company.id) }
                 .tabItem { Label("tab.home", systemImage: "house") }
                 .accessibilityIdentifier("tab_home")
             NavigationStack { ProjectsPlaceholderView() }

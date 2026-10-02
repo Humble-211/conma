@@ -1,6 +1,5 @@
 import Foundation
 import GRDB
-import Domain
 
 enum Migration001_InitialSchema {
     private static let common = """
@@ -11,10 +10,6 @@ enum Migration001_InitialSchema {
         deleted_at TEXT,
         sync_state TEXT NOT NULL DEFAULT 'pending' CHECK (sync_state IN ('pending', 'synced')),
         """
-
-    private static func enumList<T: RawRepresentable & CaseIterable>(_ type: T.Type) -> String where T.RawValue == String {
-        type.allCases.map { "'\($0.rawValue)'" }.joined(separator: ", ")
-    }
 
     private static func fk(_ column: String, _ table: String) -> String {
         "FOREIGN KEY (\(column), company_id) REFERENCES \(table)(id, company_id) ON DELETE RESTRICT"
@@ -33,14 +28,14 @@ enum Migration001_InitialSchema {
                 deleted_at TEXT,
                 sync_state TEXT NOT NULL DEFAULT 'pending' CHECK (sync_state IN ('pending', 'synced')),
                 name TEXT NOT NULL,
-                currency_code TEXT NOT NULL CHECK (currency_code IN (\(enumList(CurrencyCode.self))))
+                currency_code TEXT NOT NULL CHECK (currency_code IN ('CAD', 'USD'))
             );
 
             CREATE TABLE users (
                 \(common)
                 display_name TEXT NOT NULL,
                 email TEXT,
-                role TEXT NOT NULL DEFAULT 'owner' CHECK (role IN (\(enumList(UserRole.self)))),
+                role TEXT NOT NULL DEFAULT 'owner' CHECK (role IN ('owner')),
                 auth_user_id TEXT,
                 UNIQUE (id, company_id)
             );
@@ -52,7 +47,7 @@ enum Migration001_InitialSchema {
                 name TEXT NOT NULL,
                 phone TEXT,
                 email TEXT,
-                preferred_contact TEXT CHECK (preferred_contact IN (\(enumList(ContactMethod.self)))),
+                preferred_contact TEXT CHECK (preferred_contact IN ('phone', 'text', 'email')),
                 company_name TEXT,
                 secondary_contact TEXT,
                 notes TEXT,
@@ -65,9 +60,9 @@ enum Migration001_InitialSchema {
                 \(common)
                 customer_id TEXT NOT NULL,
                 name TEXT NOT NULL,
-                job_type TEXT NOT NULL CHECK (job_type IN (\(enumList(JobType.self)))),
+                job_type TEXT NOT NULL CHECK (job_type IN ('generalRenovation', 'basementRenovation', 'kitchen', 'bathroom', 'landscaping', 'roofing', 'plumbing', 'electrical', 'hvac', 'flooring', 'painting', 'drywall', 'concrete', 'deckFence', 'framing', 'windowsDoors', 'exterior', 'demolition', 'commercial', 'other')),
                 custom_job_type TEXT,
-                status TEXT NOT NULL CHECK (status IN (\(enumList(ProjectStatus.self)))),
+                status TEXT NOT NULL CHECK (status IN ('estimate', 'awaitingApproval', 'awaitingDeposit', 'scheduled', 'inProgress', 'onHold', 'waitingForInspection', 'waitingForMaterial', 'waitingForClient', 'completed', 'awaitingFinalPayment', 'closed', 'cancelled')),
                 address_line TEXT NOT NULL,
                 unit TEXT,
                 city TEXT,
@@ -105,7 +100,7 @@ enum Migration001_InitialSchema {
             CREATE TABLE project_estimate_lines (
                 \(common)
                 project_id TEXT NOT NULL,
-                cost_group TEXT NOT NULL CHECK (cost_group IN (\(enumList(CostGroup.self)))),
+                cost_group TEXT NOT NULL CHECK (cost_group IN ('material', 'labour', 'subcontractor', 'equipment', 'permit', 'other')),
                 label TEXT NOT NULL,
                 amount TEXT NOT NULL,
                 quantity TEXT,
@@ -137,7 +132,7 @@ enum Migration001_InitialSchema {
                 \(common)
                 project_id TEXT NOT NULL,
                 name TEXT NOT NULL,
-                status TEXT NOT NULL CHECK (status IN (\(enumList(TaskStatus.self)))),
+                status TEXT NOT NULL CHECK (status IN ('notStarted', 'scheduled', 'inProgress', 'blocked', 'waiting', 'completed')),
                 start_date TEXT,
                 due_date TEXT,
                 notes TEXT,
@@ -214,7 +209,7 @@ enum Migration001_InitialSchema {
                 schedule_item_id TEXT,
                 amount TEXT NOT NULL,
                 paid_on TEXT NOT NULL,
-                method TEXT NOT NULL CHECK (method IN (\(enumList(PaymentMethod.self)))),
+                method TEXT NOT NULL CHECK (method IN ('cash', 'cheque', 'eTransfer', 'creditCard', 'bankTransfer', 'other')),
                 notes TEXT,
                 UNIQUE (id, company_id),
                 \(fk("project_id", "projects")),
@@ -227,7 +222,7 @@ enum Migration001_InitialSchema {
             CREATE TABLE custom_expense_categories (
                 \(common)
                 name TEXT NOT NULL,
-                cost_group TEXT NOT NULL DEFAULT 'other' CHECK (cost_group IN (\(enumList(CostGroup.self)))),
+                cost_group TEXT NOT NULL DEFAULT 'other' CHECK (cost_group IN ('material', 'labour', 'subcontractor', 'equipment', 'permit', 'other')),
                 UNIQUE (id, company_id)
             );
             CREATE INDEX idx_custom_expense_categories_company ON custom_expense_categories(company_id);
@@ -236,14 +231,14 @@ enum Migration001_InitialSchema {
             CREATE TABLE expenses (
                 \(common)
                 project_id TEXT NOT NULL,
-                category TEXT NOT NULL CHECK (category IN (\(enumList(ExpenseCategory.self)))),
+                category TEXT NOT NULL CHECK (category IN ('materials', 'labour', 'subcontractor', 'equipmentRental', 'toolPurchase', 'permit', 'inspection', 'delivery', 'fuel', 'wasteDisposal', 'parking', 'office', 'other', 'custom')),
                 custom_category_id TEXT,
-                cost_group TEXT NOT NULL CHECK (cost_group IN (\(enumList(CostGroup.self)))),
+                cost_group TEXT NOT NULL CHECK (cost_group IN ('material', 'labour', 'subcontractor', 'equipment', 'permit', 'other')),
                 vendor_name TEXT,
                 amount TEXT NOT NULL,
                 tax TEXT NOT NULL DEFAULT '0.00',
                 spent_on TEXT NOT NULL,
-                payment_method TEXT CHECK (payment_method IN (\(enumList(PaymentMethod.self)))),
+                payment_method TEXT CHECK (payment_method IN ('cash', 'cheque', 'eTransfer', 'creditCard', 'bankTransfer', 'other')),
                 notes TEXT,
                 UNIQUE (id, company_id),
                 CHECK ((category = 'custom') = (custom_category_id IS NOT NULL)),
@@ -306,7 +301,7 @@ enum Migration001_InitialSchema {
                 \(common)
                 project_id TEXT NOT NULL,
                 daily_log_id TEXT,
-                category TEXT NOT NULL CHECK (category IN (\(enumList(PhotoCategory.self)))),
+                category TEXT NOT NULL CHECK (category IN ('before', 'progress', 'issues', 'inspection', 'completed', 'receipts')),
                 taken_at TEXT NOT NULL,
                 latitude REAL,
                 longitude REAL,

@@ -21,8 +21,10 @@ public final class AppSettings {
 
     /// Vietnamese when chosen, or when the system is Vietnamese and "system" is selected; English otherwise.
     public var resolvedLocale: Locale {
-        let code = language.localeIdentifier ?? (systemLanguageCode == "vi" ? "vi" : "en") // lint:allow-string
-        return Locale(identifier: code)
+        let languageCode = language.localeIdentifier ?? (systemLanguageCode == "vi" ? "vi" : "en") // lint:allow-string
+        var components = Locale.Components(languageCode: Locale.LanguageCode(languageCode))
+        components.region = Locale.current.region
+        return Locale(components: components)
     }
 
     public var colorScheme: ColorScheme? { appearance.colorScheme }

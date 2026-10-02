@@ -81,6 +81,17 @@ final class ProjectRepositoryTests: XCTestCase {
         XCTAssertEqual(actions, [])
     }
 
+    func testConstraintFailureInsideTransactionRollsBackEverything() async throws {
+        var p = project()
+        let duplicate = ProjectScopeField(id: UUID(), companyId: companyId, projectId: p.id, fieldKey: "squareFootage", valueText: "900", sortOrder: 1, createdAt: now, updatedAt: now, deletedAt: nil)
+        p.scopeFields.append(duplicate)
+        do { try await repo.save(p, actor: actor); XCTFail("expected unique constraint failure") } catch {}
+        let count = try await db.writer.read { try Int.fetchOne($0, sql: "SELECT COUNT(*) FROM projects") }
+        XCTAssertEqual(count, 0)
+        let actions = try await activityActions(p.id)
+        XCTAssertEqual(actions, [])
+    }
+
     func testListAndSummariesExcludeDeleted() async throws {
         let a = project("A"), b = project("B")
         try await repo.save(a, actor: actor); try await repo.save(b, actor: actor)
