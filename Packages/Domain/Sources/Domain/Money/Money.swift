@@ -1,6 +1,10 @@
 import Foundation
 
 public struct Money: Hashable, Sendable, Codable {
+    enum CodingKeys: String, CodingKey {
+        case amount
+        case currency
+    }
     /// Always exactly 2 decimal places (see spec 5.1).
     public let amount: Decimal
     public let currency: CurrencyCode
@@ -69,5 +73,33 @@ public struct Money: Hashable, Sendable, Codable {
         let parts = chars.split(separator: ".", omittingEmptySubsequences: false)
         guard parts.count == 2, !parts[0].isEmpty, parts[1].count == 2 else { return false }
         return parts.allSatisfy { $0.allSatisfy(\.isNumber) } && parts[0].allSatisfy(\.isASCII) && parts[1].allSatisfy(\.isASCII)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(storageString, forKey: .amount)
+        try container.encode(currency.rawValue, forKey: .currency)
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        let amountString = try container.decode(String.self, forKey: .amount)
+        let currencyRaw = try container.decode(String.self, forKey: .currency)
+
+        guard let currencyCode = CurrencyCode(rawValue: currencyRaw) else {
+            throw DecodingError.dataCorrupted(DecodingError.Context(
+                codingPath: [CodingKeys.currency],
+                debugDescription: "Invalid currency code"
+            ))
+        }
+
+        guard let money = Money(storage: amountString, currency: currencyCode) else {
+            throw DecodingError.dataCorrupted(DecodingError.Context(
+                codingPath: [CodingKeys.amount],
+                debugDescription: "Amount is not in canonical form (must be exactly 2 decimals)"
+            ))
+        }
+
+        self = money
     }
 }

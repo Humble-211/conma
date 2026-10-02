@@ -69,4 +69,33 @@ final class MoneyTests: XCTestCase {
         XCTAssertFalse(cad("0.00").isNegative)
         XCTAssertTrue(cad("0.00").isZero)
     }
+
+    func testCodableRoundTrip() throws {
+        let original = Money(Decimal(string: "246.50")!, .cad)
+        let encoder = JSONEncoder()
+        let data = try encoder.encode(original)
+        let decoder = JSONDecoder()
+        let decoded = try decoder.decode(Money.self, from: data)
+        XCTAssertEqual(decoded, original)
+    }
+
+    func testCodableRejectsNonCanonicalAmount() throws {
+        let json = """
+        {"amount":"1.005","currency":"CAD"}
+        """.data(using: .utf8)!
+        let decoder = JSONDecoder()
+        XCTAssertThrowsError(try decoder.decode(Money.self, from: json)) { error in
+            XCTAssertTrue(error is DecodingError)
+        }
+    }
+
+    func testCodableDecodesCanonicalForm() throws {
+        let json = """
+        {"amount":"12.30","currency":"USD"}
+        """.data(using: .utf8)!
+        let decoder = JSONDecoder()
+        let decoded = try decoder.decode(Money.self, from: json)
+        XCTAssertEqual(decoded.storageString, "12.30")
+        XCTAssertEqual(decoded.currency, .usd)
+    }
 }
