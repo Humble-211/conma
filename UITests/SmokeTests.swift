@@ -1,8 +1,15 @@
+import Foundation
 import XCTest
 
 final class SmokeTests: XCTestCase {
     override func setUp() {
         continueAfterFailure = false
+    }
+
+    private func pickerRow(_ app: XCUIApplication, labeled label: String) -> XCUIElement {
+        let byButton = app.buttons.matching(NSPredicate(format: "label == %@", label)).firstMatch
+        if byButton.waitForExistence(timeout: 2) { return byButton }
+        return app.staticTexts.matching(NSPredicate(format: "label == %@", label)).firstMatch
     }
 
     private func launch(_ extra: [String]) -> XCUIApplication {
@@ -21,13 +28,14 @@ final class SmokeTests: XCTestCase {
         owner.tap(); owner.typeText("Duc")
         app.buttons["setup_start"].tap()
         XCTAssertTrue(app.tabBars.buttons["Home"].waitForExistence(timeout: 10))
-        XCTAssertTrue(app.staticTexts["No jobs yet"].exists)
+        XCTAssertTrue(app.staticTexts["No jobs yet"].waitForExistence(timeout: 5))
     }
 
     func testAllTabsOpenWithSeedData() {
         let app = launch(["--seed-sample-data", "--locale", "en"])
         XCTAssertTrue(app.tabBars.buttons["Home"].waitForExistence(timeout: 10))
-        XCTAssertTrue(app.staticTexts["123 Main Street"].waitForExistence(timeout: 5))
+        let card = app.descendants(matching: .any).matching(NSPredicate(format: "label CONTAINS %@", "123 Main Street")).firstMatch
+        XCTAssertTrue(card.waitForExistence(timeout: 5))
         for (tab, title) in [("Projects", "Projects"), ("Calendar", "Calendar"), ("Expenses", "Expenses"), ("More", "More")] {
             app.tabBars.buttons[tab].tap()
             XCTAssertTrue(app.navigationBars[title].waitForExistence(timeout: 5), "tab \(tab)")
@@ -40,12 +48,12 @@ final class SmokeTests: XCTestCase {
         app.tabBars.buttons["More"].tap()
         app.buttons["more_settings"].tap()
         XCTAssertTrue(app.navigationBars["Settings"].waitForExistence(timeout: 5))
-        app.buttons["Tiếng Việt"].tap()
+        pickerRow(app, labeled: "Tiếng Việt").tap()
         // Review Focus #5: the open screen and the tab bar change without leaving the screen.
         XCTAssertTrue(app.navigationBars["Cài đặt"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.tabBars.buttons["Trang chủ"].exists)
         XCTAssertTrue(app.tabBars.buttons["Chi phí"].exists)
-        app.buttons["English"].tap()
+        pickerRow(app, labeled: "English").tap()
         XCTAssertTrue(app.navigationBars["Settings"].waitForExistence(timeout: 5))
     }
 }
