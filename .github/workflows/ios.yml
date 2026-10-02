@@ -30,7 +30,7 @@ jobs:
       - name: Pick simulator
         id: sim
         run: |
-          UDID=$(xcrun simctl list devices available -j | python3 -c "import json,sys; d=json.load(sys.stdin)['devices']; print(next(x['udid'] for k in sorted(d, reverse=True) if 'iOS' in k for x in d[k] if x['name'].startswith('iPhone 16') and x['isAvailable']))")
+          UDID=$(xcrun simctl list devices available -j | python3 -c "import json,sys; d=json.load(sys.stdin)['devices']; c=[x for k in sorted(d, reverse=True) if 'iOS' in k for x in d[k] if x['isAvailable']]; p=[x for x in c if x['name'].startswith('iPhone 16')] or [x for x in c if x['name'].startswith('iPhone')]; print(p[0]['udid'])")
           echo "udid=$UDID" >> "$GITHUB_OUTPUT"
       - name: Build app
         run: |
@@ -42,3 +42,34 @@ jobs:
             CODE_SIGNING_ALLOWED=NO \
             -skipPackagePluginValidation \
             | xcbeautify --quiet || exit ${PIPESTATUS[0]}
+      - name: UI tests
+        run: |
+          xcodebuild test \
+            -project ConstructionManagement.xcodeproj \
+            -scheme ConstructionManagement \
+            -destination "id=${{ steps.sim.outputs.udid }}" \
+            -configuration Debug \
+            CODE_SIGNING_ALLOWED=NO \
+            -skipPackagePluginValidation \
+            -resultBundlePath build/UITests.xcresult \
+            | xcbeautify --quiet || exit ${PIPESTATUS[0]}
+      - name: Export screenshots
+        if: always()
+        run: |
+          brew install chargepoint/xcparse/xcparse
+          mkdir -p build/screenshots
+          xcparse screenshots build/UITests.xcresult build/screenshots || true
+          ls -R build/screenshots | head -50
+      - name: Upload screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshots
+          path: build/screenshots
+          if-no-files-found: warn
+      - name: Upload test results
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: xcresult
+          path: build/UITests.xcresult
