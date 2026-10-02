@@ -338,7 +338,7 @@ Tên tab bản Việt: Trang chủ, Dự án, Lịch, Chi phí, Thêm.
   - Progress có và không có override; không task.
   - Budget alert ở 89%, 90%, 100%, 101%; estimate `nil`; estimate $0 với actual $0 và > $0.
   - Health: từng phase; `awaitingFinalPayment` quá completion date không Delayed; còn 0, 7, 8, −1 ngày; thứ tự ưu tiên và danh sách lý do; `terminal` trả `nil`.
-- `DataTests`: migration từ DB trống tạo đúng bảng, cột, index của Phụ lục A; round-trip record (đặc biệt `Decimal`, `CalendarDate`); soft delete và cascade soft delete của project (gồm notifications); unique index bỏ qua dòng đã xóa; vi phạm khóa ngoại bị từ chối; record company B trỏ vào project company A bị DB từ chối (khóa ngoại tổ hợp); CHECK `job_type`, `cost_group` từ chối giá trị lạ; transaction ghi kèm `activity_log`; rollback khi lỗi.
+- `DataTests`: migration từ DB trống tạo đúng bảng, cột, index của Phụ lục A; round-trip record (đặc biệt `Decimal`, `CalendarDate`); soft delete và cascade soft delete của project (gồm notifications); unique index bỏ qua dòng đã xóa; vi phạm khóa ngoại bị từ chối; record company B trỏ vào project company A bị DB từ chối (khóa ngoại tổ hợp); payment của project A gắn schedule item của project B bị từ chối, payment `schedule_item_id = NULL` được chấp nhận; photo của project A gắn daily log của project B bị từ chối, photo `daily_log_id = NULL` được chấp nhận; CHECK `job_type`, `cost_group` từ chối giá trị lạ; transaction ghi kèm `activity_log`; rollback khi lỗi.
 - UI smoke test: mở app, qua setup, đi 5 tab, đổi sang Tiếng Việt, kiểm tra tiêu đề tab; chụp screenshot.
 - Script: key thiếu bản vi; lint cấm `Double`/`Float` cho tiền trong `Domain` và `Data`.
 
@@ -379,6 +379,7 @@ Contract này là nguồn duy nhất cho migration SQLite đầu tiên và cho s
 - Các bảng dưới đây chỉ liệt kê cột riêng. Cột không ghi "NULL" là NOT NULL.
 - Mọi khóa ngoại là `ON DELETE RESTRICT` và `PRAGMA foreign_keys = ON`. Xóa vật lý không xảy ra trong vận hành bình thường; RESTRICT là lưới an toàn.
 - **Khóa ngoại cùng company**: mọi bảng có `company_id` khai báo thêm `UNIQUE (id, company_id)`. Mọi tham chiếu tới bảng cha (trừ tới `companies`) là khóa ngoại tổ hợp `FOREIGN KEY (<parent>_id, company_id) REFERENCES <parent>(id, company_id)`. Nhờ vậy DB tự chặn record company B trỏ vào project của company A; quy tắc này mang nguyên sang Postgres và làm nền cho RLS. Trong tài liệu này, "`x_id` FK → bảng" luôn hiểu là khóa ngoại tổ hợp kiểu trên.
+- **Khóa ngoại cùng project**: khi một bảng con tham chiếu một bảng khác cũng thuộc project (`payments → payment_schedule_items`, `photos → daily_logs`), bảng được tham chiếu khai báo thêm `UNIQUE (id, project_id, company_id)` và khóa ngoại là `FOREIGN KEY (<ref>_id, project_id, company_id) REFERENCES <ref>(id, project_id, company_id)`, giữ nguyên khóa ngoại tới `projects`. Cột `<ref>_id` NULL thì khóa ngoại tổ hợp không áp dụng (SQLite và Postgres cùng mặc định `MATCH SIMPLE`), nên payment chưa phân bổ và photo không gắn daily log vẫn hợp lệ.
 - Mọi cột khóa ngoại có index. Mọi bảng có index `(company_id)`.
 - Unique index luôn là partial: `WHERE deleted_at IS NULL`.
 - `sort_order` là INTEGER, thứ tự hiển thị trong cha.
@@ -424,9 +425,9 @@ Repository thực hiện trong một transaction:
 
 **project_workers** — `project_id` FK; `employee_id` FK; `work_date`. Unique `(project_id, employee_id, work_date)`. Index `(company_id, work_date)`. Một employee được phép ở hai project cùng ngày (là dữ liệu cho cảnh báo trùng lịch sau này).
 
-**payment_schedule_items** — `project_id` FK; `label`; `amount` (giá trị có thẩm quyền); `percentage` NULL (chỉ là nguồn sinh và hiển thị); `due_date` NULL; `trigger_text` NULL; `is_deposit` DEFAULT 0; `notes` NULL; `sort_order`. Index `(project_id, sort_order)`, `(company_id, due_date)`.
+**payment_schedule_items** — `project_id` FK; `label`; `amount` (giá trị có thẩm quyền); `percentage` NULL (chỉ là nguồn sinh và hiển thị); `due_date` NULL; `trigger_text` NULL; `is_deposit` DEFAULT 0; `notes` NULL; `sort_order`. Unique `(id, project_id, company_id)` (đích cho khóa ngoại cùng project). Index `(project_id, sort_order)`, `(company_id, due_date)`.
 
-**payments** — `project_id` FK; `schedule_item_id` NULL FK → payment_schedule_items; `amount` (> 0); `paid_on`; `method` CHECK 6 giá trị `PaymentMethod`; `notes` NULL. Index `(project_id, paid_on)`, `(schedule_item_id)`.
+**payments** — `project_id` FK; `schedule_item_id` NULL, khóa ngoại tổ hợp `(schedule_item_id, project_id, company_id) → payment_schedule_items(id, project_id, company_id)`; `amount` (> 0); `paid_on`; `method` CHECK 6 giá trị `PaymentMethod`; `notes` NULL. Index `(project_id, paid_on)`, `(schedule_item_id)`.
 
 **custom_expense_categories** — `name`; `cost_group` CHECK 6 giá trị `CostGroup`, DEFAULT `other`, bất biến sau khi đã có expense dùng (repository kiểm tra). Unique `(company_id, name)`.
 
@@ -436,9 +437,9 @@ Repository thực hiện trong một transaction:
 
 **labour_entries** — `project_id` FK; `employee_id` FK; `work_date`; `days` (> 0, ví dụ `0.5`); `daily_rate`; `notes` NULL. Index `(project_id, work_date)`, `(employee_id, work_date)`.
 
-**daily_logs** — `project_id` FK; `log_date`; `workers_onsite` INTEGER NULL; `weather` NULL; `work_completed` NULL; `material_delivered` NULL; `problems` NULL; `tomorrow_plan` NULL. Unique `(project_id, log_date)`.
+**daily_logs** — `project_id` FK; `log_date`; `workers_onsite` INTEGER NULL; `weather` NULL; `work_completed` NULL; `material_delivered` NULL; `problems` NULL; `tomorrow_plan` NULL. Unique `(project_id, log_date)`, `(id, project_id, company_id)` (đích cho khóa ngoại cùng project).
 
-**photos** — `project_id` FK; `daily_log_id` NULL FK → daily_logs; `category` CHECK 6 giá trị `PhotoCategory`; `taken_at`; `latitude` REAL NULL; `longitude` REAL NULL (tọa độ không phải tiền, dùng REAL); `file_path`; `remote_path` NULL; `caption` NULL. Index `(project_id, taken_at)`.
+**photos** — `project_id` FK; `daily_log_id` NULL, khóa ngoại tổ hợp `(daily_log_id, project_id, company_id) → daily_logs(id, project_id, company_id)`; `category` CHECK 6 giá trị `PhotoCategory`; `taken_at`; `latitude` REAL NULL; `longitude` REAL NULL (tọa độ không phải tiền, dùng REAL); `file_path`; `remote_path` NULL; `caption` NULL. Index `(project_id, taken_at)`.
 
 **activity_log** — `user_id` NULL FK → users; `actor_name` (chụp lại tên lúc ghi); `action` (mã ổn định, ví dụ `expenseAdded`, `paymentReceived`, `progressChanged`); `entity_type`; `entity_id`; `project_id` NULL FK; `details_json` (tham số để UI dựng câu theo ngôn ngữ đang chọn, ví dụ `{"amount":"450.00"}` hoặc `{"from":40,"to":55}`); `occurred_at`. Index `(project_id, occurred_at)`, `(company_id, occurred_at)`. Không lưu câu đã dịch.
 
