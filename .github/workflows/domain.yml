@@ -1,0 +1,14 @@
+name: domain
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    container: swift:6.0
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test Domain package
+        run: swift test --package-path Packages/Domain

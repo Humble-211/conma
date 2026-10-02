@@ -1,0 +1,34 @@
+# Xcode / SwiftPM
+*.xcodeproj
+*.xcworkspace
+!*.xcworkspace/contents.xcworkspacedata
+.build/
+DerivedData/
+*.xcresult
+.swiftpm/
+Packages/*/.build/
+Packages/*/.swiftpm/
+
+# fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/
+fastlane/test_output/
+*.ipa
+*.dSYM.zip
+*.mobileprovision
+*.p12
+*.p8
+*.cer
+
+# Ruby
+vendor/bundle/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Local
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
