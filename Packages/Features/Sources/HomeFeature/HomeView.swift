@@ -7,6 +7,7 @@ public struct HomeView: View {
     private let viewModel: HomeViewModel
     private let companyName: String
     private let makeDetail: (UUID) -> AnyView
+    private let makeActivity: (UUID) -> AnyView
 
     @State private var showAllAttention = false
     @State private var pendingDetail: UUID?
@@ -14,8 +15,8 @@ public struct HomeView: View {
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.timeZone) private var timeZone
 
-    public init(viewModel: HomeViewModel, companyName: String = "", makeDetail: @escaping (UUID) -> AnyView) {
-        self.viewModel = viewModel; self.companyName = companyName; self.makeDetail = makeDetail
+    public init(viewModel: HomeViewModel, companyName: String = "", makeDetail: @escaping (UUID) -> AnyView, makeActivity: @escaping (UUID) -> AnyView) {
+        self.viewModel = viewModel; self.companyName = companyName; self.makeDetail = makeDetail; self.makeActivity = makeActivity
     }
 
     private var names: [UUID: String] {
@@ -43,7 +44,10 @@ public struct HomeView: View {
         .background(DSColor.background)
         .navigationTitle("home.title")
         .navigationDestination(for: ProjectRoute.self) { route in
-            switch route { case .detail(let id), .activity(let id): makeDetail(id) } // .activity reuses detail until the activity list screen exists
+            switch route {
+            case .detail(let id): makeDetail(id)
+            case .activity(let id): makeActivity(id)
+            }
         }
         .navigationDestination(item: $pendingDetail) { id in makeDetail(id) }
         .task(id: retryToken) { await viewModel.start() }
@@ -94,22 +98,26 @@ public struct HomeView: View {
 
             TotalsCard(totals: d.totals).padding(.horizontal, DSSpacing.lg)
 
-            if d.cards.isEmpty {
-                EmptyState(systemImage: "hammer", title: "home.empty.title", message: "home.empty.message")
-            } else {
-                ForEach(CardGroup.allCases, id: \.self) { group in
-                    let cards = d.cards.filter { $0.group == group }
-                    if !cards.isEmpty {
-                        SectionHeader(groupKey(group)).padding(.horizontal, DSSpacing.lg)
-                        ForEach(cards) { card in
-                            NavigationLink(value: ProjectRoute.detail(card.id)) {
-                                ProjectCardView(project: card.project, customerName: card.customerName, insights: card.insights, progress: card.insights.progress)
+            VStack(alignment: .leading, spacing: DSSpacing.lg) {
+                if d.cards.isEmpty {
+                    EmptyState(systemImage: "hammer", title: "home.empty.title", message: "home.empty.message")
+                } else {
+                    ForEach(CardGroup.allCases, id: \.self) { group in
+                        let cards = d.cards.filter { $0.group == group }
+                        if !cards.isEmpty {
+                            SectionHeader(groupKey(group)).padding(.horizontal, DSSpacing.lg)
+                            ForEach(cards) { card in
+                                NavigationLink(value: ProjectRoute.detail(card.id)) {
+                                    ProjectCardView(project: card.project, customerName: card.customerName, insights: card.insights, progress: card.insights.progress)
+                                }
+                                .buttonStyle(.plain).padding(.horizontal, DSSpacing.lg)
                             }
-                            .buttonStyle(.plain).padding(.horizontal, DSSpacing.lg)
                         }
                     }
                 }
             }
+            .accessibilityElement(children: .contain)
+            .accessibilityIdentifier("home_projects")
         }
     }
 

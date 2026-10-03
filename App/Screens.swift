@@ -32,7 +32,9 @@ struct HomeScreen: View {
     }
 
     var body: some View {
-        HomeView(viewModel: viewModel, companyName: setup.company.name, makeDetail: { id in AnyView(ProjectDetailScreen(projectId: id, ready: ready, setup: setup)) })
+        HomeView(viewModel: viewModel, companyName: setup.company.name,
+                 makeDetail: { id in AnyView(ProjectDetailScreen(projectId: id, ready: ready, setup: setup)) },
+                 makeActivity: { id in AnyView(ActivityScreen(projectId: id, ready: ready, setup: setup)) })
     }
 }
 
@@ -52,8 +54,21 @@ struct ProjectDetailScreen: View {
     }
 
     var body: some View {
-        ProjectDetailView(viewModel: viewModel, makeCustomer: { id in AnyView(CustomerProfileScreen(customerId: id, ready: ready, setup: setup)) })
+        ProjectDetailView(viewModel: viewModel,
+                          makeCustomer: { id in AnyView(CustomerProfileScreen(customerId: id, ready: ready, setup: setup)) },
+                          makeActivity: { id in AnyView(ActivityScreen(projectId: id, ready: ready, setup: setup)) })
     }
+}
+
+/// Owns the full activity list view model for one project.
+struct ActivityScreen: View {
+    @State private var viewModel: ActivityListViewModel
+
+    init(projectId: UUID, ready: AppContainer.Ready, setup: CompanySetup) {
+        _viewModel = State(initialValue: ActivityListViewModel(projectId: projectId, currency: setup.company.currencyCode, activityLogRepository: ready.activityLogRepository))
+    }
+
+    var body: some View { ActivityListView(viewModel: viewModel) }
 }
 
 struct CustomersScreen: View {
@@ -103,7 +118,8 @@ struct ProjectsScreen: View {
     var body: some View {
         ProjectsListView(viewModel: viewModel,
                          makeWizard: { draft, onCreated, onDismiss in AnyView(WizardScreen(draft: draft, ready: ready, setup: setup, onCreated: onCreated, onDismiss: onDismiss)) },
-                         makeDetail: { id in AnyView(ProjectDetailScreen(projectId: id, ready: ready, setup: setup)) })
+                         makeDetail: { id in AnyView(ProjectDetailScreen(projectId: id, ready: ready, setup: setup)) },
+                         makeActivity: { id in AnyView(ActivityScreen(projectId: id, ready: ready, setup: setup)) })
     }
 }
 

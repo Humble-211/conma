@@ -9,6 +9,7 @@ public struct ProjectsListView: View {
     @Bindable private var viewModel: ProjectsListViewModel
     private let makeWizard: (ProjectDraft, @escaping (UUID) -> Void, @escaping () -> Void) -> AnyView
     private let makeDetail: (UUID) -> AnyView
+    private let makeActivity: (UUID) -> AnyView
     @State private var wizardDraft: WizardItem?
     @State private var path: [ProjectRoute] = []
     @State private var showDiscardDialog = false
@@ -17,8 +18,9 @@ public struct ProjectsListView: View {
 
     public init(viewModel: ProjectsListViewModel,
                 makeWizard: @escaping (ProjectDraft, @escaping (UUID) -> Void, @escaping () -> Void) -> AnyView,
-                makeDetail: @escaping (UUID) -> AnyView) {
-        self.viewModel = viewModel; self.makeWizard = makeWizard; self.makeDetail = makeDetail
+                makeDetail: @escaping (UUID) -> AnyView,
+                makeActivity: @escaping (UUID) -> AnyView) {
+        self.viewModel = viewModel; self.makeWizard = makeWizard; self.makeDetail = makeDetail; self.makeActivity = makeActivity
     }
 
     public var body: some View {
@@ -63,7 +65,10 @@ public struct ProjectsListView: View {
                     .padding(DSSpacing.xl).accessibilityIdentifier("projects_add")
             }
             .navigationDestination(for: ProjectRoute.self) { route in
-                switch route { case .detail(let id), .activity(let id): makeDetail(id) } // .activity reuses detail until the activity list screen exists
+                switch route {
+                case .detail(let id): makeDetail(id)
+                case .activity(let id): makeActivity(id)
+                }
             }
         }
         .confirmationDialog("draft.discard.title", isPresented: $showDiscardDialog, titleVisibility: .visible) {
