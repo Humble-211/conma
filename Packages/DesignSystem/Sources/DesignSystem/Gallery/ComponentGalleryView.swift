@@ -2,6 +2,8 @@ import SwiftUI
 
 public struct ComponentGalleryView: View {
     @State private var progress = 65
+    /// Fixed instant (2026-10-03 12:00 UTC) so gallery screenshots are deterministic.
+    private static let sampleDate = Date(timeIntervalSince1970: 1_791_028_800)
 
     public init() {}
 
@@ -29,6 +31,40 @@ public struct ComponentGalleryView: View {
                     ProgressBar(progress: 20, tone: .danger)
                 }
                 .padding(.horizontal, DSSpacing.lg)
+
+                SectionHeader("gallery.health")
+                HStack(spacing: DSSpacing.sm) {
+                    HealthChip("gallery.badge", tone: .success)
+                    HealthChip("gallery.badge", tone: .warning)
+                    HealthChip("gallery.badge", tone: .danger)
+                }
+                .padding(.horizontal, DSSpacing.lg)
+
+                SectionHeader("gallery.dualProgress")
+                VStack(spacing: DSSpacing.md) {
+                    DualProgressBar(expected: 40, actual: 65, expectedLabel: "gallery.expected", actualLabel: "gallery.actual")
+                    DualProgressBar(expected: 80, actual: 30, expectedLabel: "gallery.expected", actualLabel: "gallery.actual")
+                    DualProgressBar(expected: nil, actual: 50, expectedLabel: "gallery.expected", actualLabel: "gallery.actual")
+                }
+                .padding(.horizontal, DSSpacing.lg)
+
+                SectionHeader("gallery.dates")
+                VStack(alignment: .leading, spacing: DSSpacing.xs) {
+                    DateLabel(Self.sampleDate)
+                    DateLabel(Self.sampleDate, style: .full)
+                }
+                .padding(.horizontal, DSSpacing.lg)
+
+                SectionHeader("gallery.activity")
+                Card {
+                    ActivityRow(systemImage: "banknote", title: Text("gallery.activityTitle"), subtitle: Text("gallery.activitySubtitle"))
+                    ActivityRow(systemImage: "arrow.triangle.2.circlepath", title: Text("gallery.activityTitle"), subtitle: Text("gallery.activitySubtitle"))
+                }
+                .padding(.horizontal, DSSpacing.lg)
+
+                SectionHeader("gallery.skeleton")
+                SkeletonCard()
+                    .padding(.horizontal, DSSpacing.lg)
 
                 SectionHeader("gallery.money")
                 HStack(spacing: DSSpacing.md) {

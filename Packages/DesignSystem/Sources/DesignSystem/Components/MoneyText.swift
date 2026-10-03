@@ -1,5 +1,13 @@
 import SwiftUI
 
+/// The single money formatting rule (currency, explicit locale, two fraction digits),
+/// shared by `MoneyText` and by localized sentences that embed an amount.
+public enum MoneyFormat {
+    public static func string(_ amount: Decimal, currencyCode: String, locale: Locale) -> String {
+        amount.formatted(.currency(code: currencyCode).locale(locale).precision(.fractionLength(2)))
+    }
+}
+
 public struct MoneyText: View {
     private let amount: Decimal
     private let currencyCode: String
@@ -11,7 +19,7 @@ public struct MoneyText: View {
     }
 
     public var body: some View {
-        Text(amount, format: .currency(code: currencyCode).locale(locale).precision(.fractionLength(2)))
+        Text(verbatim: MoneyFormat.string(amount, currencyCode: currencyCode, locale: locale))
             .font(DSTypography.money(style))
     }
 }
