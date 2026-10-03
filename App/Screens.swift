@@ -35,13 +35,30 @@ struct HomeScreen: View {
     }
 }
 
-/// Placeholder until the detail screen lands.
 struct ProjectDetailScreen: View {
-    let projectId: UUID
+    @State private var viewModel: ProjectDetailViewModel
     let ready: AppContainer.Ready
     let setup: CompanySetup
 
-    var body: some View { Text(verbatim: projectId.uuidString) }
+    init(projectId: UUID, ready: AppContainer.Ready, setup: CompanySetup) {
+        _viewModel = State(initialValue: ProjectDetailViewModel(projectId: projectId, companyId: setup.company.id, currency: setup.company.currencyCode,
+                                                                 projectRepository: ready.projectRepository, estimateRepository: ready.estimateRepository,
+                                                                 scheduleRepository: ready.scheduleRepository, actor: ActivityActor(userId: setup.owner.id, name: setup.owner.displayName)))
+        self.ready = ready; self.setup = setup
+    }
+
+    var body: some View {
+        ProjectDetailView(viewModel: viewModel, makeCustomer: { id in AnyView(CustomerProfileScreen(customerId: id, ready: ready, setup: setup)) })
+    }
+}
+
+/// Placeholder until the customer profile lands.
+struct CustomerProfileScreen: View {
+    let customerId: UUID
+    let ready: AppContainer.Ready
+    let setup: CompanySetup
+
+    var body: some View { Text(verbatim: customerId.uuidString) }
 }
 
 /// Owns the list view model; builds wizard/detail screens with Data-backed repositories.

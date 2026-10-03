@@ -57,6 +57,8 @@ def main() -> int:
     for tpl in ["depositFinal", "depositProgressFinal", "fourStage", "custom"]: generated.add(f"schedule.template.{tpl}")
     for row in ["deposit", "progress", "stage2", "stage3", "final", "labourQuick"]: generated.add(f"schedule.row.{row}")
     for phase in ["all", "inWork", "preStart", "workDone", "terminal"]: generated.add(f"projects.filter.{phase}")
+    for st in ["upcoming", "dueSoon", "dueToday", "overdue", "partiallyPaid", "paid"]: generated.add(f"payment.status.{st}")
+    for g in ["labour", "material"]: generated.add(f"costGroup.{g}")
     for key in sorted(generated):
         if key not in strings: errors.append(f"generated key '{key}' missing from catalog")
     for e in errors:
