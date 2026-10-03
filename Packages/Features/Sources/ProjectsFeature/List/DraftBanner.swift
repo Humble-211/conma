@@ -21,7 +21,10 @@ public struct DraftBanner: View {
                         if let line = draft.address?.line, !line.isEmpty { Text(verbatim: line).font(DSTypography.headline) }
                         else if let type = draft.jobType { Text(type.titleKey).font(DSTypography.headline) }
                         else { Text("draft.untitled").font(DSTypography.headline) }
-                        Text(verbatim: "\(draft.step)/\(WizardStep.total)").font(DSTypography.caption).foregroundStyle(DSColor.textSecondary)
+                        HStack(spacing: DSSpacing.xs) {
+                            Text("draft.stepLabel")
+                            Text(verbatim: "\(draft.step)/\(WizardStep.total)")
+                        }.font(DSTypography.caption).foregroundStyle(DSColor.textSecondary)
                     }
                     Spacer()
                     Button("draft.discard", role: .destructive, action: onDiscard).accessibilityIdentifier("draft_discard")

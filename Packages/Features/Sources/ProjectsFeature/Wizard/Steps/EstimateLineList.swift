@@ -26,8 +26,8 @@ struct EstimateLineList: View {
                     }.padding(.horizontal, DSSpacing.lg)
                 }
             }
-            ForEach(Array(lines.enumerated()), id: \.element.id) { index, _ in
-                Card { row(index) }.padding(.horizontal, DSSpacing.lg)
+            ForEach($lines) { $line in
+                Card { row($line) }.padding(.horizontal, DSSpacing.lg)
             }
             SecondaryButton("wizard.estimate.addLine", systemImage: "plus") { add(label: "") }
                 .padding(.horizontal, DSSpacing.lg).accessibilityIdentifier("wizard_line_add")
@@ -41,42 +41,49 @@ struct EstimateLineList: View {
 
     private var total: Money { (try? Money.sum(lines.map(\.amount), currency: currency)) ?? .zero(currency) }
 
-    @ViewBuilder private func row(_ index: Int) -> some View {
+    @ViewBuilder private func row(_ line: Binding<DraftEstimateLine>) -> some View {
+        let id = line.wrappedValue.id
+        let index = lines.firstIndex(where: { $0.id == id }) ?? 0
         VStack(spacing: DSSpacing.sm) {
             HStack {
                 if kindPicker {
-                    Picker("wizard.estimate.kind", selection: Binding(get: { lines[index].otherKind ?? .other }, set: { lines[index].otherKind = $0; lines[index].costGroup = $0.costGroup; lines[index].label = $0.labelKeyString })) {
+                    Picker("wizard.estimate.kind", selection: Binding(get: { line.wrappedValue.otherKind ?? .other }, set: { kind in
+                        line.wrappedValue.otherKind = kind; line.wrappedValue.costGroup = kind.costGroup; line.wrappedValue.label = kind.labelKeyString
+                    })) {
                         ForEach(OtherCostKind.allCases, id: \.self) { Text($0.titleKey).tag($0) }
                     }.labelsHidden()
                 } else {
-                    TextField(showsRate ? "wizard.estimate.worker" : "wizard.estimate.label", text: $lines[index].label).frame(minHeight: DSSpacing.minTouch)
+                    TextField(showsRate ? "wizard.estimate.worker" : "wizard.estimate.label", text: line.label).frame(minHeight: DSSpacing.minTouch)
                         .accessibilityIdentifier("wizard_line_label_\(index)")
                 }
                 Spacer()
-                Button(role: .destructive) { lines.remove(at: index) } label: { Image(systemName: "trash") }.accessibilityLabel(Text("wizard.scope.remove"))
+                Button(role: .destructive) { lines.removeAll { $0.id == id } } label: { Image(systemName: "trash") }
+                    .accessibilityLabel(Text("wizard.scope.remove")).accessibilityIdentifier("wizard_line_delete_\(index)")
             }
             if showsRate {
                 HStack(spacing: DSSpacing.md) {
-                    FormRow("wizard.estimate.rate") { MoneyField("wizard.estimate.rate", amount: rateBinding(index), currencyCode: currency.rawValue) }
-                    FormRow("wizard.estimate.days") { DecimalField("wizard.estimate.days", value: $lines[index].quantity, fractionDigits: 1) }
+                    FormRow("wizard.estimate.rate") { MoneyField("wizard.estimate.rate", amount: rateBinding(line), currencyCode: currency.rawValue) }
+                    FormRow("wizard.estimate.days") { DecimalField("wizard.estimate.days", value: line.quantity, fractionDigits: 1) }
                 }
-                FormRow("wizard.estimate.amount") { MoneyText(amount: lines[index].amount.amount, currencyCode: currency.rawValue) }
+                FormRow("wizard.estimate.amount") { MoneyText(amount: line.wrappedValue.amount.amount, currencyCode: currency.rawValue) }
             } else {
-                FormRow("wizard.estimate.amount") { MoneyField("wizard.estimate.amount", amount: amountBinding(index), currencyCode: currency.rawValue).accessibilityIdentifier("wizard_line_amount_\(index)") }
+                FormRow("wizard.estimate.amount") { MoneyField("wizard.estimate.amount", amount: amountBinding(line), currencyCode: currency.rawValue).accessibilityIdentifier("wizard_line_amount_\(index)") }
             }
         }
-        .onChange(of: lines[index].quantity) { _, _ in recompute(index) }
+        .onChange(of: line.wrappedValue.quantity) { _, _ in recompute(id) }
     }
 
-    private func rateBinding(_ index: Int) -> Binding<Decimal?> {
-        Binding(get: { lines[index].unitRate?.amount }, set: { lines[index].unitRate = $0.map { Money($0, currency) }; recompute(index) })
+    private func rateBinding(_ line: Binding<DraftEstimateLine>) -> Binding<Decimal?> {
+        let id = line.wrappedValue.id
+        return Binding(get: { line.wrappedValue.unitRate?.amount }, set: { rate in
+            line.wrappedValue.unitRate = rate.map { Money($0, currency) }; recompute(id)
+        })
     }
-    private func amountBinding(_ index: Int) -> Binding<Decimal?> {
-        Binding(get: { lines[index].amount.isZero ? nil : lines[index].amount.amount }, set: { lines[index].amount = Money($0 ?? 0, currency) })
+    private func amountBinding(_ line: Binding<DraftEstimateLine>) -> Binding<Decimal?> {
+        Binding(get: { line.wrappedValue.amount.isZero ? nil : line.wrappedValue.amount.amount }, set: { line.wrappedValue.amount = Money($0 ?? 0, currency) })
     }
-    private func recompute(_ index: Int) {
-        guard lines.indices.contains(index) else { return }
-        guard showsRate else { return }
+    private func recompute(_ id: UUID) {
+        guard showsRate, let index = lines.firstIndex(where: { $0.id == id }) else { return }
         if let rate = lines[index].unitRate, let qty = lines[index].quantity {
             lines[index].amount = rate.multiplied(by: qty)
         } else {

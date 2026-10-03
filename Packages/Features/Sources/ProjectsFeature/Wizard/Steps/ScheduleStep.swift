@@ -23,8 +23,8 @@ struct ScheduleStep: View {
                     }
                 }.padding(.horizontal, DSSpacing.lg)
             }
-            ForEach(Array(viewModel.draft.schedule.enumerated()), id: \.element.id) { index, row in
-                Card { rowView(index, row) }.padding(.horizontal, DSSpacing.lg)
+            ForEach($viewModel.draft.schedule) { $row in
+                Card { rowView($row) }.padding(.horizontal, DSSpacing.lg)
             }
             SecondaryButton("wizard.schedule.addRow", systemImage: "plus") {
                 viewModel.draft.schedule.append(DraftScheduleRow(id: UUID(), label: "", percentage: nil, amount: nil, dueDate: nil, trigger: nil, isDeposit: viewModel.draft.schedule.isEmpty))
@@ -51,44 +51,51 @@ struct ScheduleStep: View {
         }
     }
 
-    @ViewBuilder private func rowView(_ index: Int, _ row: DraftScheduleRow) -> some View {
+    @ViewBuilder private func rowView(_ rowBinding: Binding<DraftScheduleRow>) -> some View {
+        let row = rowBinding.wrappedValue
+        let id = row.id
+        let index = viewModel.draft.schedule.firstIndex(where: { $0.id == id }) ?? 0
         VStack(spacing: DSSpacing.sm) {
             HStack {
                 if row.label.hasPrefix("schedule.row.") { // lint:allow-string
                     RowLabel.text(row.label).font(DSTypography.headline)
                 } else {
-                    TextField("wizard.schedule.label", text: $viewModel.draft.schedule[index].label).font(DSTypography.headline)
+                    TextField("wizard.schedule.label", text: rowBinding.label).font(DSTypography.headline)
                 }
                 Spacer()
                 if row.isDeposit { StatusBadge("schedule.row.deposit", tone: .warning) }
-                Button(role: .destructive) { viewModel.draft.schedule.remove(at: index); viewModel.scheduleEdited(.none) } label: { Image(systemName: "trash") }.accessibilityLabel(Text("wizard.scope.remove"))
+                Button(role: .destructive) {
+                    viewModel.draft.schedule.removeAll { $0.id == id }
+                    viewModel.scheduleEdited(.none)
+                } label: { Image(systemName: "trash") }
+                    .accessibilityLabel(Text("wizard.scope.remove")).accessibilityIdentifier("wizard_schedule_row_\(index)_delete")
             }
             HStack(spacing: DSSpacing.md) {
                 FormRow("wizard.schedule.percent") {
-                    DecimalField("wizard.schedule.percent", value: Binding(get: { row.percentage?.points }, set: { pts in
+                    DecimalField("wizard.schedule.percent", value: Binding(get: { rowBinding.wrappedValue.percentage?.points }, set: { pts in
                         if let pts {
                             guard let pct = try? Percentage.input(pts) else { return }
-                            viewModel.draft.schedule[index].percentage = pct
+                            rowBinding.wrappedValue.percentage = pct
                         } else {
-                            viewModel.draft.schedule[index].percentage = nil
+                            rowBinding.wrappedValue.percentage = nil
                         }
-                        viewModel.scheduleEdited(.percentage(index))
+                        if let i = viewModel.draft.schedule.firstIndex(where: { $0.id == id }) { viewModel.scheduleEdited(.percentage(i)) }
                     }), fractionDigits: 2).accessibilityIdentifier("wizard_schedule_row_\(index)_pct")
                 }
                 FormRow("wizard.estimate.amount") {
-                    MoneyField("wizard.estimate.amount", amount: Binding(get: { row.amount?.amount }, set: { amt in
-                        viewModel.draft.schedule[index].amount = amt.map { Money($0, viewModel.currency) }
-                        viewModel.scheduleEdited(.amount(index))
+                    MoneyField("wizard.estimate.amount", amount: Binding(get: { rowBinding.wrappedValue.amount?.amount }, set: { amt in
+                        rowBinding.wrappedValue.amount = amt.map { Money($0, viewModel.currency) }
+                        if let i = viewModel.draft.schedule.firstIndex(where: { $0.id == id }) { viewModel.scheduleEdited(.amount(i)) }
                     }), currencyCode: viewModel.currency.rawValue).accessibilityIdentifier("wizard_schedule_row_\(index)_amount")
                 }
             }
             HStack {
-                Toggle(isOn: Binding(get: { row.dueDate != nil }, set: { on in viewModel.draft.schedule[index].dueDate = on ? CalendarDate(Date(), timeZone: timeZone) : nil })) { Text("wizard.schedule.dueDate") }.tint(DSColor.accent)
+                Toggle(isOn: Binding(get: { rowBinding.wrappedValue.dueDate != nil }, set: { on in rowBinding.wrappedValue.dueDate = on ? CalendarDate(Date(), timeZone: timeZone) : nil })) { Text("wizard.schedule.dueDate") }.tint(DSColor.accent)
                 if let due = row.dueDate {
-                    DatePicker("", selection: Binding(get: { due.noonDate(in: timeZone) }, set: { viewModel.draft.schedule[index].dueDate = CalendarDate($0, timeZone: timeZone) }), displayedComponents: .date).labelsHidden()
+                    DatePicker("", selection: Binding(get: { due.noonDate(in: timeZone) }, set: { rowBinding.wrappedValue.dueDate = CalendarDate($0, timeZone: timeZone) }), displayedComponents: .date).labelsHidden()
                 }
             }.frame(minHeight: DSSpacing.minTouch)
-            TextField("wizard.schedule.trigger", text: Binding(get: { row.trigger ?? "" }, set: { viewModel.draft.schedule[index].trigger = $0.isEmpty ? nil : $0 })).frame(minHeight: DSSpacing.minTouch)
+            TextField("wizard.schedule.trigger", text: Binding(get: { rowBinding.wrappedValue.trigger ?? "" }, set: { rowBinding.wrappedValue.trigger = $0.isEmpty ? nil : $0 })).frame(minHeight: DSSpacing.minTouch)
         }
     }
 

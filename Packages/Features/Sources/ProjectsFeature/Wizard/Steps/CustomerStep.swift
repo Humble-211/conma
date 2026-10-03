@@ -50,9 +50,11 @@ struct CustomerStep: View {
     }
 
     private var filtered: [Customer] {
-        let q = query.trimmingCharacters(in: .whitespaces)
+        let q = SearchFold.normalize(query)
         guard !q.isEmpty else { return customers }
-        return customers.filter { $0.name.localizedCaseInsensitiveContains(q) || ($0.phone ?? "").contains(q) }
+        return customers.filter { c in
+            [c.name, c.phone ?? "", c.email ?? "", c.companyName ?? ""].contains { SearchFold.normalize($0).contains(q) }
+        }
     }
 
     private var newInput: Binding<NewCustomerInput> {

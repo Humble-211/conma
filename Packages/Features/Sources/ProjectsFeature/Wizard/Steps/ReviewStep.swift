@@ -11,8 +11,9 @@ struct ReviewStep: View {
             Card {
                 VStack(alignment: .leading, spacing: DSSpacing.xs) {
                     Text("wizard.review.projectName").font(DSTypography.caption).foregroundStyle(DSColor.textSecondary)
-                    TextField("wizard.review.projectName", text: Binding(get: { viewModel.draft.projectName ?? ProjectDraftAssembler.defaultName(for: viewModel.draft) ?? "" },
-                                                                        set: { viewModel.draft.projectName = $0.isEmpty ? nil : $0 }))
+                    TextField("wizard.review.projectName", text: Binding(get: { viewModel.draft.projectName ?? "" },
+                                                                        set: { viewModel.draft.projectName = $0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : $0 }),
+                              prompt: Text(verbatim: ProjectDraftAssembler.defaultName(for: viewModel.draft) ?? ""))
                         .font(DSTypography.title).accessibilityIdentifier("wizard_review_name")
                 }
             }

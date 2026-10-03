@@ -11,7 +11,12 @@ public final class ProjectWizardViewModel {
         didSet {
             guard draft != oldValue else { return }
             if draft.contractValue != oldValue.contractValue, !draft.schedule.isEmpty {
-                draft.schedule = ScheduleMath.recompute(rows: draft.schedule, contract: draft.contractValue ?? .zero(currency), edited: .none).rows
+                draft.schedule = ScheduleMath.recompute(rows: draft.schedule, contract: draft.contractValue ?? .zero(currency), edited: .rescale).rows
+            }
+            if draft.deposit != oldValue.deposit, draft.schedule.contains(where: \.isDeposit) {
+                let contract = draft.contractValue ?? .zero(currency)
+                let applied = ScheduleMath.applyDeposit(rows: draft.schedule, contract: contract, deposit: draft.deposit)
+                draft.schedule = ScheduleMath.recompute(rows: applied, contract: contract, edited: .none).rows
             }
             recomputePreview(); scheduleAutosave()
         }
@@ -96,7 +101,7 @@ public final class ProjectWizardViewModel {
     // MARK: Close / drafts
 
     public func requestClose() {
-        if draft.isEmpty { discardDraftAndClose() } else { showCloseDialog = true }
+        if draft.isEmpty { autosaveTask?.cancel(); onDismiss() } else { showCloseDialog = true }
     }
 
     public func saveDraftAndClose() { persistNow(); onDismiss() }
@@ -132,8 +137,9 @@ public final class ProjectWizardViewModel {
         draft.scheduleTemplate = template
         var depositPct: Percentage?
         if case .percentage(let p)? = draft.deposit?.mode { depositPct = p }
-        let rows = template.rows(depositPercentage: depositPct)
-        draft.schedule = ScheduleMath.recompute(rows: rows, contract: draft.contractValue ?? .zero(currency), edited: .none).rows
+        let contract = draft.contractValue ?? .zero(currency)
+        let rows = ScheduleMath.applyDeposit(rows: template.rows(depositPercentage: depositPct), contract: contract, deposit: draft.deposit)
+        draft.schedule = ScheduleMath.recompute(rows: rows, contract: contract, edited: .none).rows
     }
 
     public func scheduleEdited(_ field: EditedField) {

@@ -125,4 +125,23 @@ final class ProjectsFlowTests: XCTestCase {
         let dump = app.descendants(matching: .any).allElementsBoundByIndex.map { $0.label }.filter { !$0.isEmpty }.joined(separator: " | ")
         XCTAssertTrue(shown.waitForExistence(timeout: 5), dump)
     }
+
+    /// (g) deleting the last estimate line must not crash and must leave the list usable
+    func testDeleteLastEstimateLineDoesNotCrash() {
+        let app = launch()
+        tapTab(app, "Projects"); app.buttons["projects_add"].tap()
+        app.buttons["wizard_jobtype_kitchen"].tap(); app.buttons["wizard_continue"].tap()
+        row(app, "Ann Lee").tap(); app.buttons["wizard_continue"].tap()
+        type(app.textFields["wizard_address_line"], "3 Oak Lane"); app.buttons["wizard_continue"].tap()
+        for _ in 0..<3 { app.buttons["wizard_skip"].tap() }                 // scope, timeline, labour -> Material
+        app.buttons["wizard_line_add"].tap()
+        app.buttons["wizard_line_add"].tap()
+        type(app.textFields["wizard_line_label_0"], "Lumber")
+        type(app.textFields["wizard_line_label_1"], "Nails")
+        app.buttons["wizard_line_delete_1"].tap()
+        XCTAssertTrue(app.textFields["wizard_line_label_0"].waitForExistence(timeout: 3))
+        XCTAssertFalse(app.textFields["wizard_line_label_1"].exists)
+        app.buttons["wizard_line_add"].tap()
+        XCTAssertTrue(app.textFields["wizard_line_label_1"].waitForExistence(timeout: 3))
+    }
 }

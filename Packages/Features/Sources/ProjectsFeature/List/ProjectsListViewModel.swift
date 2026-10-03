@@ -46,6 +46,9 @@ public final class ProjectsListViewModel {
         }
     }
 
+    /// Applies a persisted filter (scene storage) before the first load picks the default.
+    public func restoreFilter(_ value: PhaseFilter) { filter = value; defaultFilterApplied = true }
+
     public func reloadDraft() { draft = (try? draftStore.load()) ?? nil }
     public func discardDraft() { try? draftStore.clear(); draft = nil }
 }
