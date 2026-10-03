@@ -97,7 +97,7 @@ public enum SampleData {
             for p in paymentRows { try PaymentRecord(p).insert(db) }
         }
 
-        guard let setup =try await companies.current() else { throw DataError.notFound }
+        guard let setup = try await companies.current() else { throw DataError.notFound }
         return setup
     }
 }
