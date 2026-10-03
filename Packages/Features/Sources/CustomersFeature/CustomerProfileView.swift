@@ -68,6 +68,8 @@ public struct CustomerProfileView: View {
                     Button("customers.edit") { editing = true }.accessibilityIdentifier("customer_edit")
                     Button("customers.delete", role: .destructive) { Task { deleteOutcome = await onDelete(); if deleteOutcome == .deleted { dismiss() } } }.accessibilityIdentifier("customer_delete")
                 } label: { Image(systemName: "ellipsis.circle") }
+                .accessibilityIdentifier("customer_menu")
+                .disabled(viewModel.customer == nil)
             }
         }
         .sheet(isPresented: $editing) {
