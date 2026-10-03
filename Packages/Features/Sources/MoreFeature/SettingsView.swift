@@ -6,6 +6,7 @@ import FeatureSupport
 public struct SettingsView: View {
     @Bindable private var settings: AppSettings
     private let company: Company
+    @Environment(\.locale) private var locale
 
     public init(settings: AppSettings, company: Company) { self.settings = settings; self.company = company }
 
@@ -32,6 +33,8 @@ public struct SettingsView: View {
                 FormRow("settings.currency") { Text(company.currencyCode.titleKey).foregroundStyle(DSColor.textSecondary) }
             }
         }
-        .navigationTitle("settings.title")
+        // Resolved to a plain string so the title text itself changes with the language: a key-based title
+        // compares equal across locales and the navigation bar could keep showing the previous language.
+        .navigationTitle(Text(verbatim: LocalizedBundle.string("settings.title", locale: locale)))
     }
 }
