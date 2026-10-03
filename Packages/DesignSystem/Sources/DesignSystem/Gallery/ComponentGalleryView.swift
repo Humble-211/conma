@@ -42,6 +42,16 @@ public struct ComponentGalleryView: View {
                 }
                 .padding(.horizontal, DSSpacing.lg)
 
+                SectionHeader("gallery.inputs")
+                VStack(spacing: DSSpacing.md) {
+                    MoneyField("gallery.contractValue", amount: .constant(Decimal(38_000)), currencyCode: "CAD")
+                    DecimalField("gallery.quantity", value: .constant(7.5))
+                    IntegerField("gallery.workers", value: .constant(3))
+                    ChoiceChips(options: ["a", "b"], selection: .constant("a")) { _ in "gallery.badge" } // lint:allow-string
+                    StepHeader(title: "gallery.progress", step: 6, total: 12)
+                }
+                .padding(.horizontal, DSSpacing.lg)
+
                 SectionHeader("gallery.emptyState")
                 EmptyState(systemImage: "tray", title: "gallery.emptyTitle", message: "gallery.emptyMessage")
                     .frame(height: 220)

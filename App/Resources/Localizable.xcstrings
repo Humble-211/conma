@@ -1,114 +1,3878 @@
 {
-  "sourceLanguage" : "en",
-  "version" : "1.0",
-  "strings" : {
-    "tab.home" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Home" } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Trang chủ" } } } },
-    "tab.projects" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Projects" } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Dự án" } } } },
-    "tab.calendar" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Calendar" } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Lịch" } } } },
-    "tab.expenses" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Expenses" } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Chi phí" } } } },
-    "tab.more" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "More" } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Thêm" } } } },
-
-    "setup.title" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Set up your company" } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Thiết lập công ty" } } } },
-    "setup.subtitle" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "You can change these later in Settings." } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Bạn có thể đổi sau trong Cài đặt." } } } },
-    "setup.companyName" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Company name" } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Tên công ty" } } } },
-    "setup.yourName" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Your name" } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Tên của bạn" } } } },
-    "setup.currency" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Currency" } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Tiền tệ" } } } },
-    "setup.language" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Language" } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Ngôn ngữ" } } } },
-    "setup.start" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Get started" } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Bắt đầu" } } } },
-    "setup.error" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Could not save. Please check the fields and try again." } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Không lưu được. Kiểm tra lại các ô và thử lại." } } } },
-
-    "language.system" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "System" } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Theo hệ thống" } } } },
-    "language.english" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "English" } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "English" } } } },
-    "language.vietnamese" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Tiếng Việt" } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Tiếng Việt" } } } },
-    "appearance.system" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "System" } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Theo hệ thống" } } } },
-    "appearance.light" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Light" } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Sáng" } } } },
-    "appearance.dark" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Dark" } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Tối" } } } },
-    "currency.CAD" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Canadian dollar (CAD)" } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Đô la Canada (CAD)" } } } },
-    "currency.USD" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "US dollar (USD)" } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Đô la Mỹ (USD)" } } } },
-
-    "home.title" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Home" } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Trang chủ" } } } },
-    "home.ongoingJobs" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Ongoing jobs" } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Job đang chạy" } } } },
-    "home.progress" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Progress" } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Tiến độ" } } } },
-    "home.contractValue" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Contract value" } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Giá trị hợp đồng" } } } },
-    "home.empty.title" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "No jobs yet" } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Chưa có job nào" } } } },
-    "home.empty.message" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Your projects will show up here." } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Các dự án của bạn sẽ hiện ở đây." } } } },
-    "home.error" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Could not load projects." } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Không tải được dự án." } } } },
-
-    "projects.title" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Projects" } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Dự án" } } } },
-    "projects.empty.title" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Projects" } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Dự án" } } } },
-    "projects.empty.message" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "The project list and the create-project wizard are coming next." } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Danh sách dự án và wizard tạo dự án sẽ có ở bước tiếp theo." } } } },
-    "calendar.title" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Calendar" } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Lịch" } } } },
-    "calendar.empty.title" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Calendar" } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Lịch" } } } },
-    "calendar.empty.message" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Deadlines, payments and crew schedule will appear here." } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Deadline, thanh toán và lịch crew sẽ hiện ở đây." } } } },
-    "expenses.title" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Expenses" } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Chi phí" } } } },
-    "expenses.empty.title" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Expenses" } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Chi phí" } } } },
-    "expenses.empty.message" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Add expenses and scan receipts here once the Money module ships." } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Thêm chi phí và chụp receipt ở đây khi module Money hoàn thành." } } } },
-
-    "more.title" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "More" } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Thêm" } } } },
-    "more.settings" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Settings" } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Cài đặt" } } } },
-    "more.componentGallery" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Component gallery" } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Thư viện component" } } } },
-    "settings.title" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Settings" } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Cài đặt" } } } },
-    "settings.language" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Language" } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Ngôn ngữ" } } } },
-    "settings.appearance" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Appearance" } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Giao diện" } } } },
-    "settings.company" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Company" } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Công ty" } } } },
-    "settings.currency" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Currency" } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Tiền tệ" } } } },
-
-    "error.database.title" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Could not open your data" } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Không mở được dữ liệu" } } } },
-    "error.database.message" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Nothing was deleted. Try again, or export the database file and send it to support." } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Không có gì bị xóa. Thử lại, hoặc xuất file dữ liệu và gửi cho hỗ trợ." } } } },
-    "error.database.retry" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Try again" } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Thử lại" } } } },
-    "error.database.export" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Export database" } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Xuất file dữ liệu" } } } },
-
-    "status.estimate" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Estimate" } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Estimate" } } } },
-    "status.awaitingApproval" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Awaiting approval" } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Chờ khách duyệt" } } } },
-    "status.awaitingDeposit" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Awaiting deposit" } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Chờ deposit" } } } },
-    "status.scheduled" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Scheduled" } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Đã lên lịch" } } } },
-    "status.inProgress" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "In progress" } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Đang thi công" } } } },
-    "status.onHold" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "On hold" } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Tạm dừng" } } } },
-    "status.waitingForInspection" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Waiting for inspection" } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Chờ inspection" } } } },
-    "status.waitingForMaterial" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Waiting for material" } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Chờ material" } } } },
-    "status.waitingForClient" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Waiting for client" } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Chờ khách" } } } },
-    "status.completed" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Completed" } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Hoàn thành" } } } },
-    "status.awaitingFinalPayment" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Awaiting final payment" } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Chờ thanh toán cuối" } } } },
-    "status.closed" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Closed" } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Đã đóng" } } } },
-    "status.cancelled" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Cancelled" } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Đã hủy" } } } },
-
-    "jobType.generalRenovation" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "General renovation" } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Renovation tổng quát" } } } },
-    "jobType.basementRenovation" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Basement renovation" } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Basement renovation" } } } },
-    "jobType.kitchen" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Kitchen" } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Nhà bếp" } } } },
-    "jobType.bathroom" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Bathroom" } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Phòng tắm" } } } },
-    "jobType.landscaping" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Landscaping" } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Landscaping" } } } },
-    "jobType.roofing" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Roofing" } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Roofing" } } } },
-    "jobType.plumbing" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Plumbing" } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Plumbing" } } } },
-    "jobType.electrical" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Electrical" } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Điện" } } } },
-    "jobType.hvac" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "HVAC" } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "HVAC" } } } },
-    "jobType.flooring" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Flooring" } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Flooring" } } } },
-    "jobType.painting" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Painting" } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Sơn" } } } },
-    "jobType.drywall" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Drywall" } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Drywall" } } } },
-    "jobType.concrete" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Concrete" } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Bê tông" } } } },
-    "jobType.deckFence" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Deck / Fence" } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Deck / Fence" } } } },
-    "jobType.framing" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Framing" } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Framing" } } } },
-    "jobType.windowsDoors" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Windows / Doors" } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Cửa sổ / Cửa" } } } },
-    "jobType.exterior" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Exterior" } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Ngoại thất" } } } },
-    "jobType.demolition" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Demolition" } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Demolition" } } } },
-    "jobType.commercial" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Commercial" } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Thương mại" } } } },
-    "jobType.other" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Other" } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Khác" } } } },
-
-    "gallery.title" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Components" } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Component" } } } },
-    "gallery.buttons" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Buttons" } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Nút" } } } },
-    "gallery.primaryButton" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Add expense" } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Thêm chi phí" } } } },
-    "gallery.loadingButton" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Saving" } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Đang lưu" } } } },
-    "gallery.secondaryButton" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Scan receipt" } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Chụp receipt" } } } },
-    "gallery.badges" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Status badges" } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Badge trạng thái" } } } },
-    "gallery.badge" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Badge" } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Badge" } } } },
-    "gallery.progress" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Progress" } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Tiến độ" } } } },
-    "gallery.money" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Money" } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Tiền" } } } },
-    "gallery.collected" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Collected" } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Đã thu" } } } },
-    "gallery.spent" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Spent" } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Đã chi" } } } },
-    "gallery.contractValue" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Contract value" } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Giá trị hợp đồng" } } } },
-    "gallery.cashPosition" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Cash position" } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Dòng tiền hiện tại" } } } },
-    "gallery.emptyState" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Empty state" } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Trạng thái trống" } } } },
-    "gallery.emptyTitle" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Nothing here" } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Chưa có gì" } } } },
-    "gallery.emptyMessage" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Items you add will appear in this list." } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Mục bạn thêm sẽ hiện trong danh sách này." } } } },
-    "gallery.add" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Add" } }, "vi" : { "stringUnit" : { "state" : "translated", "value" : "Thêm" } } } }
+  "sourceLanguage": "en",
+  "version": "1.0",
+  "strings": {
+    "tab.home": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Home"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trang chủ"
+          }
+        }
+      }
+    },
+    "tab.projects": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Projects"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dự án"
+          }
+        }
+      }
+    },
+    "tab.calendar": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Calendar"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lịch"
+          }
+        }
+      }
+    },
+    "tab.expenses": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Expenses"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chi phí"
+          }
+        }
+      }
+    },
+    "tab.more": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "More"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thêm"
+          }
+        }
+      }
+    },
+    "setup.title": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Set up your company"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thiết lập công ty"
+          }
+        }
+      }
+    },
+    "setup.subtitle": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You can change these later in Settings."
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bạn có thể đổi sau trong Cài đặt."
+          }
+        }
+      }
+    },
+    "setup.companyName": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Company name"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tên công ty"
+          }
+        }
+      }
+    },
+    "setup.yourName": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your name"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tên của bạn"
+          }
+        }
+      }
+    },
+    "setup.currency": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Currency"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tiền tệ"
+          }
+        }
+      }
+    },
+    "setup.language": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Language"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ngôn ngữ"
+          }
+        }
+      }
+    },
+    "setup.start": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Get started"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bắt đầu"
+          }
+        }
+      }
+    },
+    "setup.error": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not save. Please check the fields and try again."
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Không lưu được. Kiểm tra lại các ô và thử lại."
+          }
+        }
+      }
+    },
+    "language.system": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "System"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Theo hệ thống"
+          }
+        }
+      }
+    },
+    "language.english": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "English"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "English"
+          }
+        }
+      }
+    },
+    "language.vietnamese": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tiếng Việt"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tiếng Việt"
+          }
+        }
+      }
+    },
+    "appearance.system": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "System"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Theo hệ thống"
+          }
+        }
+      }
+    },
+    "appearance.light": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Light"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sáng"
+          }
+        }
+      }
+    },
+    "appearance.dark": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dark"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tối"
+          }
+        }
+      }
+    },
+    "currency.CAD": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Canadian dollar (CAD)"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đô la Canada (CAD)"
+          }
+        }
+      }
+    },
+    "currency.USD": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "US dollar (USD)"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đô la Mỹ (USD)"
+          }
+        }
+      }
+    },
+    "home.title": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Home"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trang chủ"
+          }
+        }
+      }
+    },
+    "home.ongoingJobs": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ongoing jobs"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Job đang chạy"
+          }
+        }
+      }
+    },
+    "home.progress": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Progress"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tiến độ"
+          }
+        }
+      }
+    },
+    "home.contractValue": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Contract value"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Giá trị hợp đồng"
+          }
+        }
+      }
+    },
+    "home.empty.title": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No jobs yet"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chưa có job nào"
+          }
+        }
+      }
+    },
+    "home.empty.message": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your projects will show up here."
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Các dự án của bạn sẽ hiện ở đây."
+          }
+        }
+      }
+    },
+    "home.error": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not load projects."
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Không tải được dự án."
+          }
+        }
+      }
+    },
+    "projects.title": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Projects"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dự án"
+          }
+        }
+      }
+    },
+    "projects.empty.title": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Projects"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dự án"
+          }
+        }
+      }
+    },
+    "projects.empty.message": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The project list and the create-project wizard are coming next."
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Danh sách dự án và wizard tạo dự án sẽ có ở bước tiếp theo."
+          }
+        }
+      }
+    },
+    "calendar.title": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Calendar"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lịch"
+          }
+        }
+      }
+    },
+    "calendar.empty.title": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Calendar"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lịch"
+          }
+        }
+      }
+    },
+    "calendar.empty.message": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deadlines, payments and crew schedule will appear here."
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deadline, thanh toán và lịch crew sẽ hiện ở đây."
+          }
+        }
+      }
+    },
+    "expenses.title": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Expenses"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chi phí"
+          }
+        }
+      }
+    },
+    "expenses.empty.title": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Expenses"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chi phí"
+          }
+        }
+      }
+    },
+    "expenses.empty.message": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add expenses and scan receipts here once the Money module ships."
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thêm chi phí và chụp receipt ở đây khi module Money hoàn thành."
+          }
+        }
+      }
+    },
+    "more.title": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "More"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thêm"
+          }
+        }
+      }
+    },
+    "more.settings": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Settings"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cài đặt"
+          }
+        }
+      }
+    },
+    "more.componentGallery": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Component gallery"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thư viện component"
+          }
+        }
+      }
+    },
+    "settings.title": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Settings"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cài đặt"
+          }
+        }
+      }
+    },
+    "settings.language": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Language"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ngôn ngữ"
+          }
+        }
+      }
+    },
+    "settings.appearance": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Appearance"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Giao diện"
+          }
+        }
+      }
+    },
+    "settings.company": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Company"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Công ty"
+          }
+        }
+      }
+    },
+    "settings.currency": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Currency"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tiền tệ"
+          }
+        }
+      }
+    },
+    "error.database.title": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not open your data"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Không mở được dữ liệu"
+          }
+        }
+      }
+    },
+    "error.database.message": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nothing was deleted. Try again, or export the database file and send it to support."
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Không có gì bị xóa. Thử lại, hoặc xuất file dữ liệu và gửi cho hỗ trợ."
+          }
+        }
+      }
+    },
+    "error.database.retry": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Try again"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thử lại"
+          }
+        }
+      }
+    },
+    "error.database.export": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Export database"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xuất file dữ liệu"
+          }
+        }
+      }
+    },
+    "status.estimate": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Estimate"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Estimate"
+          }
+        }
+      }
+    },
+    "status.awaitingApproval": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Awaiting approval"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chờ khách duyệt"
+          }
+        }
+      }
+    },
+    "status.awaitingDeposit": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Awaiting deposit"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chờ deposit"
+          }
+        }
+      }
+    },
+    "status.scheduled": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scheduled"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đã lên lịch"
+          }
+        }
+      }
+    },
+    "status.inProgress": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In progress"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đang thi công"
+          }
+        }
+      }
+    },
+    "status.onHold": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "On hold"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tạm dừng"
+          }
+        }
+      }
+    },
+    "status.waitingForInspection": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Waiting for inspection"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chờ inspection"
+          }
+        }
+      }
+    },
+    "status.waitingForMaterial": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Waiting for material"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chờ material"
+          }
+        }
+      }
+    },
+    "status.waitingForClient": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Waiting for client"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chờ khách"
+          }
+        }
+      }
+    },
+    "status.completed": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Completed"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hoàn thành"
+          }
+        }
+      }
+    },
+    "status.awaitingFinalPayment": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Awaiting final payment"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chờ thanh toán cuối"
+          }
+        }
+      }
+    },
+    "status.closed": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Closed"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đã đóng"
+          }
+        }
+      }
+    },
+    "status.cancelled": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancelled"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đã hủy"
+          }
+        }
+      }
+    },
+    "jobType.generalRenovation": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "General renovation"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Renovation tổng quát"
+          }
+        }
+      }
+    },
+    "jobType.basementRenovation": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Basement renovation"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Basement renovation"
+          }
+        }
+      }
+    },
+    "jobType.kitchen": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kitchen"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nhà bếp"
+          }
+        }
+      }
+    },
+    "jobType.bathroom": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bathroom"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Phòng tắm"
+          }
+        }
+      }
+    },
+    "jobType.landscaping": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Landscaping"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Landscaping"
+          }
+        }
+      }
+    },
+    "jobType.roofing": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Roofing"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Roofing"
+          }
+        }
+      }
+    },
+    "jobType.plumbing": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plumbing"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plumbing"
+          }
+        }
+      }
+    },
+    "jobType.electrical": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Electrical"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Điện"
+          }
+        }
+      }
+    },
+    "jobType.hvac": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "HVAC"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "HVAC"
+          }
+        }
+      }
+    },
+    "jobType.flooring": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Flooring"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Flooring"
+          }
+        }
+      }
+    },
+    "jobType.painting": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Painting"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sơn"
+          }
+        }
+      }
+    },
+    "jobType.drywall": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Drywall"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Drywall"
+          }
+        }
+      }
+    },
+    "jobType.concrete": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Concrete"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bê tông"
+          }
+        }
+      }
+    },
+    "jobType.deckFence": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deck / Fence"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deck / Fence"
+          }
+        }
+      }
+    },
+    "jobType.framing": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Framing"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Framing"
+          }
+        }
+      }
+    },
+    "jobType.windowsDoors": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Windows / Doors"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cửa sổ / Cửa"
+          }
+        }
+      }
+    },
+    "jobType.exterior": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Exterior"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ngoại thất"
+          }
+        }
+      }
+    },
+    "jobType.demolition": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Demolition"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Demolition"
+          }
+        }
+      }
+    },
+    "jobType.commercial": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Commercial"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thương mại"
+          }
+        }
+      }
+    },
+    "jobType.other": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Other"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Khác"
+          }
+        }
+      }
+    },
+    "gallery.title": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Components"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Component"
+          }
+        }
+      }
+    },
+    "gallery.buttons": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Buttons"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nút"
+          }
+        }
+      }
+    },
+    "gallery.primaryButton": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add expense"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thêm chi phí"
+          }
+        }
+      }
+    },
+    "gallery.loadingButton": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saving"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đang lưu"
+          }
+        }
+      }
+    },
+    "gallery.secondaryButton": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scan receipt"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chụp receipt"
+          }
+        }
+      }
+    },
+    "gallery.badges": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Status badges"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Badge trạng thái"
+          }
+        }
+      }
+    },
+    "gallery.badge": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Badge"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Badge"
+          }
+        }
+      }
+    },
+    "gallery.progress": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Progress"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tiến độ"
+          }
+        }
+      }
+    },
+    "gallery.money": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Money"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tiền"
+          }
+        }
+      }
+    },
+    "gallery.collected": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Collected"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đã thu"
+          }
+        }
+      }
+    },
+    "gallery.spent": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spent"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đã chi"
+          }
+        }
+      }
+    },
+    "gallery.contractValue": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Contract value"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Giá trị hợp đồng"
+          }
+        }
+      }
+    },
+    "gallery.cashPosition": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cash position"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dòng tiền hiện tại"
+          }
+        }
+      }
+    },
+    "gallery.emptyState": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Empty state"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trạng thái trống"
+          }
+        }
+      }
+    },
+    "gallery.emptyTitle": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nothing here"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chưa có gì"
+          }
+        }
+      }
+    },
+    "gallery.emptyMessage": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Items you add will appear in this list."
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mục bạn thêm sẽ hiện trong danh sách này."
+          }
+        }
+      }
+    },
+    "gallery.add": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thêm"
+          }
+        }
+      }
+    },
+    "gallery.inputs": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Inputs"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ô nhập"
+          }
+        }
+      }
+    },
+    "gallery.quantity": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quantity"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Số lượng"
+          }
+        }
+      }
+    },
+    "gallery.workers": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Workers"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Số thợ"
+          }
+        }
+      }
+    },
+    "scope.unit.sqft": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "sq ft"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "sqft"
+          }
+        }
+      }
+    },
+    "scope.unit.ft": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ft"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ft"
+          }
+        }
+      }
+    },
+    "scope.unit.in": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "in"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "inch"
+          }
+        }
+      }
+    },
+    "scope.field.squareFootage": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Square footage"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diện tích"
+          }
+        }
+      }
+    },
+    "scope.field.rooms": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rooms"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Số phòng"
+          }
+        }
+      }
+    },
+    "scope.field.floors": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Floors"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Số tầng"
+          }
+        }
+      }
+    },
+    "scope.field.itemsToRepair": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Items to repair"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hạng mục sửa"
+          }
+        }
+      }
+    },
+    "scope.field.itemsToInstall": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Items to install"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hạng mục lắp"
+          }
+        }
+      }
+    },
+    "scope.field.bathrooms": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bathrooms"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Phòng tắm"
+          }
+        }
+      }
+    },
+    "scope.field.windows": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Windows"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cửa sổ"
+          }
+        }
+      }
+    },
+    "scope.field.doors": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Doors"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cửa"
+          }
+        }
+      }
+    },
+    "scope.field.bedrooms": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bedrooms"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Phòng ngủ"
+          }
+        }
+      }
+    },
+    "scope.field.egressWindows": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Egress windows"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Egress window"
+          }
+        }
+      }
+    },
+    "scope.field.ceilingHeight": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ceiling height"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chiều cao trần"
+          }
+        }
+      }
+    },
+    "scope.field.wetBar": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wet bar"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wet bar"
+          }
+        }
+      }
+    },
+    "scope.field.cabinetLinearFeet": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cabinets (linear feet)"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tủ bếp (ft dài)"
+          }
+        }
+      }
+    },
+    "scope.field.countertopType": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Countertop type"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Loại countertop"
+          }
+        }
+      }
+    },
+    "scope.field.appliances": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Appliances"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thiết bị"
+          }
+        }
+      }
+    },
+    "scope.field.island": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Island"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đảo bếp"
+          }
+        }
+      }
+    },
+    "scope.field.backsplashSqft": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Backsplash area"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diện tích backsplash"
+          }
+        }
+      }
+    },
+    "scope.field.fixtures": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fixtures"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fixtures"
+          }
+        }
+      }
+    },
+    "scope.field.tub": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tub"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bồn tắm"
+          }
+        }
+      }
+    },
+    "scope.field.shower": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shower"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vòi sen"
+          }
+        }
+      }
+    },
+    "scope.field.vanity": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vanity"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vanity"
+          }
+        }
+      }
+    },
+    "scope.field.toilet": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toilet"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bồn cầu"
+          }
+        }
+      }
+    },
+    "scope.field.tileSqft": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tile area"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diện tích tile"
+          }
+        }
+      }
+    },
+    "scope.field.lotSize": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lot size"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diện tích lô"
+          }
+        }
+      }
+    },
+    "scope.field.grassArea": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Grass area"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diện tích cỏ"
+          }
+        }
+      }
+    },
+    "scope.field.patioArea": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Patio area"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diện tích patio"
+          }
+        }
+      }
+    },
+    "scope.field.fenceLength": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fence length"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chiều dài fence"
+          }
+        }
+      }
+    },
+    "scope.field.trees": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trees"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cây"
+          }
+        }
+      }
+    },
+    "scope.field.irrigation": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Irrigation"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tưới tự động"
+          }
+        }
+      }
+    },
+    "scope.field.roofSqft": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Roof area"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diện tích mái"
+          }
+        }
+      }
+    },
+    "scope.field.roofType": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Roof type"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Loại mái"
+          }
+        }
+      }
+    },
+    "scope.field.slopes": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Slopes"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Số mặt dốc"
+          }
+        }
+      }
+    },
+    "scope.field.layersToRemove": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Layers to remove"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lớp cần gỡ"
+          }
+        }
+      }
+    },
+    "scope.field.materialType": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Material type"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Loại material"
+          }
+        }
+      }
+    },
+    "scope.field.waterHeater": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Water heater"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Máy nước nóng"
+          }
+        }
+      }
+    },
+    "scope.field.repipe": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Repipe"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thay ống toàn bộ"
+          }
+        }
+      }
+    },
+    "scope.field.outlets": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Outlets"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ổ cắm"
+          }
+        }
+      }
+    },
+    "scope.field.switches": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Switches"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Công tắc"
+          }
+        }
+      }
+    },
+    "scope.field.lightFixtures": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Light fixtures"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đèn"
+          }
+        }
+      }
+    },
+    "scope.field.panelUpgrade": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Panel upgrade"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nâng cấp panel"
+          }
+        }
+      }
+    },
+    "scope.field.panelAmps": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Panel amps"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Panel (amp)"
+          }
+        }
+      }
+    },
+    "scope.field.systemType": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "System type"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Loại hệ thống"
+          }
+        }
+      }
+    },
+    "scope.field.units": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Units"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Số đơn vị"
+          }
+        }
+      }
+    },
+    "scope.field.ductworkFeet": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ductwork (feet)"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ống gió (ft)"
+          }
+        }
+      }
+    },
+    "scope.field.thermostats": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thermostats"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thermostat"
+          }
+        }
+      }
+    },
+    "scope.field.floorSqft": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Floor area"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diện tích sàn"
+          }
+        }
+      }
+    },
+    "scope.field.flooringType": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Flooring type"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Loại flooring"
+          }
+        }
+      }
+    },
+    "scope.field.stairs": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stairs"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cầu thang"
+          }
+        }
+      }
+    },
+    "scope.field.removalRequired": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Removal required"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cần tháo dỡ cũ"
+          }
+        }
+      }
+    },
+    "scope.field.wallSqft": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wall area"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diện tích tường"
+          }
+        }
+      }
+    },
+    "scope.field.ceilingSqft": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ceiling area"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diện tích trần"
+          }
+        }
+      }
+    },
+    "scope.field.trimLinearFeet": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trim (linear feet)"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trim (ft dài)"
+          }
+        }
+      }
+    },
+    "scope.field.coats": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Coats"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Số lớp sơn"
+          }
+        }
+      }
+    },
+    "scope.field.sheets": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sheets"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Số tấm"
+          }
+        }
+      }
+    },
+    "scope.field.drywallSqft": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Drywall area"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diện tích drywall"
+          }
+        }
+      }
+    },
+    "scope.field.ceilings": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ceilings"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trần"
+          }
+        }
+      }
+    },
+    "scope.field.finishLevel": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Finish level"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Finish level"
+          }
+        }
+      }
+    },
+    "scope.field.concreteSqft": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Concrete area"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diện tích bê tông"
+          }
+        }
+      }
+    },
+    "scope.field.thicknessInches": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thickness"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Độ dày"
+          }
+        }
+      }
+    },
+    "scope.field.concreteType": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Concrete type"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Loại hạng mục"
+          }
+        }
+      }
+    },
+    "scope.field.rebar": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rebar"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cốt thép"
+          }
+        }
+      }
+    },
+    "scope.field.deckSqft": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deck area"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diện tích deck"
+          }
+        }
+      }
+    },
+    "scope.field.fenceHeight": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fence height"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chiều cao fence"
+          }
+        }
+      }
+    },
+    "scope.field.deckMaterial": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Material"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vật liệu"
+          }
+        }
+      }
+    },
+    "scope.field.railingFeet": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Railing (feet)"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lan can (ft)"
+          }
+        }
+      }
+    },
+    "scope.field.wallLinearFeet": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Walls (linear feet)"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tường (ft dài)"
+          }
+        }
+      }
+    },
+    "scope.field.framingSqft": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Framing area"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diện tích framing"
+          }
+        }
+      }
+    },
+    "scope.field.loadBearing": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Load-bearing"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tường chịu lực"
+          }
+        }
+      }
+    },
+    "scope.field.exteriorDoors": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Exterior doors"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cửa ngoài"
+          }
+        }
+      }
+    },
+    "scope.field.patioDoors": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Patio doors"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cửa patio"
+          }
+        }
+      }
+    },
+    "scope.field.sidingSqft": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Siding area"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diện tích siding"
+          }
+        }
+      }
+    },
+    "scope.field.sidingType": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Siding type"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Loại siding"
+          }
+        }
+      }
+    },
+    "scope.field.soffitFeet": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Soffit (feet)"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Soffit (ft)"
+          }
+        }
+      }
+    },
+    "scope.field.gutterFeet": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gutters (feet)"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Máng xối (ft)"
+          }
+        }
+      }
+    },
+    "scope.field.demoSqft": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Demolition area"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diện tích demolition"
+          }
+        }
+      }
+    },
+    "scope.field.dumpsters": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dumpsters"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dumpster"
+          }
+        }
+      }
+    },
+    "scope.field.hazardousMaterials": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hazardous materials"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vật liệu nguy hại"
+          }
+        }
+      }
+    },
+    "scope.field.commercialSqft": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Area"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diện tích"
+          }
+        }
+      }
+    },
+    "scope.field.permitsRequired": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Permits required"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cần permit"
+          }
+        }
+      }
+    },
+    "scope.option.laminate": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Laminate"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Laminate"
+          }
+        }
+      }
+    },
+    "scope.option.quartz": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quartz"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quartz"
+          }
+        }
+      }
+    },
+    "scope.option.granite": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Granite"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Granite"
+          }
+        }
+      }
+    },
+    "scope.option.butcherBlock": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Butcher block"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Butcher block"
+          }
+        }
+      }
+    },
+    "scope.option.other": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Other"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Khác"
+          }
+        }
+      }
+    },
+    "scope.option.asphaltShingle": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Asphalt shingle"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Asphalt shingle"
+          }
+        }
+      }
+    },
+    "scope.option.metal": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Metal"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kim loại"
+          }
+        }
+      }
+    },
+    "scope.option.flat": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Flat"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mái bằng"
+          }
+        }
+      }
+    },
+    "scope.option.cedar": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cedar"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cedar"
+          }
+        }
+      }
+    },
+    "scope.option.tile": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tile"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tile"
+          }
+        }
+      }
+    },
+    "scope.option.amps100": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "100 A"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "100 A"
+          }
+        }
+      }
+    },
+    "scope.option.amps200": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "200 A"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "200 A"
+          }
+        }
+      }
+    },
+    "scope.option.furnace": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Furnace"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Furnace"
+          }
+        }
+      }
+    },
+    "scope.option.heatPump": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Heat pump"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Heat pump"
+          }
+        }
+      }
+    },
+    "scope.option.centralAir": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Central air"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Máy lạnh trung tâm"
+          }
+        }
+      }
+    },
+    "scope.option.ductless": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ductless"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ductless"
+          }
+        }
+      }
+    },
+    "scope.option.hardwood": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hardwood"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gỗ tự nhiên"
+          }
+        }
+      }
+    },
+    "scope.option.vinyl": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vinyl"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vinyl"
+          }
+        }
+      }
+    },
+    "scope.option.carpet": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Carpet"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thảm"
+          }
+        }
+      }
+    },
+    "scope.option.level3": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Level 3"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Level 3"
+          }
+        }
+      }
+    },
+    "scope.option.level4": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Level 4"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Level 4"
+          }
+        }
+      }
+    },
+    "scope.option.level5": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Level 5"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Level 5"
+          }
+        }
+      }
+    },
+    "scope.option.slab": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Slab"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Slab"
+          }
+        }
+      }
+    },
+    "scope.option.driveway": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Driveway"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Driveway"
+          }
+        }
+      }
+    },
+    "scope.option.sidewalk": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sidewalk"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vỉa hè"
+          }
+        }
+      }
+    },
+    "scope.option.foundation": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Foundation"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Móng"
+          }
+        }
+      }
+    },
+    "scope.option.pressureTreated": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pressure-treated"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pressure-treated"
+          }
+        }
+      }
+    },
+    "scope.option.composite": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Composite"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Composite"
+          }
+        }
+      }
+    },
+    "scope.option.wood": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wood"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gỗ"
+          }
+        }
+      }
+    },
+    "scope.option.fiberCement": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fiber cement"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fiber cement"
+          }
+        }
+      }
+    },
+    "scope.option.brick": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Brick"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gạch"
+          }
+        }
+      }
+    },
+    "scope.option.stucco": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stucco"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stucco"
+          }
+        }
+      }
+    },
+    "otherCost.subcontractors": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Subcontractors"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Subcontractor"
+          }
+        }
+      }
+    },
+    "otherCost.equipmentRental": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Equipment rental"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thuê thiết bị"
+          }
+        }
+      }
+    },
+    "otherCost.toolRental": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tool rental"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thuê dụng cụ"
+          }
+        }
+      }
+    },
+    "otherCost.permits": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Permits"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Permit"
+          }
+        }
+      }
+    },
+    "otherCost.inspectionFees": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Inspection fees"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Phí inspection"
+          }
+        }
+      }
+    },
+    "otherCost.dumpster": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dumpster"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dumpster"
+          }
+        }
+      }
+    },
+    "otherCost.delivery": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delivery"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vận chuyển"
+          }
+        }
+      }
+    },
+    "otherCost.parking": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Parking"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đậu xe"
+          }
+        }
+      }
+    },
+    "otherCost.gas": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gas"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xăng"
+          }
+        }
+      }
+    },
+    "otherCost.wasteDisposal": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Waste disposal"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đổ rác"
+          }
+        }
+      }
+    },
+    "otherCost.other": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Other"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Khác"
+          }
+        }
+      }
+    },
+    "schedule.template.depositFinal": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deposit + Final"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deposit + Cuối"
+          }
+        }
+      }
+    },
+    "schedule.template.depositProgressFinal": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deposit + Progress + Final"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deposit + Giữa + Cuối"
+          }
+        }
+      }
+    },
+    "schedule.template.fourStage": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "20 / 30 / 30 / 20"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "20 / 30 / 30 / 20"
+          }
+        }
+      }
+    },
+    "schedule.template.custom": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Custom"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tự chia"
+          }
+        }
+      }
+    },
+    "schedule.row.deposit": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deposit"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deposit"
+          }
+        }
+      }
+    },
+    "schedule.row.progress": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Progress payment"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thanh toán giữa kỳ"
+          }
+        }
+      }
+    },
+    "schedule.row.stage2": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stage 2"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đợt 2"
+          }
+        }
+      }
+    },
+    "schedule.row.stage3": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stage 3"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đợt 3"
+          }
+        }
+      }
+    },
+    "schedule.row.final": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Final payment"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thanh toán cuối"
+          }
+        }
+      }
+    },
+    "schedule.row.labourQuick": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Crew (quick estimate)"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Crew (ước tính nhanh)"
+          }
+        }
+      }
+    },
+    "projects.filter.all": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tất cả"
+          }
+        }
+      }
+    },
+    "projects.filter.inWork": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Active"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đang làm"
+          }
+        }
+      }
+    },
+    "projects.filter.preStart": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Upcoming"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sắp tới"
+          }
+        }
+      }
+    },
+    "projects.filter.workDone": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Done"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xong"
+          }
+        }
+      }
+    },
+    "projects.filter.terminal": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Closed"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đã đóng"
+          }
+        }
+      }
+    }
   }
 }

@@ -26,6 +26,8 @@ def main() -> int:
         for path in directory.rglob("*.swift"):
             if "Tests" in path.parts or path.name.endswith("Tests.swift"):
                 continue
+            if path.name == "ScopeFieldCatalog.swift":  # data catalog: ids are checked via the generated-key block below
+                continue
             source = path.read_text(encoding="utf-8")
             if VIEW_MARKER not in source:
                 continue
@@ -41,6 +43,22 @@ def main() -> int:
                             errors.append(f"{path.relative_to(ROOT)}:{lineno}: key '{literal}' missing from catalog")
                     else:
                         errors.append(f"{path.relative_to(ROOT)}:{lineno}: hard-coded string \"{literal}\"")
+    # Keys generated from Swift catalogs must exist too.
+    generated: set[str] = set()
+    catalog_swift = (ROOT / "Packages/Features/Sources/FeatureSupport/ScopeFieldCatalog.swift").read_text(encoding="utf-8")
+    for m in re.finditer(r'key: "([A-Za-z0-9]+)"', catalog_swift): generated.add(f"scope.field.{m.group(1)}")
+    for m in re.finditer(r'unitKey: "([a-z]+)"', catalog_swift): generated.add(f"scope.unit.{m.group(1)}")
+    for m in re.finditer(r"\.choice\(\[([^\]]+)\]\)", catalog_swift):
+        for opt in re.findall(r'"([A-Za-z0-9]+)"', m.group(1)): generated.add(f"scope.option.{opt}")
+    enums = (ROOT / "Packages/Domain/Sources/Domain/Drafts/OtherCostKind.swift").read_text(encoding="utf-8")
+    body = enums.split("{", 1)[1]
+    for case_line in re.findall(r"case ([a-zA-Z0-9, ]+)", body.split("var costGroup")[0]):
+        for name in case_line.split(","): generated.add(f"otherCost.{name.strip()}")
+    for tpl in ["depositFinal", "depositProgressFinal", "fourStage", "custom"]: generated.add(f"schedule.template.{tpl}")
+    for row in ["deposit", "progress", "stage2", "stage3", "final", "labourQuick"]: generated.add(f"schedule.row.{row}")
+    for phase in ["all", "inWork", "preStart", "workDone", "terminal"]: generated.add(f"projects.filter.{phase}")
+    for key in sorted(generated):
+        if key not in strings: errors.append(f"generated key '{key}' missing from catalog")
     for e in errors:
         print(e)
     print(f"check_localization: {len(strings)} keys, {len(errors)} error(s)")

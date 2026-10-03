@@ -1,13 +1,14 @@
 import SwiftUI
 import Domain
 import DesignSystem
-import FeatureSupport
 
-struct ProjectCardView: View {
+public struct ProjectCardView: View {
     let summary: ProjectSummary
     let progress: Int
 
-    var body: some View {
+    public init(summary: ProjectSummary, progress: Int) { self.summary = summary; self.progress = progress }
+
+    public var body: some View {
         Card {
             VStack(alignment: .leading, spacing: DSSpacing.md) {
                 HStack(alignment: .top) {
@@ -29,6 +30,10 @@ struct ProjectCardView: View {
                 }
                 FormRow("home.contractValue") {
                     MoneyText(amount: summary.project.contractValue.amount, currencyCode: summary.project.contractValue.currency.rawValue, style: .headline)
+                }
+                if let start = summary.project.startDate, let end = summary.project.estimatedCompletionDate {
+                    Text(verbatim: "\(start.storageString) → \(end.storageString)")
+                        .font(DSTypography.caption).foregroundStyle(DSColor.textSecondary)
                 }
             }
         }
