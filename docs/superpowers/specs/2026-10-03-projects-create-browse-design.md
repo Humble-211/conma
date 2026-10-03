@@ -340,3 +340,10 @@ Key trùng tên giữa các type (ví dụ `bathrooms`, `fixtures`, `doors`, `st
 ### B.3 Gợi ý label material theo job type (chip ở bước 7)
 
 Mặc định: Lumber, Drywall, Flooring, Paint, Tile, Fasteners, Other. Thêm theo type: kitchen → Cabinets, Countertop, Backsplash, Appliances; bathroom → Vanity, Tub/Shower, Toilet, Plumbing fixtures; roofing → Shingles, Underlayment, Flashing, Vents; landscaping → Sod, Pavers, Gravel, Plants, Fence panels; electrical → Wire, Panel, Outlets/Switches, Fixtures; plumbing → Pipe, Fittings, Water heater, Fixtures; flooring → Flooring, Underlay, Transitions; painting → Paint, Primer, Caulk; concrete → Concrete, Rebar, Forms; deckFence → Deck boards, Posts, Fence panels, Hardware; exterior → Siding, Soffit, Gutters; drywall → Drywall sheets, Mud, Tape; hvac → Unit, Ductwork, Thermostat; framing → Lumber, Hangers, Sheathing; windowsDoors → Windows, Doors, Trim. Chip chỉ điền label; contractor nhập amount.
+
+## Errata (post-review, 2026-10-03)
+
+1. §3.3 / §3.5: persisting a draft must never overwrite a user-typed schedule amount. `EditedField.none` is fill-only (rows with a percentage and no amount); only the wizard's contract-value change rescales, through `EditedField.rescale`.
+2. §3.3: a fixed deposit sets the deposit row's amount and the remaining rows split the remainder in their template proportions (`ScheduleMath.applyDeposit`); a percentage deposit sets the deposit row's percentage and the others share the remaining points. It re-runs whenever the deposit changes while a schedule exists.
+3. §5.2 step 11: drag-to-reorder of schedule rows is deferred to sub-project 2b.
+4. §5.1: Discard on the draft banner asks for confirmation first; "+" while a draft exists asks Continue draft / Start new project / Cancel. Closing an empty wizard never clears a saved draft.
