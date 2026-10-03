@@ -46,7 +46,7 @@ public enum DraftDiff {
         let live = old.filter { !$0.isDeleted }
         let oldById = Dictionary(live.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
         let rows = ScheduleMath.recompute(rows: new, contract: contract, edited: .none).rows
-        let upserts = rows.enumerated().compactMap { index, row -> PaymentScheduleItem? in
+        let upserts = rows.filter { $0.amount != nil }.enumerated().compactMap { index, row -> PaymentScheduleItem? in
             guard let amount = row.amount else { return nil }
             return PaymentScheduleItem(id: row.id, companyId: companyId, projectId: projectId, label: row.label, amount: amount, percentage: row.percentage, dueDate: row.dueDate,
                                        triggerText: row.trigger, isDeposit: row.isDeposit, notes: oldById[row.id]?.notes, sortOrder: index,

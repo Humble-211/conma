@@ -17,8 +17,17 @@ public extension ProjectDraft {
         hoursPerDay = project.hoursPerDay
         workersPerDay = project.workersPerDay
         labourMode = .detailed
+        func kind(_ g: CostGroup) -> OtherCostKind? {
+            switch g {
+            case .subcontractor: return .subcontractors
+            case .equipment: return .equipmentRental
+            case .permit: return .permits
+            case .other: return .other
+            case .labour, .material: return nil
+            }
+        }
         func toDraft(_ l: ProjectEstimateLine) -> DraftEstimateLine {
-            DraftEstimateLine(id: l.id, label: l.label, amount: l.amount, quantity: l.quantity, unitRate: l.unitRate, costGroup: l.costGroup, otherKind: nil, sortOrder: l.sortOrder)
+            DraftEstimateLine(id: l.id, label: l.label, amount: l.amount, quantity: l.quantity, unitRate: l.unitRate, costGroup: l.costGroup, otherKind: kind(l.costGroup), sortOrder: l.sortOrder)
         }
         let live = estimateLines.filter { !$0.isDeleted }.sorted { $0.sortOrder < $1.sortOrder }
         labourLines = live.filter { $0.costGroup == .labour }.map(toDraft)

@@ -69,21 +69,31 @@ final class DraftDiffTests: XCTestCase {
                         address: Address(line: "1 Main", unit: nil, city: "Toronto", region: "ON", postalCode: nil), scopeDescription: "Full gut", scopeFields: [],
                         startDate: CalendarDate(storage: "2026-10-01"), estimatedCompletionDate: CalendarDate(storage: "2026-11-01"), workingDays: 20, hoursPerDay: 8, workersPerDay: 3,
                         contractValue: Money(30_000, .cad), manualProgress: 40, depositRequiredToStart: true, createdAt: t0, updatedAt: t0, deletedAt: nil)
-        let lines = [oldLine("Mike", 2000, group: .labour), oldLine("Lumber", 2500)]
+        let lines = [oldLine("Mike", 2000, group: .labour), oldLine("Lumber", 2500), oldLine("Permit", 300, group: .permit)]
         let items = [PaymentScheduleItem(id: UUID(), companyId: company, projectId: project, label: "schedule.row.deposit", amount: Money(6000, .cad), percentage: try Percentage.input(20), dueDate: CalendarDate(storage: "2026-10-10"), triggerText: nil, isDeposit: true, notes: nil, sortOrder: 0, createdAt: t0, updatedAt: t0, deletedAt: nil)]
         let draft = ProjectDraft(project: p, estimateLines: lines, scheduleItems: items, step: 9)
         XCTAssertEqual(draft.customer, .existing(customer))
         XCTAssertEqual(draft.labourMode, .detailed)
         XCTAssertEqual(draft.labourLines.map(\.id), [lines[0].id])
         XCTAssertEqual(draft.materialLines.map(\.id), [lines[1].id])
+        XCTAssertEqual(draft.otherLines.first?.otherKind, .permits)
         XCTAssertEqual(draft.deposit, DraftDeposit(mode: .fixed(Money(6000, .cad)), deadline: CalendarDate(storage: "2026-10-10"), requiredToStart: true))
         XCTAssertEqual(draft.schedule.map(\.id), [items[0].id])
         XCTAssertEqual(draft.scheduleTemplate, .custom)
         XCTAssertEqual(draft.step, 9)
         let bundle = try ProjectDraftAssembler.assemble(draft, companyId: company, currency: .cad, now: t1)
         XCTAssertEqual(bundle.project.name, "Smith kitchen")
-        XCTAssertEqual(bundle.estimateLines.map { $0.amount.storageString }, ["2000.00", "2500.00"])
+        XCTAssertEqual(bundle.estimateLines.map { $0.amount.storageString }, ["2000.00", "2500.00", "300.00"])
         XCTAssertEqual(bundle.scheduleItems.first?.amount.storageString, "6000.00")
+        XCTAssertEqual(bundle.estimateLines.last?.costGroup, .permit)
         XCTAssertTrue(bundle.project.depositRequiredToStart)
+    }
+
+    func testScheduleDiffSortOrderHasNoGaps() throws {
+        let rows = [DraftScheduleRow(id: UUID(), label: "a", percentage: nil, amount: Money(100, .cad), dueDate: nil, trigger: nil, isDeposit: false),
+                    DraftScheduleRow(id: UUID(), label: "n", percentage: nil, amount: nil, dueDate: nil, trigger: nil, isDeposit: false),
+                    DraftScheduleRow(id: UUID(), label: "b", percentage: nil, amount: Money(200, .cad), dueDate: nil, trigger: nil, isDeposit: false)]
+        let change = try DraftDiff.scheduleItems(old: [], new: rows, contract: Money(300, .cad), companyId: company, projectId: project, now: t1)
+        XCTAssertEqual(change.upserts.map(\.sortOrder), [0, 1])
     }
 }

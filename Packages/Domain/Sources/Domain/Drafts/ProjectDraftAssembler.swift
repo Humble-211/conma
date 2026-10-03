@@ -119,7 +119,7 @@ public enum ProjectDraftAssembler {
             }
             rows = [DraftScheduleRow(id: UUID(), label: "schedule.row.deposit", percentage: nil, amount: amount, dueDate: dep.deadline, trigger: nil, isDeposit: true)]
         }
-        let scheduleItems = rows.enumerated().compactMap { index, row -> PaymentScheduleItem? in
+        let scheduleItems = rows.filter { $0.amount != nil }.enumerated().compactMap { index, row -> PaymentScheduleItem? in
             guard let amount = row.amount else { return nil }
             let due = row.dueDate ?? (row.isDeposit ? draft.deposit?.deadline : nil)
             return PaymentScheduleItem(id: row.id, companyId: companyId, projectId: projectId, label: row.label, amount: amount, percentage: row.percentage, dueDate: due,
