@@ -36,7 +36,7 @@ final class AppContainer {
 
     static var databaseURL: URL {
         let support = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
-        return support.appendingPathComponent("ConstructionManagement", isDirectory: true).appendingPathComponent("construction.sqlite")
+        return support.appendingPathComponent("ConMa", isDirectory: true).appendingPathComponent("conma.sqlite")
     }
 
     func load() async {

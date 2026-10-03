@@ -4,8 +4,8 @@ Làm một lần. Không có bước nào cần Mac.
 
 ## 1. Repo GitHub
 
-1. Tạo repo **public** `construction-management` trên GitHub, không khởi tạo README.
-2. Trong thư mục dự án: `git remote add origin https://github.com/<user>/construction-management.git && git push -u origin main`.
+1. Tạo repo **public** `conma` trên GitHub, không khởi tạo README.
+2. Trong thư mục dự án: `git remote add origin https://github.com/<user>/conma.git && git push -u origin main`.
 3. Settings → Code security → bật **Secret scanning** và **Push protection**.
 
 ## 2. Repo private cho chứng chỉ (fastlane match)
@@ -18,8 +18,8 @@ Làm một lần. Không có bước nào cần Mac.
 
 ## 3. Apple Developer / App Store Connect
 
-1. developer.apple.com → Identifiers → tạo App ID với bundle id, ví dụ `com.<ten>.constructionmanagement`. Không cần capability nào.
-2. appstoreconnect.apple.com → Apps → New App → iOS, tên "Construction Management", bundle id vừa tạo, SKU tùy ý.
+1. developer.apple.com → Identifiers → tạo App ID với bundle id, `com.humble211.conma`. Không cần capability nào.
+2. appstoreconnect.apple.com → Apps → New App → iOS, tên "ConMa" (nếu Apple báo tên đã có người dùng, chọn "ConMa – Contractor OS"), bundle id vừa tạo, SKU tùy ý.
 3. Users and Access → Integrations → App Store Connect API → Generate key, role **App Manager**. Tải file `.p8` (chỉ tải được một lần). Ghi lại **Key ID** và **Issuer ID**.
 4. `ASC_KEY_CONTENT` = base64 của file `.p8`: PowerShell
    `[Convert]::ToBase64String([IO.File]::ReadAllBytes("AuthKey_XXXX.p8"))`.
@@ -40,7 +40,7 @@ Làm một lần. Không có bước nào cần Mac.
 
 ## 5. Điền bundle id và Team ID vào `project.yml`
 
-Thay bundle id tạm `com.humble211.constructionmanagement` bằng bundle id thật (nếu khác) và `TEAM_ID_PLACEHOLDER` bằng Team ID, commit, push.
+Bundle id là `com.humble211.conma`. Thay `TEAM_ID_PLACEHOLDER` bằng Team ID, commit, push.
 
 ## 6. Tạo chứng chỉ (một lần)
 

@@ -21,8 +21,8 @@ platform :ios do
   lane :beta do
     match(type: "appstore", readonly: true)
     build_app(
-      project: "ConstructionManagement.xcodeproj",
-      scheme: "ConstructionManagement",
+      project: "ConMa.xcodeproj",
+      scheme: "ConMa",
       configuration: "Release",
       export_method: "app-store",
       output_directory: "build",

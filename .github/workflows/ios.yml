@@ -41,8 +41,8 @@ jobs:
       - name: Build app
         run: |
           xcodebuild build \
-            -project ConstructionManagement.xcodeproj \
-            -scheme ConstructionManagement \
+            -project ConMa.xcodeproj \
+            -scheme ConMa \
             -destination "id=${{ steps.sim.outputs.udid }}" \
             -configuration Debug \
             CODE_SIGNING_ALLOWED=NO \
@@ -51,8 +51,8 @@ jobs:
       - name: UI tests
         run: |
           xcodebuild test \
-            -project ConstructionManagement.xcodeproj \
-            -scheme ConstructionManagement \
+            -project ConMa.xcodeproj \
+            -scheme ConMa \
             -destination "id=${{ steps.sim.outputs.udid }}" \
             -configuration Debug \
             CODE_SIGNING_ALLOWED=NO \

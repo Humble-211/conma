@@ -1,4 +1,6 @@
-# Construction Management
+# ConMa
+
+ConMa (Construction Management)
 
 iOS app for small and mid-size contractors: jobs, progress, costs, payments, crew.
 
