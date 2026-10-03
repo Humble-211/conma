@@ -40,7 +40,7 @@ Làm một lần. Không có bước nào cần Mac.
 
 ## 5. Điền bundle id và Team ID vào `project.yml`
 
-Bundle id là `com.humble211.conma`. Thay `TEAM_ID_PLACEHOLDER` bằng Team ID, commit, push.
+Bundle id là `com.humble211.conma`, Team ID đã điền trong `project.yml` (`DEVELOPMENT_TEAM`). Đổi team thì sửa giá trị đó, commit, push.
 
 ## 6. Tạo chứng chỉ (một lần)
 

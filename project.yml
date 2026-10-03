@@ -1,4 +1,3 @@
-# Bundle id and team id are provisional; replace per docs/SETUP.md §5.
 name: ConMa
 options:
   bundleIdPrefix: com.humble211
@@ -9,7 +8,7 @@ options:
 settings:
   base:
     SWIFT_VERSION: "5.0"
-    DEVELOPMENT_TEAM: TEAM_ID_PLACEHOLDER
+    DEVELOPMENT_TEAM: XJNXL2MR8X
     CODE_SIGN_STYLE: Manual
     SWIFT_STRICT_CONCURRENCY: targeted
     CURRENT_PROJECT_VERSION: 1
