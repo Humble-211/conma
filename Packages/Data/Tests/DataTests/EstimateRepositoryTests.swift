@@ -9,7 +9,7 @@ final class EstimateRepositoryTests: XCTestCase {
 
     override func setUp() async throws {
         db = try AppDatabase.inMemory()
-        let setup = try await SampleData.seedIfEmpty(db, clock: .fixed(now))
+        let setup = try await SampleData.seedIfEmpty(db, clock: .fixed(now), today: CalendarDate(now, timeZone: .gmt))
         companyId = setup.company.id
         actor = ActivityActor(userId: setup.owner.id, name: "Duc")
         let projects = try await GRDBProjectRepository(database: db, clock: .fixed(now)).list(companyId: companyId)

@@ -62,7 +62,7 @@ final class AppContainer {
                               setup: nil)
             #if DEBUG
             if options.seedSampleData {
-                ready.setup = try await SampleData.seedIfEmpty(database, clock: clock)
+                ready.setup = try await SampleData.seedIfEmpty(database, clock: clock, today: CalendarDate(Date(), timeZone: .current))
             }
             #endif
             if ready.setup == nil { ready.setup = try await companies.current() }

@@ -9,7 +9,7 @@ final class ScheduleRepositoryTests: XCTestCase {
 
     override func setUp() async throws {
         db = try AppDatabase.inMemory()
-        let setup = try await SampleData.seedIfEmpty(db, clock: .fixed(now))
+        let setup = try await SampleData.seedIfEmpty(db, clock: .fixed(now), today: CalendarDate(now, timeZone: .gmt))
         companyId = setup.company.id
         actor = ActivityActor(userId: setup.owner.id, name: "Duc")
         projectId = try await GRDBProjectRepository(database: db, clock: .fixed(now)).list(companyId: companyId).first { $0.status == .completed }!.id  // Roof: no schedule in seed

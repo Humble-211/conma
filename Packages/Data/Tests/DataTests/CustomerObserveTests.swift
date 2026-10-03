@@ -7,7 +7,7 @@ final class CustomerObserveTests: XCTestCase {
 
     func testObserveAllEmitsSortedAndUpdates() async throws {
         let db = try AppDatabase.inMemory()
-        let setup = try await SampleData.seedIfEmpty(db, clock: .fixed(now))
+        let setup = try await SampleData.seedIfEmpty(db, clock: .fixed(now), today: CalendarDate(now, timeZone: .gmt))
         let repo = GRDBCustomerRepository(database: db, clock: .fixed(now))
         var it = repo.observeAll(companyId: setup.company.id).makeAsyncIterator()
         let first = try await it.next()
@@ -19,7 +19,7 @@ final class CustomerObserveTests: XCTestCase {
 
     func testProjectsForCustomer() async throws {
         let db = try AppDatabase.inMemory()
-        let setup = try await SampleData.seedIfEmpty(db, clock: .fixed(now))
+        let setup = try await SampleData.seedIfEmpty(db, clock: .fixed(now), today: CalendarDate(now, timeZone: .gmt))
         let repo = GRDBCustomerRepository(database: db, clock: .fixed(now))
         let ann = try await repo.list(companyId: setup.company.id).first { $0.name == "Ann Lee" }!
         let projects = try await repo.projects(customerId: ann.id)
