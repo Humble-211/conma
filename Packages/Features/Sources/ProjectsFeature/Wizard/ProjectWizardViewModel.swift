@@ -13,6 +13,7 @@ public final class ProjectWizardViewModel {
     public private(set) var isSaving = false
     public var errorKey: LocalizedStringKey?
     public var showCloseDialog = false
+    public var pendingJobTypeChange: JobType?
 
     public let companyId: UUID
     public let currency: CurrencyCode
