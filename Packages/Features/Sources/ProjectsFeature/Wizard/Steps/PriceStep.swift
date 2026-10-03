@@ -16,9 +16,10 @@ struct PriceStep: View {
                 }
             }
             let p = viewModel.preview
+            let profitAmount: Decimal = p.projectedProfit?.amount ?? 0
             HStack(spacing: DSSpacing.md) {
                 SummaryTile("wizard.price.estimatedCost", value: Text(p.estimatedCost.amount, format: .currency(code: viewModel.currency.rawValue)))
-                SummaryTile("wizard.price.profit", value: Text(p.projectedProfit?.amount ?? 0, format: .currency(code: viewModel.currency.rawValue)),
+                SummaryTile("wizard.price.profit", value: Text(profitAmount, format: .currency(code: viewModel.currency.rawValue)),
                             tone: (p.projectedProfit?.isNegative ?? false) ? .danger : .success)
             }
             Card {

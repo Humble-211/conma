@@ -40,6 +40,8 @@ struct ScheduleStep: View {
                                 Text("wizard.schedule.mismatch").font(DSTypography.caption)
                                 MoneyText(amount: diff.amount, currencyCode: viewModel.currency.rawValue, style: .caption)
                             }.foregroundStyle(DSColor.warning)
+                        case .currencyMismatch:
+                            EmptyView()
                         case .contractZero:
                             Text("wizard.schedule.noContract").font(DSTypography.caption).foregroundStyle(DSColor.warning)
                         }
