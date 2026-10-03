@@ -8561,6 +8561,38 @@
           }
         }
       }
+    },
+    "detail.status.title": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Change status"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đổi trạng thái"
+          }
+        }
+      }
+    },
+    "error.invalidProgress": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Progress must be between 0 and 100 percent."
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tiến độ phải từ 0 đến 100 phần trăm."
+          }
+        }
+      }
     }
   }
 }

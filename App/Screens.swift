@@ -44,7 +44,10 @@ struct ProjectDetailScreen: View {
     init(projectId: UUID, ready: AppContainer.Ready, setup: CompanySetup) {
         _viewModel = State(initialValue: ProjectDetailViewModel(projectId: projectId, companyId: setup.company.id, currency: setup.company.currencyCode,
                                                                  projectRepository: ready.projectRepository, estimateRepository: ready.estimateRepository,
-                                                                 scheduleRepository: ready.scheduleRepository, actor: ActivityActor(userId: setup.owner.id, name: setup.owner.displayName)))
+                                                                 scheduleRepository: ready.scheduleRepository, insightsRepository: ready.insightsRepository,
+                                                                 activityLogRepository: ready.activityLogRepository, customerRepository: ready.customerRepository,
+                                                                 actor: ActivityActor(userId: setup.owner.id, name: setup.owner.displayName),
+                                                                 today: TodayProvider.today(timeZone: .current)))
         self.ready = ready; self.setup = setup
     }
 

@@ -32,6 +32,12 @@ public final class ProjectDetailViewModel {
     public private(set) var isLoaded = false
     public var errorKey: LocalizedStringKey?
     public var editing: EditSection?
+    public private(set) var insights: ProjectInsights?
+    public private(set) var activity: [ActivityLogEntry] = []
+    /// Failure of a status/progress/customer/delete write; the view shows it as an alert.
+    public var actionErrorKey: LocalizedStringKey?
+    public private(set) var today: CalendarDate
+    private var insightsSnapshot: ProjectInsightsInputs.Snapshot?
 
     public let projectId: UUID
     public let companyId: UUID
@@ -39,12 +45,18 @@ public final class ProjectDetailViewModel {
     private let projectRepository: any ProjectRepository
     private let estimateRepository: any ProjectEstimateRepository
     private let scheduleRepository: any PaymentScheduleRepository
+    private let insightsRepository: any InsightsRepository
+    private let activityLogRepository: any ActivityLogRepository
+    public let customerRepository: any CustomerRepository
     private let actor: ActivityActor
 
     public init(projectId: UUID, companyId: UUID, currency: CurrencyCode, projectRepository: any ProjectRepository, estimateRepository: any ProjectEstimateRepository,
-                scheduleRepository: any PaymentScheduleRepository, actor: ActivityActor) {
+                scheduleRepository: any PaymentScheduleRepository, insightsRepository: any InsightsRepository, activityLogRepository: any ActivityLogRepository,
+                customerRepository: any CustomerRepository, actor: ActivityActor, today: CalendarDate) {
         self.projectId = projectId; self.companyId = companyId; self.currency = currency
         self.projectRepository = projectRepository; self.estimateRepository = estimateRepository; self.scheduleRepository = scheduleRepository; self.actor = actor
+        self.insightsRepository = insightsRepository; self.activityLogRepository = activityLogRepository; self.customerRepository = customerRepository
+        self.today = today
     }
 
     public func start() async {
@@ -52,6 +64,66 @@ public final class ProjectDetailViewModel {
             for try await value in projectRepository.observeDetail(id: projectId) { snapshot = value; isLoaded = true }
         } catch is CancellationError {
         } catch { errorKey = "detail.error" }
+    }
+
+    /// Runs alongside `start()`; bind to a second `.task`.
+    public func startInsights() async {
+        do {
+            for try await value in insightsRepository.observeProject(id: projectId) {
+                insightsSnapshot = value
+                insights = value.map { ProjectInsightsComposer.compose($0.with(today: today)) }
+            }
+        } catch is CancellationError {
+        } catch { errorKey = "detail.error" }
+    }
+
+    /// Latest five entries for the Activity section.
+    public func startActivity() async {
+        do {
+            for try await value in activityLogRepository.observeForProject(projectId: projectId, limit: 5) { activity = value }
+        } catch {}
+    }
+
+    /// Recomposes insights for a new day without waiting for a database emission.
+    public func update(today: CalendarDate) {
+        guard today != self.today else { return }
+        self.today = today
+        insights = insightsSnapshot.map { ProjectInsightsComposer.compose($0.with(today: today)) }
+    }
+
+    /// Returns the outcome (for the "set progress to 100%" suggestion) or nil on failure.
+    public func changeStatus(_ status: ProjectStatus) async -> StatusChangeOutcome? {
+        guard let project = snapshot?.project else { return nil }
+        let outcome = ProjectStatusChange.apply(project, to: status)
+        do {
+            try await projectRepository.changeStatus(id: projectId, to: status, actor: actor)
+            return outcome
+        } catch { actionErrorKey = Self.key(for: error); return nil }
+    }
+
+    public func setProgress(_ value: Int?) async -> Bool {
+        do { try await projectRepository.setManualProgress(id: projectId, to: value, actor: actor); return true }
+        catch { actionErrorKey = Self.key(for: error); return false }
+    }
+
+    public func changeCustomer(_ customerId: UUID) async -> Bool {
+        do { try await projectRepository.changeCustomer(id: projectId, to: customerId, actor: actor); return true }
+        catch { actionErrorKey = Self.key(for: error); return false }
+    }
+
+    public func deleteProject() async -> Bool {
+        do { try await projectRepository.softDelete(id: projectId, actor: actor); return true }
+        catch { actionErrorKey = Self.key(for: error); return false }
+    }
+
+    static func key(for error: Error) -> LocalizedStringKey {
+        switch error as? DomainError {
+        case .notFound?: return "error.projectGone"
+        case .customerDeleted?: return "error.customerDeleted"
+        case .currencyMismatch?: return "error.currencyMismatch"
+        case .invalidProgress?: return "error.invalidProgress"
+        default: return "error.generic"
+        }
     }
 
     /// Wizard VM seeded from the current snapshot, parked on the section's step, with no autosave.
