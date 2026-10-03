@@ -24,6 +24,7 @@ final class CustomerObserveTests: XCTestCase {
         let ann = try await repo.list(companyId: setup.company.id).first { $0.name == "Ann Lee" }!
         let projects = try await repo.projects(customerId: ann.id)
         XCTAssertEqual(projects.map(\.name), ["Basement Renovation"])
-        XCTAssertEqual(try await repo.projects(customerId: UUID()), [])
+        let none = try await repo.projects(customerId: UUID())
+        XCTAssertEqual(none, [])
     }
 }

@@ -23,7 +23,8 @@ final class ScheduleRepositoryTests: XCTestCase {
         let repo = GRDBPaymentScheduleRepository(database: db, clock: .fixed(now))
         let dep = item("schedule.row.deposit", 5000, deposit: true), fin = item("schedule.row.final", 13_500, order: 1)
         try await repo.replace(projectId: projectId, change: ScheduleItemChange(upserts: [dep, fin], deletedIds: [], totalBefore: .zero(.cad), totalAfter: Money(18_500, .cad)), actor: actor)
-        XCTAssertEqual(try await repo.items(projectId: projectId), [dep, fin])
+        let stored = try await repo.items(projectId: projectId)
+        XCTAssertEqual(stored, [dep, fin])
         let details = try await db.writer.read { try String.fetchOne($0, sql: "SELECT details_json FROM activity_log WHERE action = 'scheduleChanged' AND project_id = ?", arguments: [self.projectId.dbKey]) }
         XCTAssertEqual(details, #"{"from":"0.00","to":"18500.00"}"#)
     }
@@ -38,10 +39,11 @@ final class ScheduleRepositoryTests: XCTestCase {
                            arguments: [c, p, i, "2026-10-05T00:00:00.000Z", "2026-10-05T00:00:00.000Z"])
         }
         try await repo.replace(projectId: projectId, change: ScheduleItemChange(upserts: [], deletedIds: [dep.id], totalBefore: Money(5000, .cad), totalAfter: .zero(.cad)), actor: actor)
-        let link = try await db.writer.read { try Row.fetchOne($0, sql: "SELECT schedule_item_id, deleted_at FROM payments WHERE id = 'pay1'") }
+        let link: Row? = try await db.writer.read { db -> Row? in try Row.fetchOne(db, sql: "SELECT schedule_item_id, deleted_at FROM payments WHERE id = 'pay1'") }
         XCTAssertNil(link?["schedule_item_id"] as String?)
         XCTAssertNil(link?["deleted_at"] as String?, "payment itself stays live")
-        XCTAssertEqual(try await repo.items(projectId: projectId), [])
+        let remaining = try await repo.items(projectId: projectId)
+        XCTAssertEqual(remaining, [])
     }
 
     func testScopeMismatchRejected() async throws {
