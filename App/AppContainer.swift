@@ -37,6 +37,7 @@ final class AppContainer {
         self.settings = AppSettings(defaults: defaults)
         if let locale = options.localeOverride { settings.language = locale == "vi" ? .vietnamese : .english }
         if let appearance = options.appearanceOverride { settings.appearance = appearance == "dark" ? .dark : .light }
+        if options.isUITesting, let raw = options.todayOverride, let day = CalendarDate(storage: raw) { TodayProvider.override = day }
     }
 
     static var databaseURL: URL {
@@ -66,7 +67,7 @@ final class AppContainer {
                               setup: nil)
             #if DEBUG
             if options.seedSampleData {
-                ready.setup = try await SampleData.seedIfEmpty(database, clock: clock, today: CalendarDate(Date(), timeZone: .current))
+                ready.setup = try await SampleData.seedIfEmpty(database, clock: clock, today: TodayProvider.today(timeZone: .current))
             }
             #endif
             if ready.setup == nil { ready.setup = try await companies.current() }

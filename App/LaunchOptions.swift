@@ -6,6 +6,7 @@ struct LaunchOptions {
     var keepDrafts = false
     var localeOverride: String?
     var appearanceOverride: String?
+    var todayOverride: String?
 
     static func parse(_ args: [String] = CommandLine.arguments) -> LaunchOptions {
         var options = LaunchOptions()
@@ -17,6 +18,7 @@ struct LaunchOptions {
             case "--keep-drafts": options.keepDrafts = true
             case "--locale": options.localeOverride = iterator.next()
             case "--appearance": options.appearanceOverride = iterator.next()
+            case "--today": options.todayOverride = iterator.next()
             default: break
             }
         }
