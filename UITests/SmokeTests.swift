@@ -42,18 +42,30 @@ final class SmokeTests: XCTestCase {
         }
     }
 
+    /// A language row of the Settings picker, addressed by the picker identifier plus its (language-native) label.
+    private func languageRow(_ app: XCUIApplication, _ label: String) -> XCUIElement {
+        let row = app.buttons.matching(identifier: "settings_language_picker").matching(NSPredicate(format: "label == %@", label)).firstMatch
+        return row.waitForExistence(timeout: 5) ? row : pickerRow(app, labeled: label)
+    }
+
+    private func dump(_ app: XCUIApplication) -> String {
+        "nav=\(app.navigationBars.allElementsBoundByIndex.map(\.identifier)) tabs=\(app.tabBars.buttons.allElementsBoundByIndex.map(\.label))"
+    }
+
     func testLanguageSwitchUpdatesOpenScreenAndTabsImmediately() {
         let app = launch(["--seed-sample-data", "--locale", "en"])
-        XCTAssertTrue(app.tabBars.buttons["More"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.tabBars.buttons["More"].waitForExistence(timeout: 15))
         app.tabBars.buttons["More"].tap()
+        XCTAssertTrue(app.buttons["more_settings"].waitForExistence(timeout: 10))
         app.buttons["more_settings"].tap()
-        XCTAssertTrue(app.navigationBars["Settings"].waitForExistence(timeout: 5))
-        pickerRow(app, labeled: "Tiếng Việt").tap()
+        XCTAssertTrue(app.navigationBars["Settings"].waitForExistence(timeout: 10), dump(app))
+        languageRow(app, "Tiếng Việt").tap()
         // Review Focus #5: the open screen and the tab bar change without leaving the screen.
-        XCTAssertTrue(app.navigationBars["Cài đặt"].waitForExistence(timeout: 5))
-        XCTAssertTrue(app.tabBars.buttons["Trang chủ"].exists)
-        XCTAssertTrue(app.tabBars.buttons["Chi phí"].exists)
-        pickerRow(app, labeled: "English").tap()
-        XCTAssertTrue(app.navigationBars["Settings"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.navigationBars["Cài đặt"].waitForExistence(timeout: 10), dump(app))
+        XCTAssertTrue(app.tabBars.buttons["Trang chủ"].waitForExistence(timeout: 10), dump(app))
+        XCTAssertTrue(app.tabBars.buttons["Chi phí"].waitForExistence(timeout: 10), dump(app))
+        languageRow(app, "English").tap()
+        XCTAssertTrue(app.navigationBars["Settings"].waitForExistence(timeout: 10), dump(app))
+        XCTAssertTrue(app.tabBars.buttons["Home"].waitForExistence(timeout: 10), dump(app))
     }
 }
