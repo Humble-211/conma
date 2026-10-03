@@ -58,7 +58,62 @@ public final class GRDBProjectRepository: ProjectRepository {
         }
     }
 
+    public func observeDetail(id: UUID) -> AsyncThrowingStream<ProjectDetailSnapshot?, Error> {
+        let key = id.dbKey
+        let observation = ValueObservation.tracking { db -> ProjectDetailSnapshot? in
+            guard let record = try ProjectRecord.filter(Column("id") == key && Column("deleted_at") == nil).fetchOne(db) else { return nil }
+            let currency = try Self.currency(db, companyId: record.companyId)
+            let fields = try Self.scopeFields(db, projectIds: [record.id])[record.id] ?? []
+            let project = try record.toDomain(currency: currency, scopeFields: fields)
+            guard let customerRecord = try CustomerRecord.filter(Column("id") == record.customerId).fetchOne(db) else {
+                throw DataError.corruptRow(table: "projects", id: record.id, column: "customer_id")
+            }
+            return ProjectDetailSnapshot(project: project, customer: try customerRecord.toDomain(),
+                                         estimateLines: try ProjectEstimateLineRecord.fetchLive(db, projectId: record.id, currency: currency),
+                                         scheduleItems: try PaymentScheduleItemRecord.fetchLive(db, projectId: record.id, currency: currency))
+        }
+        let writer = database.writer
+        return AsyncThrowingStream { continuation in
+            let task = Task {
+                do {
+                    for try await value in observation.values(in: writer) { continuation.yield(value) }
+                    continuation.finish()
+                } catch { continuation.finish(throwing: error) }
+            }
+            continuation.onTermination = { _ in task.cancel() }
+        }
+    }
+
     // MARK: Writes
+
+    public func create(_ bundle: NewProjectBundle, actor: ActivityActor) async throws {
+        try bundle.project.validate()
+        try bundle.newCustomer?.validate()
+        let now = clock.now()
+        let projectRecord = ProjectRecord(bundle.project)
+        let fieldRecords = bundle.scopeFields.map { ProjectScopeFieldRecord($0) }
+        let lineRecords = bundle.estimateLines.map { ProjectEstimateLineRecord($0) }
+        let itemRecords = bundle.scheduleItems.map { PaymentScheduleItemRecord($0) }
+        let customerRecord = bundle.newCustomer.map { CustomerRecord($0) }
+        let project = bundle.project
+        let newCustomer = bundle.newCustomer
+        try await database.writer.write { db in
+            let currency = try Self.currency(db, companyId: project.companyId.dbKey)
+            guard project.contractValue.currency == currency else { throw DomainError.currencyMismatch }
+            if let customerRecord, let newCustomer {
+                try customerRecord.insert(db)
+                try ActivityLogRecord.append(db, companyId: project.companyId, actor: actor, action: .customerCreated, entityType: "customer", entityId: newCustomer.id, projectId: nil,
+                                             details: ["name": newCustomer.name], at: now)
+            }
+            try projectRecord.insert(db)
+            for record in fieldRecords { try record.insert(db) }
+            for record in lineRecords { try record.insert(db) }
+            for record in itemRecords { try record.insert(db) }
+            try ActivityLogRecord.append(db, companyId: project.companyId, actor: actor, action: .projectCreated, entityType: "project", entityId: project.id, projectId: project.id,
+                                         details: ["name": project.name, "contractValue": project.contractValue.storageString,
+                                                   "estimateLines": String(lineRecords.count), "scheduleItems": String(itemRecords.count)], at: now)
+        }
+    }
 
     public func save(_ project: Project, actor: ActivityActor) async throws {
         try project.validate()
@@ -69,7 +124,10 @@ public final class GRDBProjectRepository: ProjectRepository {
         let stampedProject = stamped
         let record = ProjectRecord(stampedProject)
         try await database.writer.write { db in
+            let currency = try Self.currency(db, companyId: stampedProject.companyId.dbKey)
+            guard stampedProject.contractValue.currency == currency else { throw DomainError.currencyMismatch }
             let existing = try ProjectRecord.filter(Column("id") == stampedProject.id.dbKey).fetchOne(db)
+            if let existing, existing.deletedAt != nil { throw DataError.notFound }
             try record.save(db)
             try Self.replaceScopeFields(db, project: stampedProject, now: now)
 
