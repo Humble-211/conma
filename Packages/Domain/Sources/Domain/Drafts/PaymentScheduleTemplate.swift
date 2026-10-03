@@ -1,15 +1,6 @@
 import Foundation
 
 public extension PaymentScheduleTemplate {
-    /// Localisation keys for the row labels used by the templates.
-    static let labelKeys: [String: String] = [
-        "deposit": "schedule.row.deposit",
-        "progress": "schedule.row.progress",
-        "stage2": "schedule.row.stage2",
-        "stage3": "schedule.row.stage3",
-        "final": "schedule.row.final"
-    ]
-
     /// Base rows as (label key, percentage points). First row is the deposit.
     private var base: [(String, Decimal)] {
         switch self {

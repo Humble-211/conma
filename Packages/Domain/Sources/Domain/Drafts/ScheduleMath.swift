@@ -5,6 +5,7 @@ public enum EditedField: Equatable, Sendable { case percentage(Int), amount(Int)
 public enum ScheduleWarning: Equatable, Sendable {
     case totalMismatch(difference: Money)
     case contractZero
+    case currencyMismatch
 }
 
 public struct ScheduleResult: Equatable, Sendable {
@@ -30,12 +31,15 @@ public enum ScheduleMath {
             let amounts = ScheduleSplitter.amounts(of: contract, percentages: pcts)
             for (k, index) in withPct.enumerated() { rows[index].amount = amounts[k] }
         }
+        let hasMismatch = rows.contains { ($0.amount?.currency ?? currency) != currency }
         let total = rows.reduce(Money.zero(currency)) { acc, row in
-            guard let amount = row.amount, let sum = try? acc.adding(amount) else { return acc }
+            guard let amount = row.amount, amount.currency == currency, let sum = try? acc.adding(amount) else { return acc }
             return sum
         }
         var warning: ScheduleWarning?
-        if contract.isZero, rows.contains(where: { $0.percentage != nil }) {
+        if hasMismatch {
+            warning = .currencyMismatch
+        } else if contract.isZero, rows.contains(where: { $0.percentage != nil }) {
             warning = .contractZero
         } else if !rows.isEmpty, total != contract, let diff = try? total.subtracting(contract) {
             warning = .totalMismatch(difference: diff)

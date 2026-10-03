@@ -45,6 +45,13 @@ final class ScheduleMathTests: XCTestCase {
         XCTAssertNil(r2.rows[0].percentage, "no division by zero")
     }
 
+    func testCurrencyMismatchIsReported() {
+        let usd = DraftScheduleRow(id: UUID(), label: "x", percentage: nil, amount: Money(100, .usd), dueDate: nil, trigger: nil, isDeposit: false)
+        let r = ScheduleMath.recompute(rows: [row(50), usd], contract: Money(1000, .cad), edited: .none)
+        XCTAssertEqual(r.warning, .currencyMismatch)
+        XCTAssertEqual(r.total.storageString, "500.00")
+    }
+
     func testEmptyRows() {
         let r = ScheduleMath.recompute(rows: [], contract: Money(1000, .cad), edited: .none)
         XCTAssertTrue(r.rows.isEmpty); XCTAssertEqual(r.total.storageString, "0.00"); XCTAssertNil(r.warning)

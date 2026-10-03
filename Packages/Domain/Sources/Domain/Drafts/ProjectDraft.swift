@@ -117,6 +117,7 @@ public struct ProjectDraft: Codable, Equatable, Sendable {
     public var scheduleTemplate: PaymentScheduleTemplate?
     public var schedule: [DraftScheduleRow] = []
     public var step: Int = 1
+    /// Epoch by default; the persistence layer stamps it on save.
     public var updatedAt: Date = Date(timeIntervalSince1970: 0)
 
     public init() {}
