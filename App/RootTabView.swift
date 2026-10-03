@@ -15,10 +15,10 @@ struct RootTabView: View {
 
     var body: some View {
         TabView {
-            NavigationStack { HomeScreen(projectRepository: ready.projectRepository, companyId: setup.company.id) }
+            NavigationStack { HomeScreen(ready: ready, setup: setup) }
                 .tabItem { Label("tab.home", systemImage: "house") }
                 .accessibilityIdentifier("tab_home")
-            NavigationStack { ProjectsPlaceholderView() }
+            ProjectsScreen(ready: ready, setup: setup)
                 .tabItem { Label("tab.projects", systemImage: "folder") }
                 .accessibilityIdentifier("tab_projects")
             NavigationStack { CalendarPlaceholderView() }

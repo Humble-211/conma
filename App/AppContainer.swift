@@ -12,6 +12,9 @@ final class AppContainer {
         let companyRepository: any CompanyRepository
         let customerRepository: any CustomerRepository
         let projectRepository: any ProjectRepository
+        let estimateRepository: any ProjectEstimateRepository
+        let scheduleRepository: any PaymentScheduleRepository
+        let draftStore: any DraftStore
         var setup: CompanySetup?
     }
 
@@ -45,10 +48,17 @@ final class AppContainer {
             let database = options.isUITesting ? try AppDatabase.inMemory() : try AppDatabase.onDisk(at: AppContainer.databaseURL)
             let clock = Clock.system
             let companies = GRDBCompanyRepository(database: database, clock: clock)
+            let draftDirectory = options.isUITesting
+                ? FileManager.default.temporaryDirectory.appendingPathComponent("conma-ui-drafts", isDirectory: true)
+                : FileDraftStore.defaultDirectory()
+            if options.isUITesting { try? FileManager.default.removeItem(at: draftDirectory) }
             var ready = Ready(database: database,
                               companyRepository: companies,
                               customerRepository: GRDBCustomerRepository(database: database, clock: clock),
                               projectRepository: GRDBProjectRepository(database: database, clock: clock),
+                              estimateRepository: GRDBProjectEstimateRepository(database: database, clock: clock),
+                              scheduleRepository: GRDBPaymentScheduleRepository(database: database, clock: clock),
+                              draftStore: FileDraftStore(directory: draftDirectory),
                               setup: nil)
             #if DEBUG
             if options.seedSampleData {

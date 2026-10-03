@@ -487,13 +487,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "The project list and the create-project wizard are coming next."
+            "value": "Tap + to create a project."
           }
         },
         "vi": {
           "stringUnit": {
             "state": "translated",
-            "value": "Danh sách dự án và wizard tạo dự án sẽ có ở bước tiếp theo."
+            "value": "Bấm + để tạo dự án."
           }
         }
       }
@@ -5470,6 +5470,86 @@
           "stringUnit": {
             "state": "translated",
             "value": "Có dòng dùng tiền tệ khác."
+          }
+        }
+      }
+    },
+    "projects.search": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Search name, address or customer"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tìm tên, địa chỉ, khách"
+          }
+        }
+      }
+    },
+    "projects.filter": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Filter"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lọc"
+          }
+        }
+      }
+    },
+    "projects.add": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "New project"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dự án mới"
+          }
+        }
+      }
+    },
+    "projects.createFirst": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Create your first project"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tạo dự án đầu tiên"
+          }
+        }
+      }
+    },
+    "projects.noMatches": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No projects match"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Không có dự án phù hợp"
           }
         }
       }

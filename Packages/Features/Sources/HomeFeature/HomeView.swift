@@ -6,7 +6,11 @@ import FeatureSupport
 public struct HomeView: View {
     private let viewModel: HomeViewModel
 
-    public init(viewModel: HomeViewModel) { self.viewModel = viewModel }
+    private let makeDetail: (UUID) -> AnyView
+
+    public init(viewModel: HomeViewModel, makeDetail: @escaping (UUID) -> AnyView) {
+        self.viewModel = viewModel; self.makeDetail = makeDetail
+    }
 
     public var body: some View {
         Group {
@@ -19,8 +23,11 @@ public struct HomeView: View {
                     VStack(alignment: .leading, spacing: DSSpacing.md) {
                         SectionHeader("home.ongoingJobs")
                         ForEach(viewModel.summaries) { summary in
-                            ProjectCardView(summary: summary, progress: viewModel.progress(for: summary))
-                                .padding(.horizontal, DSSpacing.lg)
+                            NavigationLink(value: ProjectRoute.detail(summary.project.id)) {
+                                ProjectCardView(summary: summary, progress: viewModel.progress(for: summary))
+                            }
+                            .buttonStyle(.plain)
+                            .padding(.horizontal, DSSpacing.lg)
                         }
                     }
                     .padding(.vertical, DSSpacing.lg)
@@ -30,6 +37,9 @@ public struct HomeView: View {
         }
         .background(DSColor.background)
         .navigationTitle("home.title")
+        .navigationDestination(for: ProjectRoute.self) { route in
+            switch route { case .detail(let id): makeDetail(id) }
+        }
         .task { await viewModel.start() }
     }
 }
