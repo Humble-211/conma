@@ -14,4 +14,7 @@ public enum DomainError: Error, Equatable, Sendable {
     case categoryHasExpenses
     case emptyName
     case emptyFieldKey
+    case customerDeleted
+    case crossCompany
+    case notFound
 }

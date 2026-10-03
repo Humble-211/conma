@@ -170,7 +170,7 @@ public final class ProjectWizardViewModel {
         } catch DraftError.missing(let fields) {
             missing = fields
             errorKey = "wizard.error.missing"
-        } catch DraftError.completionBeforeStart {
+        } catch DraftError.invalidTimeline(let errors) where errors.contains(.completionBeforeStart) {
             errorKey = "wizard.error.completionBeforeStart"
         } catch {
             errorKey = "wizard.error.saveFailed"

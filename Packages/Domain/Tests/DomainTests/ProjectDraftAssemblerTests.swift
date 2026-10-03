@@ -66,11 +66,11 @@ final class ProjectDraftAssemblerTests: XCTestCase {
         var d = minimal(); d.contractValue = Money(-1, .cad)
         XCTAssertThrowsError(try assemble(d)) { XCTAssertEqual($0 as? DraftError, .negativeAmount) }
         d = minimal(); d.startDate = CalendarDate(storage: "2026-10-20"); d.estimatedCompletionDate = CalendarDate(storage: "2026-10-01")
-        XCTAssertThrowsError(try assemble(d)) { XCTAssertEqual($0 as? DraftError, .completionBeforeStart) }
+        XCTAssertThrowsError(try assemble(d)) { XCTAssertEqual($0 as? DraftError, .invalidTimeline([.completionBeforeStart])) }
         d = minimal(); d.hoursPerDay = 25
-        XCTAssertThrowsError(try assemble(d)) { XCTAssertEqual($0 as? DraftError, .invalidTimeline) }
+        XCTAssertThrowsError(try assemble(d)) { XCTAssertEqual($0 as? DraftError, .invalidTimeline([.hoursPerDayOutOfRange])) }
         d = minimal(); d.workersPerDay = -1
-        XCTAssertThrowsError(try assemble(d)) { XCTAssertEqual($0 as? DraftError, .invalidTimeline) }
+        XCTAssertThrowsError(try assemble(d)) { XCTAssertEqual($0 as? DraftError, .invalidTimeline([.workersPerDayNegative])) }
         d = minimal(); d.contractValue = Money(1, .usd)
         XCTAssertThrowsError(try assemble(d)) { XCTAssertEqual($0 as? DraftError, .currencyMismatch) }
     }

@@ -89,7 +89,7 @@ public enum DraftError: Error, Equatable, Sendable {
     case missing(Set<DraftField>)
     case negativeAmount
     case completionBeforeStart
-    case invalidTimeline
+    case invalidTimeline([TimelineError])
     case currencyMismatch
 }
 

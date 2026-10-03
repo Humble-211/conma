@@ -78,10 +78,8 @@ public enum ProjectDraftAssembler {
             }
         if allMoney.contains(where: { $0.currency != currency }) { throw DraftError.currencyMismatch }
         if allMoney.contains(where: \.isNegative) { throw DraftError.negativeAmount }
-        if let s = draft.startDate, let e = draft.estimatedCompletionDate, e < s { throw DraftError.completionBeforeStart }
-        if let w = draft.workingDays, w < 0 { throw DraftError.invalidTimeline }
-        if let w = draft.workersPerDay, w < 0 { throw DraftError.invalidTimeline }
-        if let h = draft.hoursPerDay, !(h > 0 && h <= 24) { throw DraftError.invalidTimeline }
+        let timelineErrors = TimelineValidator.validate(start: draft.startDate, completion: draft.estimatedCompletionDate, workingDays: draft.workingDays, hoursPerDay: draft.hoursPerDay, workersPerDay: draft.workersPerDay)
+        if !timelineErrors.isEmpty { throw DraftError.invalidTimeline(timelineErrors) }
 
         let projectId = UUID()
         var newCustomer: Customer?
