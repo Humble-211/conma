@@ -38,7 +38,7 @@ public struct HomeView: View {
         .background(DSColor.background)
         .navigationTitle("home.title")
         .navigationDestination(for: ProjectRoute.self) { route in
-            switch route { case .detail(let id): makeDetail(id) }
+            switch route { case .detail(let id), .activity(let id): makeDetail(id) } // .activity reuses detail until the activity list screen exists
         }
         .task { await viewModel.start() }
     }

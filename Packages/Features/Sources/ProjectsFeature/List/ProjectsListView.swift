@@ -63,7 +63,7 @@ public struct ProjectsListView: View {
                     .padding(DSSpacing.xl).accessibilityIdentifier("projects_add")
             }
             .navigationDestination(for: ProjectRoute.self) { route in
-                switch route { case .detail(let id): makeDetail(id) }
+                switch route { case .detail(let id), .activity(let id): makeDetail(id) } // .activity reuses detail until the activity list screen exists
             }
         }
         .confirmationDialog("draft.discard.title", isPresented: $showDiscardDialog, titleVisibility: .visible) {

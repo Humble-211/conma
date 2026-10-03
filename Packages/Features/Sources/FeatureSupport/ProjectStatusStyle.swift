@@ -5,6 +5,9 @@ import DesignSystem
 public extension ProjectStatus {
     var titleKey: LocalizedStringKey { LocalizedStringKey("status." + rawValue) }
 
+    /// One-line explanation shown in the status picker (`status.<raw>.hint`).
+    var hintKey: LocalizedStringKey { LocalizedStringKey("status." + rawValue + ".hint") }
+
     var tone: DSTone {
         switch self {
         case .estimate, .awaitingApproval: return .neutral
