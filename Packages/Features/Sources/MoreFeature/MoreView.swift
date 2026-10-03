@@ -8,12 +8,16 @@ public struct MoreView: View {
     private let company: Company
     private let showsGallery: Bool
 
-    public init(settings: AppSettings, company: Company, showsGallery: Bool) {
-        self.settings = settings; self.company = company; self.showsGallery = showsGallery
+    private let makeCustomers: () -> AnyView
+
+    public init(settings: AppSettings, company: Company, showsGallery: Bool, makeCustomers: @escaping () -> AnyView) {
+        self.settings = settings; self.company = company; self.showsGallery = showsGallery; self.makeCustomers = makeCustomers
     }
 
     public var body: some View {
         List {
+            NavigationLink { makeCustomers() } label: { Label("more.customers", systemImage: "person.2") }
+                .frame(minHeight: DSSpacing.minTouch).accessibilityIdentifier("more_customers")
             NavigationLink { SettingsView(settings: settings, company: company) } label: {
                 Label("more.settings", systemImage: "gearshape")
             }

@@ -27,7 +27,7 @@ struct RootTabView: View {
             NavigationStack { ExpensesPlaceholderView() }
                 .tabItem { Label("tab.expenses", systemImage: "receipt") }
                 .accessibilityIdentifier("tab_expenses")
-            NavigationStack { MoreView(settings: settings, company: setup.company, showsGallery: showsGallery) }
+            NavigationStack { MoreView(settings: settings, company: setup.company, showsGallery: showsGallery, makeCustomers: { AnyView(CustomersScreen(ready: ready, setup: setup)) }) }
                 .tabItem { Label("tab.more", systemImage: "ellipsis.circle") }
                 .accessibilityIdentifier("tab_more")
         }

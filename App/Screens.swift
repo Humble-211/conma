@@ -4,6 +4,7 @@ import FeatureSupport
 import SetupFeature
 import HomeFeature
 import ProjectsFeature
+import CustomersFeature
 
 /// Owns the setup view model so parent re-renders (e.g. language change) don't recreate it.
 struct SetupScreen: View {
@@ -52,13 +53,37 @@ struct ProjectDetailScreen: View {
     }
 }
 
-/// Placeholder until the customer profile lands.
-struct CustomerProfileScreen: View {
-    let customerId: UUID
+struct CustomersScreen: View {
+    @State private var viewModel: CustomersListViewModel
     let ready: AppContainer.Ready
     let setup: CompanySetup
 
-    var body: some View { Text(verbatim: customerId.uuidString) }
+    init(ready: AppContainer.Ready, setup: CompanySetup) {
+        _viewModel = State(initialValue: CustomersListViewModel(customerRepository: ready.customerRepository, companyId: setup.company.id, actor: ActivityActor(userId: setup.owner.id, name: setup.owner.displayName)))
+        self.ready = ready; self.setup = setup
+    }
+
+    var body: some View { CustomersListView(viewModel: viewModel, makeProfile: { id in AnyView(CustomerProfileScreen(customerId: id, ready: ready, setup: setup)) }) }
+}
+
+struct CustomerProfileScreen: View {
+    @State private var viewModel: CustomerProfileViewModel
+    @State private var listViewModel: CustomersListViewModel
+    let ready: AppContainer.Ready
+    let setup: CompanySetup
+
+    init(customerId: UUID, ready: AppContainer.Ready, setup: CompanySetup) {
+        _viewModel = State(initialValue: CustomerProfileViewModel(customerId: customerId, customerRepository: ready.customerRepository))
+        _listViewModel = State(initialValue: CustomersListViewModel(customerRepository: ready.customerRepository, companyId: setup.company.id, actor: ActivityActor(userId: setup.owner.id, name: setup.owner.displayName)))
+        self.ready = ready; self.setup = setup
+    }
+
+    var body: some View {
+        CustomerProfileView(viewModel: viewModel, companyId: setup.company.id,
+                            onSave: { await listViewModel.save($0) },
+                            onDelete: { await listViewModel.delete(viewModel.customer?.id ?? UUID()) },
+                            makeProject: { id in AnyView(ProjectDetailScreen(projectId: id, ready: ready, setup: setup)) })
+    }
 }
 
 /// Owns the list view model; builds wizard/detail screens with Data-backed repositories.
