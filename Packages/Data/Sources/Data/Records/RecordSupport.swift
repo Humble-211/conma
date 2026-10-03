@@ -10,7 +10,8 @@ enum RecordSupport {
 
     static func uuid(_ text: String?, table: String, id: String, column: String) throws -> UUID? {
         guard let text else { return nil }
-        return try uuid(text, table: table, id: id, column: column)
+        guard let value = UUID(uuidString: text) else { throw DataError.corruptRow(table: table, id: id, column: column) }
+        return value
     }
 
     static func money(_ text: String, currency: CurrencyCode, table: String, id: String, column: String) throws -> Money {
@@ -25,7 +26,8 @@ enum RecordSupport {
 
     static func date(_ text: String?, table: String, id: String, column: String) throws -> Date? {
         guard let text else { return nil }
-        return try date(text, table: table, id: id, column: column)
+        guard let value = Timestamps.date(text) else { throw DataError.corruptRow(table: table, id: id, column: column) }
+        return value
     }
 
     static func calendarDate(_ text: String?, table: String, id: String, column: String) throws -> CalendarDate? {
