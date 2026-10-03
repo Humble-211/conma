@@ -384,3 +384,7 @@ UI tests (`UITests/DashboardFlowTests.swift`, launch `--ui-testing --seed-sample
 ## 12. Ngoài phạm vi 2b
 
 Nhập expense / payment / labour (3); tasks, daily logs, calendar, notifications (4); drag-reorder schedule; `categoryInUse`; Percentage Codable; undo xóa; màn hoạt động toàn công ty; sửa activity; đổi currency; tasks-based progress.
+
+## Errata
+
+- §10 (g) exercises `hoursPerDay` out of range instead of completion < start (compact DatePicker is not scriptable in XCUITest); `completionBeforeStart` is covered by Domain tests.

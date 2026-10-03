@@ -3,7 +3,7 @@ import XCTest
 final class ScreenshotTests: XCTestCase {
     private func launch(locale: String, appearance: String) -> XCUIApplication {
         let app = XCUIApplication()
-        app.launchArguments = ["--ui-testing", "--seed-sample-data", "--locale", locale, "--appearance", appearance]
+        app.launchArguments = ["--ui-testing", "--seed-sample-data", "--locale", locale, "--appearance", appearance, "--today", "2026-10-03"]
         app.launch()
         return app
     }
@@ -53,6 +53,21 @@ final class ScreenshotTests: XCTestCase {
                     app.descendants(matching: .any).matching(NSPredicate(format: "label CONTAINS %@", "123 Main Street")).firstMatch.tap()
                     _ = app.otherElements["detail_header"].waitForExistence(timeout: 5)
                     snap(app, "detail_\(locale)_light")
+                    app.buttons["detail_status"].tap()
+                    _ = app.buttons["status_inProgress"].waitForExistence(timeout: 5)
+                    snap(app, "status_picker_\(locale)")
+                    app.buttons["sheet_cancel"].tap()
+                    _ = app.otherElements["detail_header"].waitForExistence(timeout: 5)
+                    app.swipeUp(); app.swipeUp()
+                    snap(app, "detail_full_\(locale)")
+                    let allActivity = app.buttons["detail_activity_all"]
+                    var swipes = 0
+                    while !(allActivity.exists && allActivity.isHittable) && swipes < 4 { app.swipeUp(); swipes += 1 }
+                    allActivity.tap()
+                    _ = app.descendants(matching: .any)["activity_list"].waitForExistence(timeout: 5)
+                    snap(app, "activity_\(locale)")
+                    app.navigationBars.buttons.element(boundBy: 0).tap()                       // activity → detail
+                    _ = app.otherElements["detail_header"].waitForExistence(timeout: 5)
                     app.navigationBars.buttons.element(boundBy: 0).tap()
                     app.tabBars.buttons.element(boundBy: 4).tap()
                     if !app.buttons["more_customers"].waitForExistence(timeout: 2) { app.tabBars.buttons.element(boundBy: 4).tap() }   // gallery is still open: re-tap pops to root
