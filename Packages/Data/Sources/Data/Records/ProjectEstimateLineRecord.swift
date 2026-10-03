@@ -48,4 +48,9 @@ struct ProjectEstimateLineRecord: Codable, FetchableRecord, PersistableRecord {
         try ProjectEstimateLineRecord.filter(Column("project_id") == projectId && Column("deleted_at") == nil)
             .order(Column("cost_group"), Column("sort_order")).fetchAll(db).map { try $0.toDomain(currency: currency) }
     }
+
+    static func fetchLive(_ db: Database, companyId: String, currency: CurrencyCode) throws -> [ProjectEstimateLine] {
+        try ProjectEstimateLineRecord.filter(Column("company_id") == companyId && Column("deleted_at") == nil)
+            .order(Column("project_id"), Column("cost_group"), Column("sort_order")).fetchAll(db).map { try $0.toDomain(currency: currency) }
+    }
 }

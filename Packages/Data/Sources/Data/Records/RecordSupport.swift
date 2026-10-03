@@ -36,6 +36,11 @@ enum RecordSupport {
         return value
     }
 
+    static func requiredCalendarDate(_ text: String, table: String, id: String, column: String) throws -> CalendarDate {
+        guard let value = CalendarDate(storage: text) else { throw DataError.corruptRow(table: table, id: id, column: column) }
+        return value
+    }
+
     static func decimal(_ text: String?, table: String, id: String, column: String) throws -> Decimal? {
         guard let text else { return nil }
         guard let value = Decimal(string: text, locale: nil) else { throw DataError.corruptRow(table: table, id: id, column: column) }

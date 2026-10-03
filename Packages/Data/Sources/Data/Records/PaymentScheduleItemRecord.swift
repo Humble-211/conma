@@ -49,4 +49,9 @@ struct PaymentScheduleItemRecord: Codable, FetchableRecord, PersistableRecord {
         try PaymentScheduleItemRecord.filter(Column("project_id") == projectId && Column("deleted_at") == nil)
             .order(Column("sort_order")).fetchAll(db).map { try $0.toDomain(currency: currency) }
     }
+
+    static func fetchLive(_ db: Database, companyId: String, currency: CurrencyCode) throws -> [PaymentScheduleItem] {
+        try PaymentScheduleItemRecord.filter(Column("company_id") == companyId && Column("deleted_at") == nil)
+            .order(Column("project_id"), Column("sort_order")).fetchAll(db).map { try $0.toDomain(currency: currency) }
+    }
 }

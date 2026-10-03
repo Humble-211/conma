@@ -155,7 +155,7 @@ public final class GRDBProjectRepository: ProjectRepository {
         let now = clock.now()
         let stamp = Timestamps.string(now)
         try await database.writer.write { db in
-            guard let record = try ProjectRecord.filter(Column("id") == id.dbKey && Column("deleted_at") == nil).fetchOne(db) else { throw DataError.notFound }
+            guard let record = try ProjectRecord.filter(Column("id") == id.dbKey && Column("deleted_at") == nil).fetchOne(db) else { throw DomainError.notFound }
             let pid = record.id
             let set = "SET deleted_at = ?, updated_at = ?, sync_state = 'pending'"
             try db.execute(sql: "UPDATE projects \(set) WHERE id = ?", arguments: [stamp, stamp, pid])
@@ -173,13 +173,13 @@ public final class GRDBProjectRepository: ProjectRepository {
 
     // MARK: Helpers
 
-    private static func currency(_ db: Database, companyId: String) throws -> CurrencyCode {
+    static func currency(_ db: Database, companyId: String) throws -> CurrencyCode {
         guard let raw = try String.fetchOne(db, sql: "SELECT currency_code FROM companies WHERE id = ?", arguments: [companyId]),
               let currency = CurrencyCode(rawValue: raw) else { throw DataError.corruptRow(table: "companies", id: companyId, column: "currency_code") }
         return currency
     }
 
-    private static func scopeFields(_ db: Database, projectIds: [String]) throws -> [String: [ProjectScopeField]] {
+    static func scopeFields(_ db: Database, projectIds: [String]) throws -> [String: [ProjectScopeField]] {
         guard !projectIds.isEmpty else { return [:] }
         let records = try ProjectScopeFieldRecord.filter(projectIds.contains(Column("project_id")) && Column("deleted_at") == nil).order(Column("sort_order")).fetchAll(db)
         var result: [String: [ProjectScopeField]] = [:]
