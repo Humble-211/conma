@@ -35,6 +35,8 @@ public final class ProjectWizardViewModel {
     public var errorKey: LocalizedStringKey?
     public var showCloseDialog = false
     public var pendingJobTypeChange: JobType?
+    /// Set by `CustomerStep` when the selected existing customer is no longer in the list.
+    public var missingCustomer = false
 
     public let companyId: UUID
     public let currency: CurrencyCode
@@ -62,17 +64,20 @@ public final class ProjectWizardViewModel {
         case .jobType: return draft.jobType != nil && (draft.jobType != .other || !(draft.customJobType ?? "").trimmingCharacters(in: .whitespaces).isEmpty)
         case .customer:
             switch draft.customer {
-            case .existing?: return true
+            case .existing?: return !missingCustomer
             case .new(let input)?: return !input.name.trimmingCharacters(in: .whitespaces).isEmpty
             case nil: return false
             }
         case .location: return !(draft.address?.line ?? "").trimmingCharacters(in: .whitespaces).isEmpty
-        case .timeline:
-            if let s = draft.startDate, let e = draft.estimatedCompletionDate { return e >= s }
-            return true
+        case .timeline: return timelineErrors.isEmpty
         case .price: return draft.contractValue != nil
         default: return true
         }
+    }
+
+    public var timelineErrors: [TimelineError] {
+        TimelineValidator.validate(start: draft.startDate, completion: draft.estimatedCompletionDate,
+                                   workingDays: draft.workingDays, hoursPerDay: draft.hoursPerDay, workersPerDay: draft.workersPerDay)
     }
 
     public var canSkip: Bool { !step.isRequired && step != .review && (step != .timeline || canContinue) }
@@ -170,8 +175,9 @@ public final class ProjectWizardViewModel {
         } catch DraftError.missing(let fields) {
             missing = fields
             errorKey = "wizard.error.missing"
-        } catch DraftError.invalidTimeline(let errors) where errors.contains(.completionBeforeStart) {
-            errorKey = "wizard.error.completionBeforeStart"
+        } catch DraftError.invalidTimeline {
+            move(to: .timeline)
+            errorKey = nil
         } catch {
             errorKey = "wizard.error.saveFailed"
         }

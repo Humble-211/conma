@@ -4082,22 +4082,6 @@
         }
       }
     },
-    "wizard.error.completionBeforeStart": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Completion date is before the start date."
-          }
-        },
-        "vi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ngày hoàn thành trước ngày bắt đầu."
-          }
-        }
-      }
-    },
     "wizard.error.saveFailed": {
       "localizations": {
         "en": {

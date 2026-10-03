@@ -14,22 +14,38 @@ struct TimelineStep: View {
                     dateRow("wizard.timeline.start", date: $viewModel.draft.startDate, id: "wizard_start_date") // lint:allow-string
                     Divider()
                     dateRow("wizard.timeline.end", date: $viewModel.draft.estimatedCompletionDate, id: "wizard_end_date") // lint:allow-string
-                    if !viewModel.canContinue {
-                        Text("wizard.error.completionBeforeStart").font(DSTypography.caption).foregroundStyle(DSColor.danger)
-                    }
+                    ForEach(viewModel.timelineErrors.filter { $0 == .completionBeforeStart }, id: \.self) { errorText($0) }
                 }
             }
             Card {
                 VStack(spacing: DSSpacing.md) {
-                    FormRow("wizard.timeline.workingDays") { IntegerField("wizard.timeline.workingDays", value: $viewModel.draft.workingDays) }
+                    FormRow("wizard.timeline.workingDays") { IntegerField("wizard.timeline.workingDays", value: $viewModel.draft.workingDays).accessibilityIdentifier("wizard_working_days") }
                     Divider()
-                    FormRow("wizard.timeline.hoursPerDay") { DecimalField("wizard.timeline.hoursPerDay", value: $viewModel.draft.hoursPerDay, fractionDigits: 1) }
+                    FormRow("wizard.timeline.hoursPerDay") { DecimalField("wizard.timeline.hoursPerDay", value: $viewModel.draft.hoursPerDay, fractionDigits: 1).accessibilityIdentifier("wizard_hours_per_day") }
                     Divider()
-                    FormRow("wizard.timeline.workersPerDay") { IntegerField("wizard.timeline.workersPerDay", value: $viewModel.draft.workersPerDay) }
+                    FormRow("wizard.timeline.workersPerDay") { IntegerField("wizard.timeline.workersPerDay", value: $viewModel.draft.workersPerDay).accessibilityIdentifier("wizard_workers_per_day") }
+                    ForEach(viewModel.timelineErrors.filter { $0 != .completionBeforeStart }, id: \.self) { errorText($0) }
                 }
             }
         }
         .padding(.horizontal, DSSpacing.lg)
+    }
+
+    private func errorText(_ error: TimelineError) -> some View {
+        let name = Self.name(error)
+        return Text(LocalizedStringKey("timeline.error." + name))
+            .font(DSTypography.caption).foregroundStyle(DSColor.danger)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .accessibilityIdentifier("timeline_error_" + name)
+    }
+
+    private static func name(_ error: TimelineError) -> String {
+        switch error {
+        case .completionBeforeStart: "completionBeforeStart" // lint:allow-string
+        case .hoursPerDayOutOfRange: "hoursPerDayOutOfRange" // lint:allow-string
+        case .workingDaysNegative: "workingDaysNegative" // lint:allow-string
+        case .workersPerDayNegative: "workersPerDayNegative" // lint:allow-string
+        }
     }
 
     private func dateRow(_ title: LocalizedStringKey, date: Binding<CalendarDate?>, id: String) -> some View {

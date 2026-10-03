@@ -15,6 +15,11 @@ struct CustomerStep: View {
             if creatingNew {
                 newCustomerForm
             } else {
+                if viewModel.missingCustomer {
+                    Label("wizard.customer.missing", systemImage: "exclamationmark.triangle")
+                        .foregroundStyle(DSColor.danger).padding(.horizontal, DSSpacing.lg)
+                        .accessibilityIdentifier("wizard_customer_missing")
+                }
                 TextField("wizard.customer.search", text: $query)
                     .textFieldStyle(.roundedBorder).padding(.horizontal, DSSpacing.lg)
                     .accessibilityIdentifier("wizard_customer_search")
@@ -46,6 +51,7 @@ struct CustomerStep: View {
             }
         }
         .task { await observe() }
+        .onChange(of: viewModel.draft.customer) { _, _ in updateMissing() }
         .onAppear { if case .new? = viewModel.draft.customer { creatingNew = true } }
     }
 
@@ -91,7 +97,11 @@ struct CustomerStep: View {
         Binding(get: { binding.wrappedValue ?? "" }, set: { binding.wrappedValue = $0.isEmpty ? nil : $0 })
     }
 
+    private func updateMissing() {
+        if case .existing(let id)? = viewModel.draft.customer { viewModel.missingCustomer = !customers.contains { $0.id == id } } else { viewModel.missingCustomer = false }
+    }
+
     private func observe() async {
-        do { for try await value in customerRepository.observeAll(companyId: viewModel.companyId) { customers = value } } catch {}
+        do { for try await value in customerRepository.observeAll(companyId: viewModel.companyId) { customers = value; updateMissing() } } catch {}
     }
 }
