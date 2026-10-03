@@ -64,6 +64,12 @@ final class DraftDiffTests: XCTestCase {
         XCTAssertEqual(fields.map(\.sortOrder), [0, 1])
     }
 
+    func testScopeFieldValueIsTrimmed() {
+        let new = [DraftScopeField(id: UUID(), key: "rooms", value: "  5 ", sortOrder: 0)]
+        let fields = DraftDiff.scopeFields(old: [], new: new, companyId: company, projectId: project, now: t1)
+        XCTAssertEqual(fields.map(\.valueText), ["5"])
+    }
+
     func testSeedFromProjectRoundTripsThroughAssembler() throws {
         let p = Project(id: project, companyId: company, customerId: customer, name: "Smith kitchen", jobType: .kitchen, customJobType: nil, status: .inProgress,
                         address: Address(line: "1 Main", unit: nil, city: "Toronto", region: "ON", postalCode: nil), scopeDescription: "Full gut", scopeFields: [],

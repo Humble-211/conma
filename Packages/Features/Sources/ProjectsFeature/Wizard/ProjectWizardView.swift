@@ -7,6 +7,7 @@ public struct ProjectWizardView: View {
     @Bindable private var viewModel: ProjectWizardViewModel
     private let customerRepository: any CustomerRepository
     @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.locale) private var locale
 
     public init(viewModel: ProjectWizardViewModel, customerRepository: any CustomerRepository) {
         self.viewModel = viewModel; self.customerRepository = customerRepository
@@ -50,7 +51,7 @@ public struct ProjectWizardView: View {
                 Button("wizard.close.cancel", role: .cancel) {}
             }
             .confirmationDialog("wizard.jobType.change.title", isPresented: Binding(get: { viewModel.pendingJobTypeChange != nil }, set: { if !$0 { viewModel.pendingJobTypeChange = nil } }), titleVisibility: .visible) {
-                Button("wizard.jobType.change.keep") { viewModel.confirmJobTypeChange(keepFields: true, labelFor: { String(localized: String.LocalizationValue("scope.field." + $0)) }) } // lint:allow-string
+                Button("wizard.jobType.change.keep") { viewModel.confirmJobTypeChange(keepFields: true, labelFor: { ScopeFieldCatalog.labelString(forFieldKey: $0, locale: locale) }) }
                 Button("wizard.jobType.change.clear", role: .destructive) { viewModel.confirmJobTypeChange(keepFields: false, labelFor: { $0 }) }
                 Button("wizard.close.cancel", role: .cancel) { viewModel.pendingJobTypeChange = nil }
             }

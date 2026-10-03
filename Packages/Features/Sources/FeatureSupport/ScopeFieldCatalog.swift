@@ -66,6 +66,11 @@ public enum ScopeFieldCatalog {
     public static func isCustom(_ key: String) -> Bool { key.hasPrefix(customPrefix) }
     public static func customLabel(_ key: String) -> String { String(key.dropFirst(customPrefix.count)) }
 
+    /// Label of a catalog field in the app's chosen language (used when keeping fields as custom ones).
+    public static func labelString(forFieldKey key: String, locale: Locale) -> String {
+        LocalizedBundle.string("scope.field." + key, locale: locale)
+    }
+
     /// nil for custom keys (show verbatim).
     public static func labelKey(forFieldKey key: String) -> LocalizedStringKey? {
         isCustom(key) ? nil : LocalizedStringKey("scope.field." + key)

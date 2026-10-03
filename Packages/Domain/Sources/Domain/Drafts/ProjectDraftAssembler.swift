@@ -100,7 +100,7 @@ public enum ProjectDraftAssembler {
             .filter { !$0.key.isBlank && !$0.value.isBlank }
             .sorted { $0.sortOrder < $1.sortOrder }
             .enumerated()
-            .map { index, f in ProjectScopeField(id: f.id, companyId: companyId, projectId: projectId, fieldKey: f.key, valueText: f.value, sortOrder: index, createdAt: now, updatedAt: now, deletedAt: nil) }
+            .map { index, f in ProjectScopeField(id: f.id, companyId: companyId, projectId: projectId, fieldKey: f.key, valueText: f.value.trimmingCharacters(in: .whitespacesAndNewlines), sortOrder: index, createdAt: now, updatedAt: now, deletedAt: nil) }
 
         var sortByGroup: [CostGroup: Int] = [:]
         let estimateLines = draft.allEstimateLines(currency: currency).map { line -> ProjectEstimateLine in

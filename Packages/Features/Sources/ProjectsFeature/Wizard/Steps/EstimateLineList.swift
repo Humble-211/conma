@@ -45,7 +45,7 @@ struct EstimateLineList: View {
         VStack(spacing: DSSpacing.sm) {
             HStack {
                 if kindPicker {
-                    Picker("wizard.estimate.kind", selection: Binding(get: { lines[index].otherKind ?? .other }, set: { lines[index].otherKind = $0; lines[index].costGroup = $0.costGroup })) {
+                    Picker("wizard.estimate.kind", selection: Binding(get: { lines[index].otherKind ?? .other }, set: { lines[index].otherKind = $0; lines[index].costGroup = $0.costGroup; lines[index].label = $0.labelKeyString })) {
                         ForEach(OtherCostKind.allCases, id: \.self) { Text($0.titleKey).tag($0) }
                     }.labelsHidden()
                 } else {
@@ -75,10 +75,15 @@ struct EstimateLineList: View {
         Binding(get: { lines[index].amount.isZero ? nil : lines[index].amount.amount }, set: { lines[index].amount = Money($0 ?? 0, currency) })
     }
     private func recompute(_ index: Int) {
-        guard lines.indices.contains(index), let rate = lines[index].unitRate, let qty = lines[index].quantity else { return }
-        lines[index].amount = rate.multiplied(by: qty)
+        guard lines.indices.contains(index) else { return }
+        guard showsRate else { return }
+        if let rate = lines[index].unitRate, let qty = lines[index].quantity {
+            lines[index].amount = rate.multiplied(by: qty)
+        } else {
+            lines[index].amount = .zero(currency)
+        }
     }
     private func add(label: String) {
-        lines.append(DraftEstimateLine(id: UUID(), label: label, amount: .zero(currency), quantity: showsRate ? 1 : nil, unitRate: nil, costGroup: kindPicker ? OtherCostKind.other.costGroup : group, otherKind: kindPicker ? .other : nil, sortOrder: lines.count))
+        lines.append(DraftEstimateLine(id: UUID(), label: kindPicker ? OtherCostKind.other.labelKeyString : label, amount: .zero(currency), quantity: showsRate ? 1 : nil, unitRate: nil, costGroup: kindPicker ? OtherCostKind.other.costGroup : group, otherKind: kindPicker ? .other : nil, sortOrder: lines.count))
     }
 }

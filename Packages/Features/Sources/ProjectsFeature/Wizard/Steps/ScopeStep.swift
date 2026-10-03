@@ -86,7 +86,7 @@ struct ScopeStep: View {
 
     private func set(_ key: String, _ newValue: String) {
         if let index = viewModel.draft.scopeFields.firstIndex(where: { $0.key == key }) {
-            if newValue.isEmpty { viewModel.draft.scopeFields.remove(at: index) } else { viewModel.draft.scopeFields[index].value = newValue }
+            if newValue.isEmpty && !ScopeFieldCatalog.isCustom(key) { viewModel.draft.scopeFields.remove(at: index) } else { viewModel.draft.scopeFields[index].value = newValue }
         } else if !newValue.isEmpty {
             viewModel.draft.scopeFields.append(DraftScopeField(id: UUID(), key: key, value: newValue, sortOrder: viewModel.draft.scopeFields.count))
         }
@@ -106,7 +106,10 @@ struct ScopeStep: View {
     private func addCustom() {
         let label = newFieldLabel.trimmingCharacters(in: .whitespaces)
         guard !label.isEmpty else { return }
-        set(ScopeFieldCatalog.customPrefix + label, " ")   // placeholder so the row appears; user types the value // lint:allow-string
+        let key = ScopeFieldCatalog.customPrefix + label
+        if !viewModel.draft.scopeFields.contains(where: { $0.key == key }) {
+            viewModel.draft.scopeFields.append(DraftScopeField(id: UUID(), key: key, value: "", sortOrder: viewModel.draft.scopeFields.count))
+        }
         newFieldLabel = ""
     }
 

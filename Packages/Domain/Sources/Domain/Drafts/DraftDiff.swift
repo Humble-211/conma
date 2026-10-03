@@ -63,7 +63,7 @@ public enum DraftDiff {
     public static func scopeFields(old: [ProjectScopeField], new: [DraftScopeField], companyId: UUID, projectId: UUID, now: Date) -> [ProjectScopeField] {
         let oldById = Dictionary(old.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
         return new.filter { !$0.key.isBlank && !$0.value.isBlank }.sorted { $0.sortOrder < $1.sortOrder }.enumerated().map { index, f in
-            ProjectScopeField(id: f.id, companyId: companyId, projectId: projectId, fieldKey: f.key, valueText: f.value, sortOrder: index,
+            ProjectScopeField(id: f.id, companyId: companyId, projectId: projectId, fieldKey: f.key, valueText: f.value.trimmingCharacters(in: .whitespacesAndNewlines), sortOrder: index,
                               createdAt: oldById[f.id]?.createdAt ?? now, updatedAt: now, deletedAt: nil)
         }
     }
