@@ -51,7 +51,7 @@ final class AppContainer {
             let draftDirectory = options.isUITesting
                 ? FileManager.default.temporaryDirectory.appendingPathComponent("conma-ui-drafts", isDirectory: true)
                 : FileDraftStore.defaultDirectory()
-            if options.isUITesting { try? FileManager.default.removeItem(at: draftDirectory) }
+            if options.isUITesting && !options.keepDrafts { try? FileManager.default.removeItem(at: draftDirectory) }
             var ready = Ready(database: database,
                               companyRepository: companies,
                               customerRepository: GRDBCustomerRepository(database: database, clock: clock),

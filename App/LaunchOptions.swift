@@ -3,6 +3,7 @@ import Foundation
 struct LaunchOptions {
     var isUITesting = false
     var seedSampleData = false
+    var keepDrafts = false
     var localeOverride: String?
     var appearanceOverride: String?
 
@@ -13,6 +14,7 @@ struct LaunchOptions {
             switch arg {
             case "--ui-testing": options.isUITesting = true
             case "--seed-sample-data": options.seedSampleData = true
+            case "--keep-drafts": options.keepDrafts = true
             case "--locale": options.localeOverride = iterator.next()
             case "--appearance": options.appearanceOverride = iterator.next()
             default: break
