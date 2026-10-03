@@ -122,6 +122,35 @@ public struct ProjectDraft: Codable, Equatable, Sendable {
 
     public init() {}
 
+    /// Tolerant decoding: a draft written before a field existed still loads (missing keys take
+    /// the declared defaults). Encoding stays synthesized.
+    public init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        jobType = try c.decodeIfPresent(JobType.self, forKey: .jobType)
+        customJobType = try c.decodeIfPresent(String.self, forKey: .customJobType)
+        customer = try c.decodeIfPresent(CustomerChoice.self, forKey: .customer)
+        projectName = try c.decodeIfPresent(String.self, forKey: .projectName)
+        address = try c.decodeIfPresent(Address.self, forKey: .address)
+        scopeDescription = try c.decodeIfPresent(String.self, forKey: .scopeDescription)
+        scopeFields = try c.decodeIfPresent([DraftScopeField].self, forKey: .scopeFields) ?? []
+        startDate = try c.decodeIfPresent(CalendarDate.self, forKey: .startDate)
+        estimatedCompletionDate = try c.decodeIfPresent(CalendarDate.self, forKey: .estimatedCompletionDate)
+        workingDays = try c.decodeIfPresent(Int.self, forKey: .workingDays)
+        hoursPerDay = try c.decodeIfPresent(Decimal.self, forKey: .hoursPerDay)
+        workersPerDay = try c.decodeIfPresent(Int.self, forKey: .workersPerDay)
+        labourMode = try c.decodeIfPresent(LabourEntryMode.self, forKey: .labourMode) ?? .quick
+        labourQuick = try c.decodeIfPresent(LabourQuickInput.self, forKey: .labourQuick)
+        labourLines = try c.decodeIfPresent([DraftEstimateLine].self, forKey: .labourLines) ?? []
+        materialLines = try c.decodeIfPresent([DraftEstimateLine].self, forKey: .materialLines) ?? []
+        otherLines = try c.decodeIfPresent([DraftEstimateLine].self, forKey: .otherLines) ?? []
+        contractValue = try c.decodeIfPresent(Money.self, forKey: .contractValue)
+        deposit = try c.decodeIfPresent(DraftDeposit.self, forKey: .deposit)
+        scheduleTemplate = try c.decodeIfPresent(PaymentScheduleTemplate.self, forKey: .scheduleTemplate)
+        schedule = try c.decodeIfPresent([DraftScheduleRow].self, forKey: .schedule) ?? []
+        step = try c.decodeIfPresent(Int.self, forKey: .step) ?? 1
+        updatedAt = try c.decodeIfPresent(Date.self, forKey: .updatedAt) ?? Date(timeIntervalSince1970: 0)
+    }
+
     /// True when nothing user-entered is present (step/updatedAt/labourMode are not content).
     public var isEmpty: Bool {
         jobType == nil && Self.blank(customJobType) && customerIsBlank && projectName == nil && addressIsBlank && scopeDescription == nil

@@ -102,4 +102,13 @@ final class DraftDiffTests: XCTestCase {
         let change = try DraftDiff.scheduleItems(old: [], new: rows, contract: Money(300, .cad), companyId: company, projectId: project, now: t1)
         XCTAssertEqual(change.upserts.map(\.sortOrder), [0, 1])
     }
+
+    func testTypedScheduleAmountSurvivesDiff() throws {
+        let contract = Money(10_000, .cad)
+        var rows = ScheduleMath.recompute(rows: PaymentScheduleTemplate.depositFinal.rows(depositPercentage: nil), contract: contract, edited: .none).rows
+        rows[0].amount = Money(Decimal(string: "3333")!, .cad)
+        rows = ScheduleMath.recompute(rows: rows, contract: contract, edited: .amount(0)).rows
+        let change = try DraftDiff.scheduleItems(old: [], new: rows, contract: contract, companyId: company, projectId: project, now: t1)
+        XCTAssertEqual(change.upserts.map { $0.amount.storageString }, ["3333.00", "7000.00"])
+    }
 }

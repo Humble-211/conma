@@ -116,4 +116,14 @@ final class ProjectDraftAssemblerTests: XCTestCase {
         XCTAssertTrue(b.scheduleItems[0].isDeposit)
         XCTAssertEqual(Set(b.warnings), [.depositExceedsContract, .scheduleTotalMismatch(difference: Money(5000, .cad))])
     }
+
+    func testTypedScheduleAmountSurvivesAssemble() throws {
+        var d = minimal()
+        d.contractValue = Money(10_000, .cad)
+        var rows = ScheduleMath.recompute(rows: PaymentScheduleTemplate.depositFinal.rows(depositPercentage: nil), contract: Money(10_000, .cad), edited: .none).rows
+        rows[0].amount = Money(Decimal(string: "3333")!, .cad)
+        d.schedule = ScheduleMath.recompute(rows: rows, contract: Money(10_000, .cad), edited: .amount(0)).rows
+        let b = try assemble(d)
+        XCTAssertEqual(b.scheduleItems.map { $0.amount.storageString }, ["3333.00", "7000.00"])
+    }
 }

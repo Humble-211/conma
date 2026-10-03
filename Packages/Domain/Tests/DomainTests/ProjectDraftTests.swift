@@ -80,4 +80,24 @@ final class ProjectDraftTests: XCTestCase {
         let back = try JSONDecoder().decode(DraftDeposit.self, from: JSONEncoder().encode(fixed))
         XCTAssertEqual(back, fixed)
     }
+
+    func testDecodesDraftMissingNewerFields() throws {
+        let json = #"{"jobType":"kitchen","step":3}"#
+        let d = try JSONDecoder().decode(ProjectDraft.self, from: Data(json.utf8))
+        XCTAssertEqual(d.jobType, .kitchen)
+        XCTAssertEqual(d.step, 3)
+        XCTAssertEqual(d.labourMode, .quick)
+        XCTAssertTrue(d.scopeFields.isEmpty); XCTAssertTrue(d.labourLines.isEmpty)
+        XCTAssertTrue(d.materialLines.isEmpty); XCTAssertTrue(d.otherLines.isEmpty); XCTAssertTrue(d.schedule.isEmpty)
+        XCTAssertEqual(d.updatedAt, Date(timeIntervalSince1970: 0))
+    }
+
+    func testRoundTripKeepsTwoDecimalPercentageAndAmount() throws {
+        var d = ProjectDraft(); d.jobType = .kitchen; d.step = 11
+        d.schedule = [DraftScheduleRow(id: UUID(), label: "x", percentage: Percentage.exact(Decimal(string: "28.13")!), amount: Money(Decimal(string: "1234.56")!, .cad), dueDate: nil, trigger: nil, isDeposit: false)]
+        let encoder = JSONEncoder(); encoder.outputFormatting = [.sortedKeys]
+        let back = try JSONDecoder().decode(ProjectDraft.self, from: try encoder.encode(d))
+        XCTAssertEqual(back, d)
+        XCTAssertEqual(back.schedule[0].percentage?.points, Decimal(string: "28.13"))
+    }
 }
