@@ -40,14 +40,11 @@ public final class ProjectsListViewModel {
     }
 
     public var visible: [ProjectSummary] {
-        let q = Self.fold(query)
+        let q = SearchFold.normalize(query)
         return summaries.filter { s in
-            filter.matches(s.project.status) && (q.isEmpty || [s.project.name, s.project.address.line, s.project.address.city ?? "", s.customerName].contains { Self.fold($0).contains(q) })
+            filter.matches(s.project.status) && (q.isEmpty || [s.project.name, s.project.address.line, s.project.address.city ?? "", s.customerName].contains { SearchFold.normalize($0).contains(q) })
         }
     }
-
-    /// Case- and diacritic-insensitive (Vietnamese names).
-    static func fold(_ s: String) -> String { s.folding(options: [.caseInsensitive, .diacriticInsensitive], locale: nil).trimmingCharacters(in: .whitespaces) }
 
     public func reloadDraft() { draft = (try? draftStore.load()) ?? nil }
     public func discardDraft() { try? draftStore.clear(); draft = nil }
