@@ -6,7 +6,10 @@ import FeatureSupport
 struct DepositStep: View {
     @Bindable var viewModel: ProjectWizardViewModel
     @Environment(\.timeZone) private var timeZone
-    @State private var usesPercentage = true
+    private var usesPercentage: Binding<Bool> {
+        Binding(get: { if case .fixed? = viewModel.draft.deposit?.mode { return false } else { return true } },
+                set: { switchMode(toPercentage: $0) })
+    }
 
     var body: some View {
         VStack(spacing: DSSpacing.lg) {
@@ -18,12 +21,11 @@ struct DepositStep: View {
             if let deposit = viewModel.draft.deposit {
                 Card {
                     VStack(spacing: DSSpacing.md) {
-                        Picker("wizard.deposit.mode", selection: $usesPercentage) {
+                        Picker("wizard.deposit.mode", selection: usesPercentage) {
                             Text("wizard.deposit.percentage").tag(true)
                             Text("wizard.deposit.fixed").tag(false)
                         }.pickerStyle(.segmented).accessibilityIdentifier("wizard_deposit_mode")
-                        .onChange(of: usesPercentage) { _, pct in switchMode(toPercentage: pct) }
-                        if usesPercentage {
+                        if usesPercentage.wrappedValue {
                             FormRow("wizard.deposit.percentage") {
                                 DecimalField("wizard.deposit.percentage", value: Binding(get: { percentagePoints }, set: { setPercentage($0) }), fractionDigits: 2).accessibilityIdentifier("wizard_deposit_value")
                             }
@@ -51,7 +53,6 @@ struct DepositStep: View {
             }
         }
         .padding(.horizontal, DSSpacing.lg)
-        .onAppear { if case .fixed? = viewModel.draft.deposit?.mode { usesPercentage = false } }
     }
 
     private var percentagePoints: Decimal? { if case .percentage(let p)? = viewModel.draft.deposit?.mode { return p.points } else { return nil } }
@@ -64,11 +65,16 @@ struct DepositStep: View {
     private func setFixed(_ amount: Decimal?) { viewModel.draft.deposit?.mode = .fixed(Money(amount ?? 0, viewModel.currency)) }
 
     private func switchMode(toPercentage: Bool) {
-        guard let contract = viewModel.draft.contractValue, let current = viewModel.preview.depositAmount else { return }
+        let contract = viewModel.draft.contractValue
+        let current = viewModel.preview.depositAmount
         if toPercentage {
-            if let ratio = Percentage.ratio(current, over: contract), let pct = try? Percentage.input(min(max(ratio.points, 0), 100)) { viewModel.draft.deposit?.mode = .percentage(pct) }
+            if let contract, let current, let ratio = Percentage.ratio(current, over: contract), let pct = try? Percentage.input(min(max(ratio.points, 0), 100)) {
+                viewModel.draft.deposit?.mode = .percentage(pct)
+            } else {
+                viewModel.draft.deposit?.mode = .percentage((try? Percentage.input(20)) ?? Percentage.computed(20))
+            }
         } else {
-            viewModel.draft.deposit?.mode = .fixed(current)
+            viewModel.draft.deposit?.mode = .fixed(current ?? Money.zero(viewModel.currency))
         }
     }
 

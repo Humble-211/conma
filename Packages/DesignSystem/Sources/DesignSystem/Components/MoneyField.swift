@@ -48,6 +48,7 @@ public struct MoneyField: View {
                 .focused($focused)
                 .onChange(of: text) { _, newValue in amount = LocaleNumberParser.decimal(from: newValue, locale: locale) }
                 .onChange(of: focused) { _, isFocused in if !isFocused, let amount { text = LocaleNumberParser.string(amount, locale: locale, fractionDigits: 2) } }
+                .onChange(of: amount) { _, newValue in if !focused { text = newValue.map { LocaleNumberParser.string($0, locale: locale, fractionDigits: 2) } ?? "" } }
                 .onAppear { if let amount { text = LocaleNumberParser.string(amount, locale: locale, fractionDigits: 2) } }
         }
         .frame(minHeight: DSSpacing.minTouch)

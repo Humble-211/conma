@@ -5,6 +5,7 @@ import FeatureSupport
 
 struct PriceStep: View {
     @Bindable var viewModel: ProjectWizardViewModel
+    @Environment(\.locale) private var locale
 
     var body: some View {
         VStack(spacing: DSSpacing.lg) {
@@ -24,7 +25,7 @@ struct PriceStep: View {
             }
             Card {
                 FormRow("wizard.price.margin") {
-                    if let margin = p.projectedMargin { Text(verbatim: "\(margin.points)%").font(DSTypography.money(.headline)) } else { Text(verbatim: "—") }
+                    if let margin = p.projectedMargin { Text(verbatim: LocaleNumberParser.string(margin.points, locale: locale, fractionDigits: 1) + "%").font(DSTypography.money(.headline)) } else { Text(verbatim: "—") }
                 }
             }
         }

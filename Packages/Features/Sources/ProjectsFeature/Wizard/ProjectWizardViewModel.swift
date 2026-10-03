@@ -7,7 +7,15 @@ import FeatureSupport
 @Observable
 @MainActor
 public final class ProjectWizardViewModel {
-    public var draft: ProjectDraft { didSet { if draft != oldValue { recomputePreview(); scheduleAutosave() } } }
+    public var draft: ProjectDraft {
+        didSet {
+            guard draft != oldValue else { return }
+            if draft.contractValue != oldValue.contractValue, !draft.schedule.isEmpty {
+                draft.schedule = ScheduleMath.recompute(rows: draft.schedule, contract: draft.contractValue ?? .zero(currency), edited: .none).rows
+            }
+            recomputePreview(); scheduleAutosave()
+        }
+    }
     public private(set) var step: WizardStep
     public var missing: Set<DraftField> = []
     public private(set) var preview: DraftFinancialPreview

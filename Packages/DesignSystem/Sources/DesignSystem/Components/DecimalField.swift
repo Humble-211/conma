@@ -20,6 +20,7 @@ public struct DecimalField: View {
             .focused($focused)
             .onChange(of: text) { _, newValue in value = LocaleNumberParser.decimal(from: newValue, locale: locale) }
             .onChange(of: focused) { _, isFocused in if !isFocused, let value { text = LocaleNumberParser.string(value, locale: locale, fractionDigits: fractionDigits) } }
+            .onChange(of: value) { _, newValue in if !focused { text = newValue.map { LocaleNumberParser.string($0, locale: locale, fractionDigits: fractionDigits) } ?? "" } }
             .onAppear { if let value { text = LocaleNumberParser.string(value, locale: locale, fractionDigits: fractionDigits) } }
             .frame(minHeight: DSSpacing.minTouch)
     }
@@ -29,6 +30,7 @@ public struct IntegerField: View {
     private let title: LocalizedStringKey
     @Binding private var value: Int?
     @State private var text = ""
+    @FocusState private var focused: Bool
 
     public init(_ title: LocalizedStringKey, value: Binding<Int?>) { self.title = title; _value = value }
 
@@ -37,6 +39,8 @@ public struct IntegerField: View {
             .keyboardType(.numberPad)
             .font(DSTypography.money(.body))
             .multilineTextAlignment(.trailing)
+            .focused($focused)
+            .onChange(of: value) { _, newValue in if !focused { text = newValue.map { String($0) } ?? "" } }
             .onChange(of: text) { _, newValue in value = Int(newValue.filter(\.isNumber)) }
             .onAppear { if let value { text = String(value) } }
             .frame(minHeight: DSSpacing.minTouch)

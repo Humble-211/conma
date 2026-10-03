@@ -5457,6 +5457,22 @@
           }
         }
       }
+    },
+    "wizard.schedule.currencyMismatch": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Some rows use a different currency."
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Có dòng dùng tiền tệ khác."
+          }
+        }
+      }
     }
   }
 }

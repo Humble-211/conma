@@ -41,7 +41,7 @@ struct ScheduleStep: View {
                                 MoneyText(amount: diff.amount, currencyCode: viewModel.currency.rawValue, style: .caption)
                             }.foregroundStyle(DSColor.warning)
                         case .currencyMismatch:
-                            EmptyView()
+                            Text("wizard.schedule.currencyMismatch").font(DSTypography.caption).foregroundStyle(DSColor.danger)
                         case .contractZero:
                             Text("wizard.schedule.noContract").font(DSTypography.caption).foregroundStyle(DSColor.warning)
                         }
@@ -66,7 +66,12 @@ struct ScheduleStep: View {
             HStack(spacing: DSSpacing.md) {
                 FormRow("wizard.schedule.percent") {
                     DecimalField("wizard.schedule.percent", value: Binding(get: { row.percentage?.points }, set: { pts in
-                        viewModel.draft.schedule[index].percentage = pts.flatMap { try? Percentage.input($0) }
+                        if let pts {
+                            guard let pct = try? Percentage.input(pts) else { return }
+                            viewModel.draft.schedule[index].percentage = pct
+                        } else {
+                            viewModel.draft.schedule[index].percentage = nil
+                        }
                         viewModel.scheduleEdited(.percentage(index))
                     }), fractionDigits: 2).accessibilityIdentifier("wizard_schedule_row_\(index)_pct")
                 }
