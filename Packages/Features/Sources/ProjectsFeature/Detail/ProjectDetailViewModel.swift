@@ -63,7 +63,7 @@ public final class ProjectDetailViewModel {
                                       actor: actor, onCreated: { _ in }, onDismiss: {})
     }
 
-    /// Persists only the edited section. Returns false (and sets errorKey) on failure.
+    /// Persists only the edited section. Returns false on failure; the sheet surfaces the alert.
     public func save(_ wizard: ProjectWizardViewModel, section: EditSection) async -> Bool {
         guard let s = snapshot else { return false }
         let draft = wizard.draft
@@ -122,7 +122,6 @@ public final class ProjectDetailViewModel {
             editing = nil
             return true
         } catch {
-            errorKey = "detail.saveFailed"
             return false
         }
     }

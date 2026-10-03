@@ -8,6 +8,7 @@ public struct ProjectDetailView: View {
     private let makeCustomer: (UUID) -> AnyView
     @State private var editWizard: ProjectWizardViewModel?
     @Environment(\.timeZone) private var timeZone
+    @Environment(\.locale) private var locale
 
     public init(viewModel: ProjectDetailViewModel, makeCustomer: @escaping (UUID) -> AnyView) { self.viewModel = viewModel; self.makeCustomer = makeCustomer }
 
@@ -30,7 +31,7 @@ public struct ProjectDetailView: View {
                 EditSectionSheet(section: section, wizard: wizard, onSave: { w in await viewModel.save(w, section: section) }, onCancel: { viewModel.editing = nil })
             }
         }
-        .alert("detail.saveFailed", isPresented: Binding(get: { viewModel.errorKey != nil }, set: { if !$0 { viewModel.errorKey = nil } })) { Button("sheet.ok") {} }
+        .alert(viewModel.errorKey ?? "detail.error", isPresented: Binding(get: { viewModel.errorKey != nil }, set: { if !$0 { viewModel.errorKey = nil } })) { Button("sheet.ok") {} }
     }
 
     private func edit(_ section: EditSection) {
@@ -135,7 +136,7 @@ public struct ProjectDetailView: View {
                 Divider()
                 FormRow("wizard.price.estimatedCost") { MoneyText(amount: f?.estimatedCost.amount ?? 0, currencyCode: currency.rawValue, style: .headline).accessibilityIdentifier("detail_estimate_total") }
                 FormRow("wizard.price.profit") { MoneyText(amount: f?.projectedProfit.amount ?? 0, currencyCode: currency.rawValue) }
-                FormRow("wizard.price.margin") { if let m = f?.projectedMargin { Text(verbatim: "\(m.points)%") } else { Text(verbatim: "—") } }
+                FormRow("wizard.price.margin") { if let m = f?.projectedMargin { Text(verbatim: LocaleNumberParser.string(m.points, locale: locale, fractionDigits: 1) + "%") } else { Text(verbatim: "—") } }
             }
         }
     }

@@ -10,6 +10,7 @@ struct EditSectionSheet: View {
     let onSave: (ProjectWizardViewModel) async -> Bool
     let onCancel: () -> Void
     @State private var saving = false
+    @State private var saveFailed = false
 
     init(section: EditSection, wizard: ProjectWizardViewModel, onSave: @escaping (ProjectWizardViewModel) async -> Bool, onCancel: @escaping () -> Void) {
         self.section = section; _wizard = State(initialValue: wizard); self.onSave = onSave; self.onCancel = onCancel
@@ -25,10 +26,11 @@ struct EditSectionSheet: View {
                 .toolbar {
                     ToolbarItem(placement: .cancellationAction) { Button("sheet.cancel", action: onCancel).accessibilityIdentifier("sheet_cancel") }
                     ToolbarItem(placement: .confirmationAction) {
-                        Button("sheet.save") { Task { saving = true; _ = await onSave(wizard); saving = false } }
+                        Button("sheet.save") { Task { saving = true; let ok = await onSave(wizard); if !ok { saveFailed = true }; saving = false } }
                             .disabled(saving || !wizard.canContinue).accessibilityIdentifier("sheet_save")
                     }
                 }
+                .alert("detail.saveFailed", isPresented: $saveFailed) { Button("sheet.ok") {} }
         }
     }
 
