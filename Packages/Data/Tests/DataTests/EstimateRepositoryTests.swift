@@ -27,8 +27,8 @@ final class EstimateRepositoryTests: XCTestCase {
         try await repo.replace(projectId: projectId, group: .material, change: EstimateLineChange(upserts: [a, b], deletedIds: [], totalBefore: .zero(.cad), totalAfter: Money(4100, .cad)), actor: actor)
         let lines = try await repo.lines(projectId: projectId)
         XCTAssertEqual(lines, [a, b])
-        XCTAssertEqual(try actions(), ["projectCreated", "estimateChanged"])
-        let details = try await db.writer.read { try String.fetchOne($0, sql: "SELECT details_json FROM activity_log WHERE action = 'estimateChanged'") }
+        XCTAssertEqual(try actions(), ["projectCreated", "scheduleChanged", "estimateChanged"])  // seed gives Kitchen one deposit schedule item
+        let details = try await db.writer.read { try String.fetchOne($0, sql: "SELECT details_json FROM activity_log WHERE action = 'estimateChanged' AND project_id = ?", arguments: [self.projectId.dbKey]) }
         XCTAssertEqual(details, #"{"from":"0.00","group":"material","to":"4100.00"}"#)
     }
 
