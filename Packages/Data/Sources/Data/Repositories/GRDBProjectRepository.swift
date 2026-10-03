@@ -171,6 +171,50 @@ public final class GRDBProjectRepository: ProjectRepository {
         }
     }
 
+    public func changeStatus(id: UUID, to status: ProjectStatus, actor: ActivityActor) async throws {
+        let now = clock.now()
+        let stamp = Timestamps.string(now)
+        try await database.writer.write { db in
+            guard let record = try ProjectRecord.filter(Column("id") == id.dbKey && Column("deleted_at") == nil).fetchOne(db) else { throw DomainError.notFound }
+            guard record.status != status.rawValue else { return }
+            try db.execute(sql: "UPDATE projects SET status = ?, updated_at = ?, sync_state = 'pending' WHERE id = ?", arguments: [status.rawValue, stamp, record.id])
+            let companyId = try RecordSupport.uuid(record.companyId, table: "projects", id: record.id, column: "company_id")
+            try ActivityLogRecord.append(db, companyId: companyId, actor: actor, action: .statusChanged, entityType: "project", entityId: id, projectId: id,
+                                         details: ["from": record.status, "to": status.rawValue], at: now)
+        }
+    }
+
+    public func setManualProgress(id: UUID, to value: Int?, actor: ActivityActor) async throws {
+        if let v = value, !(0...100).contains(v) { throw DomainError.invalidProgress }
+        let now = clock.now()
+        let stamp = Timestamps.string(now)
+        try await database.writer.write { db in
+            guard let record = try ProjectRecord.filter(Column("id") == id.dbKey && Column("deleted_at") == nil).fetchOne(db) else { throw DomainError.notFound }
+            guard record.manualProgress != value else { return }
+            try db.execute(sql: "UPDATE projects SET manual_progress = ?, updated_at = ?, sync_state = 'pending' WHERE id = ?", arguments: [value, stamp, record.id])
+            let companyId = try RecordSupport.uuid(record.companyId, table: "projects", id: record.id, column: "company_id")
+            try ActivityLogRecord.append(db, companyId: companyId, actor: actor, action: .progressChanged, entityType: "project", entityId: id, projectId: id,
+                                         details: ["from": record.manualProgress.map(String.init) ?? "", "to": value.map(String.init) ?? ""], at: now)
+        }
+    }
+
+    public func changeCustomer(id: UUID, to customerId: UUID, actor: ActivityActor) async throws {
+        let now = clock.now()
+        let stamp = Timestamps.string(now)
+        try await database.writer.write { db in
+            guard let record = try ProjectRecord.filter(Column("id") == id.dbKey && Column("deleted_at") == nil).fetchOne(db) else { throw DomainError.notFound }
+            guard let target = try CustomerRecord.filter(Column("id") == customerId.dbKey).fetchOne(db) else { throw DomainError.notFound }
+            guard target.deletedAt == nil else { throw DomainError.customerDeleted }
+            guard target.companyId == record.companyId else { throw DomainError.crossCompany }
+            guard target.id != record.customerId else { return }
+            let fromName = try String.fetchOne(db, sql: "SELECT name FROM customers WHERE id = ?", arguments: [record.customerId]) ?? ""
+            try db.execute(sql: "UPDATE projects SET customer_id = ?, updated_at = ?, sync_state = 'pending' WHERE id = ?", arguments: [target.id, stamp, record.id])
+            let companyId = try RecordSupport.uuid(record.companyId, table: "projects", id: record.id, column: "company_id")
+            try ActivityLogRecord.append(db, companyId: companyId, actor: actor, action: .customerChanged, entityType: "project", entityId: id, projectId: id,
+                                         details: ["from": fromName, "to": target.name, "fromId": record.customerId, "toId": target.id], at: now)
+        }
+    }
+
     // MARK: Helpers
 
     static func currency(_ db: Database, companyId: String) throws -> CurrencyCode {

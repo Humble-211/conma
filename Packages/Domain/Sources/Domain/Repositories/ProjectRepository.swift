@@ -41,4 +41,10 @@ public protocol ProjectRepository: Sendable {
     func save(_ project: Project, actor: ActivityActor) async throws
     /// Cascading soft delete per spec A.2.
     func softDelete(id: UUID, actor: ActivityActor) async throws
+    /// Writes `statusChanged {from,to}` in the same transaction; same status → no write. Throws DomainError.notFound.
+    func changeStatus(id: UUID, to status: ProjectStatus, actor: ActivityActor) async throws
+    /// Writes `progressChanged {from,to}` ("" for nil); equal → no write. Validates 0…100.
+    func setManualProgress(id: UUID, to value: Int?, actor: ActivityActor) async throws
+    /// Customer must be live and in the same company; writes `customerChanged {from,to,fromId,toId}` (names).
+    func changeCustomer(id: UUID, to customerId: UUID, actor: ActivityActor) async throws
 }

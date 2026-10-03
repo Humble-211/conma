@@ -31,6 +31,20 @@ struct ActivityLogRecord: Codable, FetchableRecord, PersistableRecord {
         detailsJson = e.detailsJSON; occurredAt = Timestamps.string(e.occurredAt)
     }
 
+    func toDomain() throws -> ActivityLogEntry {
+        let t = Self.databaseTableName
+        guard let act = ActivityAction(rawValue: action) else { throw DataError.corruptRow(table: t, id: id, column: "action") }
+        return ActivityLogEntry(id: try RecordSupport.uuid(id, table: t, id: id, column: "id"),
+                                companyId: try RecordSupport.uuid(companyId, table: t, id: id, column: "company_id"),
+                                userId: try RecordSupport.uuid(userId, table: t, id: id, column: "user_id"), actorName: actorName, action: act, entityType: entityType,
+                                entityId: try RecordSupport.uuid(entityId, table: t, id: id, column: "entity_id"),
+                                projectId: try RecordSupport.uuid(projectId, table: t, id: id, column: "project_id"), detailsJSON: detailsJson,
+                                occurredAt: try RecordSupport.date(occurredAt, table: t, id: id, column: "occurred_at"),
+                                createdAt: try RecordSupport.date(createdAt, table: t, id: id, column: "created_at"),
+                                updatedAt: try RecordSupport.date(updatedAt, table: t, id: id, column: "updated_at"),
+                                deletedAt: try RecordSupport.date(deletedAt, table: t, id: id, column: "deleted_at"))
+    }
+
     /// Append-only helper used inside repository transactions.
     static func append(_ db: Database, companyId: UUID, actor: ActivityActor, action: ActivityAction, entityType: String, entityId: UUID, projectId: UUID?, details: [String: String], at now: Date) throws {
         let json = try JSONSerialization.data(withJSONObject: details.sorted { $0.key < $1.key }.reduce(into: [String: String]()) { $0[$1.key] = $1.value }, options: [.sortedKeys])
