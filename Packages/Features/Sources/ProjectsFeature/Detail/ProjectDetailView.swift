@@ -63,7 +63,7 @@ public struct ProjectDetailView: View {
                         Text(verbatim: "\(start.storageString) → \(end.storageString)").font(DSTypography.caption).foregroundStyle(DSColor.textSecondary)
                     }
                 }
-            }.accessibilityIdentifier("detail_header")
+            }.accessibilityElement(children: .contain).accessibilityIdentifier("detail_header")
 
             section("detail.scope", .scope) {
                 if let d = s.project.scopeDescription { Text(verbatim: d) }

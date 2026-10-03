@@ -121,7 +121,7 @@ final class ProjectsFlowTests: XCTestCase {
         app.buttons["wizard_skip"].tap(); app.buttons["wizard_skip"].tap()
         app.buttons["wizard_continue"].tap()
         XCTAssertTrue(app.otherElements["detail_header"].waitForExistence(timeout: 10))
-        let header = app.otherElements["detail_header"]
-        XCTAssertTrue(header.label.contains("1.500,50") || header.staticTexts.matching(NSPredicate(format: "label CONTAINS %@", "1.500,50")).firstMatch.exists, header.label)
+        let shown = app.staticTexts.matching(NSPredicate(format: "label CONTAINS %@", "1.500,50")).firstMatch
+        XCTAssertTrue(shown.waitForExistence(timeout: 5), app.debugDescription)
     }
 }

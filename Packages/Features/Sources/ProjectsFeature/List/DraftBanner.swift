@@ -29,6 +29,7 @@ public struct DraftBanner: View {
                 }
             }
         }
+        .accessibilityElement(children: .contain)
         .accessibilityIdentifier("draft_banner")
     }
 }
