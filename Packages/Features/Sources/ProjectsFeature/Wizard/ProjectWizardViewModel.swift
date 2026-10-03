@@ -2,6 +2,7 @@ import Foundation
 import Observation
 import SwiftUI
 import Domain
+import FeatureSupport
 
 @Observable
 @MainActor
@@ -55,6 +56,23 @@ public final class ProjectWizardViewModel {
     }
 
     public var canSkip: Bool { !step.isRequired && step != .review && (step != .timeline || canContinue) }
+
+    /// Review Focus #3: keep foreign fields as custom:<label> or drop them.
+    public func confirmJobTypeChange(keepFields: Bool, labelFor: (String) -> String) {
+        guard let newType = pendingJobTypeChange else { return }
+        let allowed = Set(ScopeFieldCatalog.fields(for: newType).map(\.key))
+        if keepFields {
+            draft.scopeFields = draft.scopeFields.map { field in
+                guard !allowed.contains(field.key), !ScopeFieldCatalog.isCustom(field.key) else { return field }
+                var copy = field; copy.key = ScopeFieldCatalog.customPrefix + labelFor(field.key); return copy
+            }
+        } else {
+            draft.scopeFields.removeAll { !allowed.contains($0.key) && !ScopeFieldCatalog.isCustom($0.key) }
+        }
+        draft.jobType = newType
+        if newType != .other { draft.customJobType = nil }
+        pendingJobTypeChange = nil
+    }
 
     public func next() { guard canContinue, let n = step.next else { return }; move(to: n) }
     public func skip() { guard canSkip, let n = step.next else { return }; move(to: n) }

@@ -49,6 +49,11 @@ public struct ProjectWizardView: View {
                 Button("wizard.close.discard", role: .destructive) { viewModel.discardDraftAndClose() }
                 Button("wizard.close.cancel", role: .cancel) {}
             }
+            .confirmationDialog("wizard.jobType.change.title", isPresented: Binding(get: { viewModel.pendingJobTypeChange != nil }, set: { if !$0 { viewModel.pendingJobTypeChange = nil } }), titleVisibility: .visible) {
+                Button("wizard.jobType.change.keep") { viewModel.confirmJobTypeChange(keepFields: true, labelFor: { String(localized: String.LocalizationValue("scope.field." + $0)) }) } // lint:allow-string
+                Button("wizard.jobType.change.clear", role: .destructive) { viewModel.confirmJobTypeChange(keepFields: false, labelFor: { $0 }) }
+                Button("wizard.close.cancel", role: .cancel) { viewModel.pendingJobTypeChange = nil }
+            }
             .onChange(of: scenePhase) { _, phase in if phase == .background { viewModel.flushAutosave() } }
         }
         .interactiveDismissDisabled(true)
