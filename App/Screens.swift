@@ -27,12 +27,12 @@ struct HomeScreen: View {
     let setup: CompanySetup
 
     init(ready: AppContainer.Ready, setup: CompanySetup) {
-        _viewModel = State(initialValue: HomeViewModel(projectRepository: ready.projectRepository, companyId: setup.company.id))
+        _viewModel = State(initialValue: HomeViewModel(insightsRepository: ready.insightsRepository, companyId: setup.company.id, today: TodayProvider.today(timeZone: .current)))
         self.ready = ready; self.setup = setup
     }
 
     var body: some View {
-        HomeView(viewModel: viewModel, makeDetail: { id in AnyView(ProjectDetailScreen(projectId: id, ready: ready, setup: setup)) })
+        HomeView(viewModel: viewModel, companyName: setup.company.name, makeDetail: { id in AnyView(ProjectDetailScreen(projectId: id, ready: ready, setup: setup)) })
     }
 }
 

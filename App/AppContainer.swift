@@ -14,6 +14,8 @@ final class AppContainer {
         let projectRepository: any ProjectRepository
         let estimateRepository: any ProjectEstimateRepository
         let scheduleRepository: any PaymentScheduleRepository
+        let insightsRepository: any InsightsRepository
+        let activityLogRepository: any ActivityLogRepository
         let draftStore: any DraftStore
         var setup: CompanySetup?
     }
@@ -58,6 +60,8 @@ final class AppContainer {
                               projectRepository: GRDBProjectRepository(database: database, clock: clock),
                               estimateRepository: GRDBProjectEstimateRepository(database: database, clock: clock),
                               scheduleRepository: GRDBPaymentScheduleRepository(database: database, clock: clock),
+                              insightsRepository: GRDBInsightsRepository(database: database),
+                              activityLogRepository: GRDBActivityLogRepository(database: database),
                               draftStore: FileDraftStore(directory: draftDirectory),
                               setup: nil)
             #if DEBUG
