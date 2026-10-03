@@ -110,7 +110,7 @@ final class ProjectsFlowTests: XCTestCase {
     /// (f) Vietnamese locale: "1.500,50" is stored as 1500.50 and shown back
     func testVietnameseDecimalInput() {
         let app = XCUIApplication()
-        app.launchArguments = ["--ui-testing", "--seed-sample-data", "--locale", "vi"]
+        app.launchArguments = ["--ui-testing", "--seed-sample-data", "--locale", "vi", "-AppleLocale", "vi_VN"]   // device region VN: app copies the device region into its locale
         app.launch()
         app.tabBars.buttons["Dự án"].tap(); app.buttons["projects_add"].tap()
         app.buttons["wizard_jobtype_kitchen"].tap(); app.buttons["wizard_continue"].tap()

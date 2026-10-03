@@ -54,7 +54,9 @@ final class ScreenshotTests: XCTestCase {
                     _ = app.otherElements["detail_header"].waitForExistence(timeout: 5)
                     snap(app, "detail_\(locale)_light")
                     app.navigationBars.buttons.element(boundBy: 0).tap()
-                    app.tabBars.buttons.element(boundBy: 4).tap(); app.buttons["more_customers"].tap()
+                    app.tabBars.buttons.element(boundBy: 4).tap()
+                    if !app.buttons["more_customers"].waitForExistence(timeout: 2) { app.tabBars.buttons.element(boundBy: 4).tap() }   // gallery is still open: re-tap pops to root
+                    app.buttons["more_customers"].tap()
                     snap(app, "customers_\(locale)")
                     app.cells.firstMatch.tap(); snap(app, "customer_profile_\(locale)")
                 } else {
