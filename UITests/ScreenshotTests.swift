@@ -37,7 +37,7 @@ final class ScreenshotTests: XCTestCase {
                     app.buttons["wizard_jobtype_basementRenovation"].tap(); snap(app, "wizard_1_\(steps[0])_\(locale)")
                     app.buttons["wizard_continue"].tap(); snap(app, "wizard_2_\(steps[1])_\(locale)")
                     let ann = app.buttons.matching(NSPredicate(format: "label == %@", "Ann Lee")).firstMatch
-                    if ann.waitForExistence(timeout: 2) { ann.tap() } else { app.staticTexts["Ann Lee"].tap() }
+                    if ann.waitForExistence(timeout: 2) { ann.tap() } else { app.staticTexts.matching(NSPredicate(format: "label == %@", "Ann Lee")).firstMatch.tap() }
                     app.buttons["wizard_continue"].tap()
                     app.textFields["wizard_address_line"].tap(); app.textFields["wizard_address_line"].typeText("88 Screenshot Lane")
                     snap(app, "wizard_3_\(steps[2])_\(locale)")
