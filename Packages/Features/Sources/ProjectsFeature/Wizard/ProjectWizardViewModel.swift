@@ -10,8 +10,15 @@ public final class ProjectWizardViewModel {
     public var draft: ProjectDraft {
         didSet {
             guard draft != oldValue else { return }
-            if draft.contractValue != oldValue.contractValue, !draft.schedule.isEmpty {
-                draft.schedule = ScheduleMath.recompute(rows: draft.schedule, contract: draft.contractValue ?? .zero(currency), edited: .rescale).rows
+            let contractChanged = draft.contractValue != oldValue.contractValue
+            if contractChanged, !draft.schedule.isEmpty {
+                let contract = draft.contractValue ?? .zero(currency)
+                var rows = ScheduleMath.recompute(rows: draft.schedule, contract: contract, edited: .rescale).rows
+                // A fixed deposit is authoritative: re-pin it after the percentage rescale.
+                if case .fixed? = draft.deposit?.mode, rows.contains(where: \.isDeposit) {
+                    rows = ScheduleMath.recompute(rows: ScheduleMath.applyDeposit(rows: rows, contract: contract, deposit: draft.deposit), contract: contract, edited: .none).rows
+                }
+                draft.schedule = rows
             }
             if draft.deposit != oldValue.deposit, draft.schedule.contains(where: \.isDeposit) {
                 let contract = draft.contractValue ?? .zero(currency)
