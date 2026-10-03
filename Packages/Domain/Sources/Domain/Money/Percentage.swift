@@ -19,6 +19,9 @@ public struct Percentage: Hashable, Sendable, Codable {
         Percentage(points: Money.rounded(points, scale: 1))
     }
 
+    /// Exact points without rounding or validation: template rows and re-hydration of stored values.
+    public static func exact(_ points: Decimal) -> Percentage { Percentage(points: points) }
+
     /// numerator / denominator × 100, or nil when the denominator is zero.
     public static func ratio(_ numerator: Money, over denominator: Money) -> Percentage? {
         guard !denominator.isZero else { return nil }
