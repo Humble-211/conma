@@ -20,6 +20,30 @@ final class ProjectDraftTests: XCTestCase {
         XCTAssertTrue(d.isEmpty, "step alone does not make a draft")
     }
 
+    func testBlankAddressIsEmpty() {
+        var d = ProjectDraft(); d.address = Address(line: "", unit: nil, city: nil, region: nil, postalCode: nil)
+        XCTAssertTrue(d.isEmpty)
+        d.address = Address(line: "", unit: nil, city: "Calgary", region: nil, postalCode: nil)
+        XCTAssertFalse(d.isEmpty)
+    }
+
+    func testBlankNewCustomerIsEmpty() {
+        var d = ProjectDraft()
+        d.customer = .new(NewCustomerInput(name: "", phone: nil, email: nil, preferredContact: nil, companyName: nil, secondaryContact: nil, notes: nil))
+        XCTAssertTrue(d.isEmpty)
+        d.customer = .new(NewCustomerInput(name: "Ann", phone: nil, email: nil, preferredContact: nil, companyName: nil, secondaryContact: nil, notes: nil))
+        XCTAssertFalse(d.isEmpty)
+        d.customer = .existing(UUID())
+        XCTAssertFalse(d.isEmpty)
+    }
+
+    func testBlankCustomJobTypeIsEmpty() {
+        var d = ProjectDraft(); d.customJobType = "  "
+        XCTAssertTrue(d.isEmpty)
+        d.customJobType = "Sauna"
+        XCTAssertFalse(d.isEmpty)
+    }
+
     func testCodableRoundTrip() throws {
         var d = ProjectDraft()
         d.jobType = .other; d.customJobType = "Sauna"

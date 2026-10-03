@@ -41,7 +41,9 @@ struct LocationStep: View {
     private func openMaps() {
         let a = address.wrappedValue
         let query = [a.line, a.unit, a.city, a.region, a.postalCode].compactMap { $0 }.filter { !$0.isEmpty }.joined(separator: ", ") // lint:allow-string
-        guard let encoded = query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed), let url = URL(string: "maps://?q=" + encoded) else { return }
+        var components = URLComponents(string: "maps://")
+        components?.queryItems = [URLQueryItem(name: "q", value: query)]
+        guard let url = components?.url else { return }
         UIApplication.shared.open(url)
     }
 }

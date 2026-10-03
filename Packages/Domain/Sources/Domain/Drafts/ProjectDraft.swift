@@ -124,9 +124,28 @@ public struct ProjectDraft: Codable, Equatable, Sendable {
 
     /// True when nothing user-entered is present (step/updatedAt/labourMode are not content).
     public var isEmpty: Bool {
-        jobType == nil && customJobType == nil && customer == nil && projectName == nil && address == nil && scopeDescription == nil
+        jobType == nil && Self.blank(customJobType) && customerIsBlank && projectName == nil && addressIsBlank && scopeDescription == nil
             && scopeFields.isEmpty && startDate == nil && estimatedCompletionDate == nil && workingDays == nil && hoursPerDay == nil
             && workersPerDay == nil && labourQuick == nil && labourLines.isEmpty && materialLines.isEmpty && otherLines.isEmpty
             && contractValue == nil && deposit == nil && scheduleTemplate == nil && schedule.isEmpty
+    }
+
+    private static func blank(_ s: String?) -> Bool {
+        s == nil || s?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == true
+    }
+
+    private var addressIsBlank: Bool {
+        guard let a = address else { return true }
+        return Self.blank(a.line) && Self.blank(a.unit) && Self.blank(a.city) && Self.blank(a.region) && Self.blank(a.postalCode)
+    }
+
+    private var customerIsBlank: Bool {
+        switch customer {
+        case nil: return true
+        case .existing?: return false
+        case .new(let i)?:
+            return Self.blank(i.name) && Self.blank(i.phone) && Self.blank(i.email) && i.preferredContact == nil
+                && Self.blank(i.companyName) && Self.blank(i.secondaryContact) && Self.blank(i.notes)
+        }
     }
 }

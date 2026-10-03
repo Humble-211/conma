@@ -54,7 +54,7 @@ public final class ProjectWizardViewModel {
         }
     }
 
-    public var canSkip: Bool { !step.isRequired && step != .review }
+    public var canSkip: Bool { !step.isRequired && step != .review && (step != .timeline || canContinue) }
 
     public func next() { guard canContinue, let n = step.next else { return }; move(to: n) }
     public func skip() { guard canSkip, let n = step.next else { return }; move(to: n) }
@@ -93,6 +93,7 @@ public final class ProjectWizardViewModel {
     public func flushAutosave() { autosaveTask?.cancel(); persistNow() }
 
     private func persistNow() {
+        autosaveTask?.cancel()
         guard !draft.isEmpty else { return }
         var copy = draft
         copy.updatedAt = Date()

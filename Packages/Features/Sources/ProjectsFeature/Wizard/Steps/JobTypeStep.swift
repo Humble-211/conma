@@ -30,7 +30,7 @@ struct JobTypeStep: View {
             .padding(.horizontal, DSSpacing.lg)
             if viewModel.draft.jobType == .other {
                 Card {
-                    TextField("wizard.jobType.customPlaceholder", text: Binding(get: { viewModel.draft.customJobType ?? "" }, set: { viewModel.draft.customJobType = $0 }))
+                    TextField("wizard.jobType.customPlaceholder", text: Binding(get: { viewModel.draft.customJobType ?? "" }, set: { viewModel.draft.customJobType = $0.trimmingCharacters(in: .whitespaces).isEmpty ? nil : $0 }))
                         .frame(minHeight: DSSpacing.minTouch)
                         .accessibilityIdentifier("wizard_custom_jobtype")
                 }
@@ -44,8 +44,8 @@ struct JobTypeStep: View {
             viewModel.pendingJobTypeChange = type   // Task 14 adds the keep/clear dialog
         } else {
             viewModel.draft.jobType = type
+            if type != .other { viewModel.draft.customJobType = nil }
         }
-        if type != .other { viewModel.draft.customJobType = nil }
     }
 
     static func symbol(for type: JobType) -> String {
