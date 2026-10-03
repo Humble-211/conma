@@ -23,6 +23,34 @@ public final class GRDBCustomerRepository: CustomerRepository {
         }
     }
 
+    public func observeAll(companyId: UUID) -> AsyncThrowingStream<[Customer], Error> {
+        let key = companyId.dbKey
+        let observation = ValueObservation.tracking { db -> [Customer] in
+            try CustomerRecord.filter(Column("company_id") == key && Column("deleted_at") == nil)
+                .order(Column("name").collating(.localizedCaseInsensitiveCompare)).fetchAll(db).map { try $0.toDomain() }
+        }
+        let writer = database.writer
+        return AsyncThrowingStream { continuation in
+            let task = Task {
+                do {
+                    for try await value in observation.values(in: writer) { continuation.yield(value) }
+                    continuation.finish()
+                } catch { continuation.finish(throwing: error) }
+            }
+            continuation.onTermination = { _ in task.cancel() }
+        }
+    }
+
+    public func projects(customerId: UUID) async throws -> [Project] {
+        try await database.writer.read { db in
+            let records = try ProjectRecord.filter(Column("customer_id") == customerId.dbKey && Column("deleted_at") == nil).order(Column("updated_at").desc, Column("name")).fetchAll(db)
+            guard let first = records.first else { return [] }
+            let currencyRaw = try String.fetchOne(db, sql: "SELECT currency_code FROM companies WHERE id = ?", arguments: [first.companyId]) ?? ""
+            guard let currency = CurrencyCode(rawValue: currencyRaw) else { throw DataError.corruptRow(table: "companies", id: first.companyId, column: "currency_code") }
+            return try records.map { try $0.toDomain(currency: currency, scopeFields: []) }
+        }
+    }
+
     public func save(_ customer: Customer) async throws {
         try customer.validate()
         var stamped = customer
