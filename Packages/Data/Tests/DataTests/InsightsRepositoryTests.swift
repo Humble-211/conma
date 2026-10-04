@@ -54,4 +54,19 @@ final class InsightsRepositoryTests: XCTestCase {
         let first = try await iterator.next()!
         XCTAssertEqual(first.expenses.count, 0)
     }
+
+    func testObserveProjectEmitsAfterExpenseCreate() async throws {
+        let store = temporaryReceiptStore()
+        defer { try? FileManager.default.removeItem(at: store.root) }
+        var it = GRDBInsightsRepository(database: db).observeProject(id: project.id).makeAsyncIterator()
+        let first = try await it.next()!
+        XCTAssertEqual(first?.expenses.count, 0)
+        let e = Expense(id: UUID(), companyId: companyId, projectId: project.id, category: .fuel, customCategoryId: nil, costGroup: .other, vendorName: nil,
+                        amount: Money(250, .cad), tax: .zero(.cad), spentOn: CalendarDate(storage: "2026-10-03")!, paymentMethod: nil, notes: nil, receiptImages: [],
+                        createdAt: now, updatedAt: now, deletedAt: nil)
+        try await GRDBExpenseRepository(database: db, clock: .fixed(now), receiptStore: store).create(e, receiptPages: [], actor: ActivityActor(userId: nil, name: "Duc"))
+        let second = try XCTUnwrap(try await it.next()!)
+        XCTAssertEqual(second.expenses.map(\.id), [e.id])
+        XCTAssertEqual(ProjectInsightsComposer.compose(second.with(today: CalendarDate(storage: "2026-10-03")!)).financials?.spentSoFar, Money(250, .cad))
+    }
 }
