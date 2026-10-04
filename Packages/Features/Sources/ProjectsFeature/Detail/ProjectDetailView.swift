@@ -11,6 +11,7 @@ public struct ProjectDetailView: View {
     @Bindable private var viewModel: ProjectDetailViewModel
     private let makeCustomer: (UUID) -> AnyView
     private let makeActivity: (UUID) -> AnyView
+    private let makeExpensesSection: (UUID) -> AnyView
     @State private var editWizard: ProjectWizardViewModel?
     @State private var showStatusPicker = false
     @State private var showProgress = false
@@ -25,8 +26,9 @@ public struct ProjectDetailView: View {
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.dismiss) private var dismiss
 
-    public init(viewModel: ProjectDetailViewModel, makeCustomer: @escaping (UUID) -> AnyView, makeActivity: @escaping (UUID) -> AnyView) {
-        self.viewModel = viewModel; self.makeCustomer = makeCustomer; self.makeActivity = makeActivity
+    public init(viewModel: ProjectDetailViewModel, makeCustomer: @escaping (UUID) -> AnyView, makeActivity: @escaping (UUID) -> AnyView,
+                makeExpensesSection: @escaping (UUID) -> AnyView = { _ in AnyView(EmptyView()) }) {
+        self.viewModel = viewModel; self.makeCustomer = makeCustomer; self.makeActivity = makeActivity; self.makeExpensesSection = makeExpensesSection
     }
 
     public var body: some View {
@@ -146,6 +148,7 @@ public struct ProjectDetailView: View {
             header(s, insights: insights)
 
             FinancialSummarySection(insights: insights, currency: viewModel.currency, onEditEstimate: { edit(.estimate($0)) })
+            makeExpensesSection(viewModel.projectId)
             HealthSection(insights: insights)
             TimelineSection(insights: insights, project: s.project, today: viewModel.today, onEdit: { edit(.timeline) }, onAdd: { edit(.timeline) })
 

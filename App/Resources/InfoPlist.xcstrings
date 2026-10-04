@@ -1,0 +1,13 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "NSCameraUsageDescription" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "ConMa uses the camera to scan receipts." } },
+        "vi" : { "stringUnit" : { "state" : "translated", "value" : "ConMa dùng camera để chụp receipt." } }
+      }
+    }
+  },
+  "version" : "1.0"
+}

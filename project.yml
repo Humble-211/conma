@@ -37,6 +37,7 @@ targets:
         UILaunchScreen: {}
         UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
         ITSAppUsesNonExemptEncryption: false
+        NSCameraUsageDescription: "ConMa uses the camera to scan receipts."
         CFBundleLocalizations: [en, vi]
         CFBundleDevelopmentRegion: en
     settings:

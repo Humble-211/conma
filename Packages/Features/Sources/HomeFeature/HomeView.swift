@@ -8,15 +8,19 @@ public struct HomeView: View {
     private let companyName: String
     private let makeDetail: (UUID) -> AnyView
     private let makeActivity: (UUID) -> AnyView
+    private let makeExpenseForm: ((ExpenseFormRequest) -> AnyView)?
 
     @State private var showAllAttention = false
+    @State private var expenseRequest: ExpenseFormRequest?
     @State private var pendingDetail: UUID?
     @State private var retryToken = 0
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.timeZone) private var timeZone
 
-    public init(viewModel: HomeViewModel, companyName: String = "", makeDetail: @escaping (UUID) -> AnyView, makeActivity: @escaping (UUID) -> AnyView) {
+    public init(viewModel: HomeViewModel, companyName: String = "", makeDetail: @escaping (UUID) -> AnyView, makeActivity: @escaping (UUID) -> AnyView,
+                makeExpenseForm: ((ExpenseFormRequest) -> AnyView)? = nil) {
         self.viewModel = viewModel; self.companyName = companyName; self.makeDetail = makeDetail; self.makeActivity = makeActivity
+        self.makeExpenseForm = makeExpenseForm
     }
 
     private var names: [UUID: String] {
@@ -24,21 +28,28 @@ public struct HomeView: View {
     }
 
     public var body: some View {
-        Group {
-            if viewModel.errorKey != nil {
-                VStack(spacing: DSSpacing.md) {
-                    EmptyState(systemImage: "exclamationmark.triangle", title: "home.error", message: "home.error.message")
-                    SecondaryButton("home.retry") { viewModel.retry(); retryToken += 1 }
-                        .accessibilityIdentifier("home_retry")
-                }
-            } else if let d = viewModel.dashboard {
-                ScrollView { content(d).padding(.vertical, DSSpacing.lg) }
+        ZStack(alignment: .bottomTrailing) {
+            Group {
+                if viewModel.errorKey != nil {
+                    VStack(spacing: DSSpacing.md) {
+                        EmptyState(systemImage: "exclamationmark.triangle", title: "home.error", message: "home.error.message")
+                        SecondaryButton("home.retry") { viewModel.retry(); retryToken += 1 }
+                            .accessibilityIdentifier("home_retry")
+                    }
+                } else if let d = viewModel.dashboard {
+                    ScrollView { content(d).padding(.vertical, DSSpacing.lg) }
+                        .accessibilityIdentifier("home_list")
+                } else {
+                    ScrollView {
+                        VStack(spacing: DSSpacing.md) { SkeletonCard(lines: 2); SkeletonCard(); SkeletonCard() }.padding(DSSpacing.lg)
+                    }
                     .accessibilityIdentifier("home_list")
-            } else {
-                ScrollView {
-                    VStack(spacing: DSSpacing.md) { SkeletonCard(lines: 2); SkeletonCard(); SkeletonCard() }.padding(DSSpacing.lg)
                 }
-                .accessibilityIdentifier("home_list")
+            }
+            if makeExpenseForm != nil {
+                FloatingActionButton(accessibilityLabel: "home.addExpense") { expenseRequest = .create(projectId: nil) }
+                    .padding(DSSpacing.xl)
+                    .accessibilityIdentifier("home_add_expense")
             }
         }
         .background(DSColor.background)
@@ -63,6 +74,7 @@ public struct HomeView: View {
                 pendingDetail = id
             }
         }
+        .fullScreenCover(item: $expenseRequest) { request in makeExpenseForm?(request) ?? AnyView(EmptyView()) }
     }
 
     @ViewBuilder private func content(_ d: Dashboard) -> some View {
@@ -122,6 +134,7 @@ public struct HomeView: View {
             .accessibilityElement(children: .contain)
             .accessibilityIdentifier("home_projects")
         }
+        .padding(.bottom, 72)
     }
 
     private func groupKey(_ group: CardGroup) -> LocalizedStringKey {

@@ -5,6 +5,7 @@ import SetupFeature
 import HomeFeature
 import ProjectsFeature
 import CustomersFeature
+import ExpensesFeature
 
 /// Owns the setup view model so parent re-renders (e.g. language change) don't recreate it.
 struct SetupScreen: View {
@@ -34,7 +35,8 @@ struct HomeScreen: View {
     var body: some View {
         HomeView(viewModel: viewModel, companyName: setup.company.name,
                  makeDetail: { id in AnyView(ProjectDetailScreen(projectId: id, ready: ready, setup: setup)) },
-                 makeActivity: { id in AnyView(ActivityScreen(projectId: id, ready: ready, setup: setup)) })
+                 makeActivity: { id in AnyView(ActivityScreen(projectId: id, ready: ready, setup: setup)) },
+                 makeExpenseForm: { request in AnyView(ExpenseFlowScreen(request: request, ready: ready, setup: setup)) })
     }
 }
 
@@ -56,7 +58,8 @@ struct ProjectDetailScreen: View {
     var body: some View {
         ProjectDetailView(viewModel: viewModel,
                           makeCustomer: { id in AnyView(CustomerProfileScreen(customerId: id, ready: ready, setup: setup)) },
-                          makeActivity: { id in AnyView(ActivityScreen(projectId: id, ready: ready, setup: setup)) })
+                          makeActivity: { id in AnyView(ActivityScreen(projectId: id, ready: ready, setup: setup)) },
+                          makeExpensesSection: { id in AnyView(ProjectExpensesSectionScreen(projectId: id, ready: ready, setup: setup)) })
     }
 }
 
@@ -136,4 +139,68 @@ struct WizardScreen: View {
     }
 
     var body: some View { ProjectWizardView(viewModel: viewModel, customerRepository: customerRepository) }
+}
+
+/// Expenses tab (projectId nil) or a project's "See all" (filtered; the filter can be cleared).
+struct ExpensesScreen: View {
+    @State private var viewModel: ExpensesListViewModel
+    let ready: AppContainer.Ready
+    let setup: CompanySetup
+
+    init(projectId: UUID? = nil, ready: AppContainer.Ready, setup: CompanySetup) {
+        _viewModel = State(initialValue: ExpensesListViewModel(expenseRepository: ready.expenseRepository, companyId: setup.company.id, currency: setup.company.currencyCode,
+                                                               today: TodayProvider.today(timeZone: .current), projectId: projectId))
+        self.ready = ready; self.setup = setup
+    }
+
+    var body: some View {
+        ExpensesListView(viewModel: viewModel, makeForm: { request in AnyView(ExpenseFlowScreen(request: request, ready: ready, setup: setup)) })
+    }
+}
+
+/// Owns the expense form view model for one create/edit flow; closes with `dismiss` (it is presented full screen).
+struct ExpenseFlowScreen: View {
+    @State private var viewModel: ExpenseFormViewModel
+    private let captureMode: ReceiptCaptureMode
+    @Environment(\.dismiss) private var dismiss
+
+    init(request: ExpenseFormRequest, ready: AppContainer.Ready, setup: CompanySetup) {
+        _viewModel = State(initialValue: ExpenseFormViewModel(request: request, companyId: setup.company.id, currency: setup.company.currencyCode,
+                                                              expenseRepository: ready.expenseRepository, categoryRepository: ready.categoryRepository,
+                                                              actor: ActivityActor(userId: setup.owner.id, name: setup.owner.displayName),
+                                                              today: TodayProvider.today(timeZone: .current), defaultTaxPercent: ready.settings.defaultTaxPercent))
+        captureMode = ready.captureMode
+    }
+
+    var body: some View { ExpenseFlowView(viewModel: viewModel, captureMode: captureMode, onClose: { dismiss() }) }
+}
+
+/// Project detail's expenses card (five newest, "+", "See all").
+struct ProjectExpensesSectionScreen: View {
+    @State private var viewModel: ExpensesListViewModel
+    let projectId: UUID
+    let ready: AppContainer.Ready
+    let setup: CompanySetup
+
+    init(projectId: UUID, ready: AppContainer.Ready, setup: CompanySetup) {
+        _viewModel = State(initialValue: ExpensesListViewModel(expenseRepository: ready.expenseRepository, companyId: setup.company.id, currency: setup.company.currencyCode,
+                                                               today: TodayProvider.today(timeZone: .current), projectId: projectId))
+        self.projectId = projectId; self.ready = ready; self.setup = setup
+    }
+
+    var body: some View {
+        ProjectExpensesSection(viewModel: viewModel,
+                               makeAll: { AnyView(ExpensesScreen(projectId: projectId, ready: ready, setup: setup)) },
+                               makeForm: { request in AnyView(ExpenseFlowScreen(request: request, ready: ready, setup: setup)) })
+    }
+}
+
+struct CategoriesScreen: View {
+    @State private var viewModel: CategoriesViewModel
+
+    init(ready: AppContainer.Ready, setup: CompanySetup) {
+        _viewModel = State(initialValue: CategoriesViewModel(categoryRepository: ready.categoryRepository, companyId: setup.company.id))
+    }
+
+    var body: some View { CategoriesView(viewModel: viewModel) }
 }
