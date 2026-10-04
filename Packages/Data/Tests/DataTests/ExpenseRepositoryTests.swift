@@ -43,7 +43,7 @@ final class ExpenseRepositoryTests: XCTestCase {
     func testCreateWritesExpenseReceiptsAndActivity() async throws {
         let e = expense()
         try await repo.create(e, receiptPages: [jpeg, jpeg], actor: f.actor)
-        let back = try XCTUnwrap(try await repo.get(id: e.id))
+        let back = try await XCTUnwrapAsync(try await repo.get(id: e.id))
         XCTAssertEqual(back.receiptImages.map(\.pageIndex), [0, 1])
         let first = try XCTUnwrap(back.receiptImages.first)
         XCTAssertEqual(first.filePath, "Receipts/\(e.id.uuidString.lowercased())/\(first.id.uuidString.lowercased()).jpg")
@@ -58,8 +58,8 @@ final class ExpenseRepositoryTests: XCTestCase {
         let c = try await scaffolding(.equipment)
         let e = expense(.custom, group: .other, custom: c.id)            // stale group in the entity
         try await repo.create(e, receiptPages: [], actor: f.actor)
-        XCTAssertEqual(try await repo.get(id: e.id)?.costGroup, .equipment)
-        XCTAssertEqual(try await activities().last?.details, #"{"category":"custom","categoryName":"Scaffolding","total":"113.00","vendor":"Home Depot"}"#)
+        await XCTAssertEqualAsync(try await repo.get(id: e.id)?.costGroup, .equipment)
+        await XCTAssertEqualAsync(try await activities().last?.details, #"{"category":"custom","categoryName":"Scaffolding","total":"113.00","vendor":"Home Depot"}"#)
     }
 
     func testCreateOnDeletedProjectThrowsAndLeavesNoFiles() async throws {
@@ -69,7 +69,7 @@ final class ExpenseRepositoryTests: XCTestCase {
         XCTAssertEqual(jpgFiles(e.id), [])
         let rows = try await db.writer.read { db in try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM expenses") ?? -1 }
         XCTAssertEqual(rows, 0)
-        XCTAssertEqual(try await activities().count, 0)
+        await XCTAssertEqualAsync(try await activities().count, 0)
     }
 
     func testCurrencyMismatchAndTooManyPagesRejected() async throws {
@@ -82,35 +82,35 @@ final class ExpenseRepositoryTests: XCTestCase {
     func testUpdateRemovesAndAddsPages() async throws {
         let e = expense()
         try await repo.create(e, receiptPages: [jpeg, jpeg], actor: f.actor)
-        let created = try XCTUnwrap(try await repo.get(id: e.id))
+        let created = try await XCTUnwrapAsync(try await repo.get(id: e.id))
         let p0 = created.receiptImages[0], p1 = created.receiptImages[1]
         try await repo.update(created, receipts: ReceiptChange(keptImageIds: [p1.id], newPages: [jpeg]), actor: f.actor)
-        let back = try XCTUnwrap(try await repo.get(id: e.id))
+        let back = try await XCTUnwrapAsync(try await repo.get(id: e.id))
         XCTAssertEqual(back.receiptImages.map(\.pageIndex), [0, 1])
         XCTAssertEqual(back.receiptImages.first?.id, p1.id)
         let p0Deleted = try await db.writer.read { db in try String.fetchOne(db, sql: "SELECT deleted_at FROM receipt_images WHERE id = ?", arguments: [p0.id.dbKey]) }
         XCTAssertNotNil(p0Deleted)
         XCTAssertTrue(FileManager.default.fileExists(atPath: repo.fileURL(for: p0).path))   // file kept
         XCTAssertEqual(jpgFiles(e.id).count, 3)
-        XCTAssertEqual(try await activities().map(\.action), ["expenseAdded", "expenseUpdated"])
+        await XCTAssertEqualAsync(try await activities().map(\.action), ["expenseAdded", "expenseUpdated"])
     }
 
     func testNoOpUpdateWritesNothing() async throws {
         let e = expense()
         try await repo.create(e, receiptPages: [jpeg], actor: f.actor)
-        let created = try XCTUnwrap(try await repo.get(id: e.id))
+        let created = try await XCTUnwrapAsync(try await repo.get(id: e.id))
         try await repo.update(created, receipts: ReceiptChange(keptImageIds: created.receiptImages.map(\.id), newPages: []), actor: f.actor)
-        XCTAssertEqual(try await activities().count, 1)
+        await XCTAssertEqualAsync(try await activities().count, 1)
     }
 
     func testAmountChangeLogsFromAndTotal() async throws {
         let e = expense()
         try await repo.create(e, receiptPages: [], actor: f.actor)
-        var changed = try XCTUnwrap(try await repo.get(id: e.id))
+        var changed = try await XCTUnwrapAsync(try await repo.get(id: e.id))
         changed.amount = Money(150, .cad)
         try await repo.update(changed, receipts: ReceiptChange(keptImageIds: [], newPages: []), actor: f.actor)
-        XCTAssertEqual(try await repo.get(id: e.id)?.amount.storageString, "150.00")
-        XCTAssertEqual(try await activities().last?.details, #"{"category":"materials","categoryName":"","from":"113.00","total":"163.00","vendor":"Home Depot"}"#)
+        await XCTAssertEqualAsync(try await repo.get(id: e.id)?.amount.storageString, "150.00")
+        await XCTAssertEqualAsync(try await activities().last?.details, #"{"category":"materials","categoryName":"","from":"113.00","total":"163.00","vendor":"Home Depot"}"#)
     }
 
     func testKeepingCategoryKeepsSnapshotGroup() async throws {
@@ -118,16 +118,16 @@ final class ExpenseRepositoryTests: XCTestCase {
         let e = expense(.custom, group: .equipment, custom: c.id)
         try await repo.create(e, receiptPages: [], actor: f.actor)
         try await db.writer.write { db in try db.execute(sql: "UPDATE custom_expense_categories SET cost_group = 'other' WHERE id = ?", arguments: [c.id.dbKey]) }
-        var changed = try XCTUnwrap(try await repo.get(id: e.id))
+        var changed = try await XCTUnwrapAsync(try await repo.get(id: e.id))
         changed.amount = Money(120, .cad)
         try await repo.update(changed, receipts: ReceiptChange(keptImageIds: [], newPages: []), actor: f.actor)
-        XCTAssertEqual(try await repo.get(id: e.id)?.costGroup, .equipment)
+        await XCTAssertEqualAsync(try await repo.get(id: e.id)?.costGroup, .equipment)
     }
 
     func testUpdateMissingOrForeignPageThrows() async throws {
         let e = expense()
         try await repo.create(e, receiptPages: [], actor: f.actor)
-        let created = try XCTUnwrap(try await repo.get(id: e.id))
+        let created = try await XCTUnwrapAsync(try await repo.get(id: e.id))
         await XCTAssertThrowsErrorAsync(try await repo.update(created, receipts: ReceiptChange(keptImageIds: [UUID()], newPages: []), actor: f.actor)) { XCTAssertEqual($0 as? DomainError, .notFound) }
         try await repo.softDelete(id: e.id, actor: f.actor)
         await XCTAssertThrowsErrorAsync(try await repo.update(created, receipts: ReceiptChange(keptImageIds: [], newPages: [self.jpeg]), actor: f.actor)) { XCTAssertEqual($0 as? DomainError, .notFound) }
@@ -149,8 +149,8 @@ final class ExpenseRepositoryTests: XCTestCase {
         let liveReceipts = try await db.writer.read { db in try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM receipt_images WHERE deleted_at IS NULL") ?? -1 }
         XCTAssertEqual(liveReceipts, 0)
         XCTAssertEqual(jpgFiles(e.id).count, 1)
-        XCTAssertNil(try await repo.get(id: e.id))
-        XCTAssertEqual(try await activities().map(\.action), ["expenseAdded", "expenseDeleted"])
+        await XCTAssertNilAsync(try await repo.get(id: e.id))
+        await XCTAssertEqualAsync(try await activities().map(\.action), ["expenseAdded", "expenseDeleted"])
         await XCTAssertThrowsErrorAsync(try await repo.softDelete(id: e.id, actor: f.actor)) { XCTAssertEqual($0 as? DomainError, .notFound) }
     }
 }

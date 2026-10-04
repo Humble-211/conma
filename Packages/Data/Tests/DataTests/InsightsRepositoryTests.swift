@@ -65,7 +65,7 @@ final class InsightsRepositoryTests: XCTestCase {
                         amount: Money(250, .cad), tax: .zero(.cad), spentOn: CalendarDate(storage: "2026-10-03")!, paymentMethod: nil, notes: nil, receiptImages: [],
                         createdAt: now, updatedAt: now, deletedAt: nil)
         try await GRDBExpenseRepository(database: db, clock: .fixed(now), receiptStore: store).create(e, receiptPages: [], actor: ActivityActor(userId: nil, name: "Duc"))
-        let second = try XCTUnwrap(try await it.next()!)
+        let second = try await XCTUnwrapAsync(try await it.next()!)
         XCTAssertEqual(second.expenses.map(\.id), [e.id])
         XCTAssertEqual(ProjectInsightsComposer.compose(second.with(today: CalendarDate(storage: "2026-10-03")!)).financials?.spentSoFar, Money(250, .cad))
     }

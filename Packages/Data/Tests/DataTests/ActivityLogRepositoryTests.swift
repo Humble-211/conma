@@ -59,7 +59,7 @@ final class ActivityLogRepositoryTests: XCTestCase {
         }
         let logs = GRDBActivityLogRepository(database: db)
         var it = logs.observeForProject(projectId: p.id, limit: 5).makeAsyncIterator()
-        XCTAssertEqual(try await it.next()!.map(\.action), [.projectCreated])
-        XCTAssertEqual(try await logs.list(projectId: p.id).map(\.action), [.projectCreated])
+        await XCTAssertEqualAsync(try await it.next()!.map(\.action), [.projectCreated])
+        await XCTAssertEqualAsync(try await logs.list(projectId: p.id).map(\.action), [.projectCreated])
     }
 }

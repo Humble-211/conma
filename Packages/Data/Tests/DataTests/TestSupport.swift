@@ -33,3 +33,20 @@ func makeFixture(_ db: AppDatabase, now: Date) async throws -> Fixture {
 func temporaryReceiptStore() -> FileReceiptStore {
     FileReceiptStore(root: FileManager.default.temporaryDirectory.appendingPathComponent("receipts-\(UUID().uuidString)", isDirectory: true))
 }
+
+func XCTAssertEqualAsync<T: Equatable>(_ a: @autoclosure () async throws -> T, _ b: @autoclosure () -> T, file: StaticString = #filePath, line: UInt = #line) async {
+    do { let value = try await a(); XCTAssertEqual(value, b(), file: file, line: line) } catch { XCTFail("threw \(error)", file: file, line: line) }
+}
+
+func XCTAssertNilAsync<T>(_ a: @autoclosure () async throws -> T?, file: StaticString = #filePath, line: UInt = #line) async {
+    do { let value = try await a(); XCTAssertNil(value, file: file, line: line) } catch { XCTFail("threw \(error)", file: file, line: line) }
+}
+
+func XCTAssertNotNilAsync<T>(_ a: @autoclosure () async throws -> T?, file: StaticString = #filePath, line: UInt = #line) async {
+    do { let value = try await a(); XCTAssertNotNil(value, file: file, line: line) } catch { XCTFail("threw \(error)", file: file, line: line) }
+}
+
+func XCTUnwrapAsync<T>(_ a: @autoclosure () async throws -> T?, file: StaticString = #filePath, line: UInt = #line) async throws -> T {
+    let value = try await a()
+    return try XCTUnwrap(value, file: file, line: line)
+}

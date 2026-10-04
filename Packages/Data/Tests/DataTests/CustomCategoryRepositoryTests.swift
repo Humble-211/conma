@@ -64,7 +64,7 @@ final class CustomCategoryRepositoryTests: XCTestCase {
         try await repo.create(c)
         try await repo.update(id: c.id, name: "Scaffolding", costGroup: .material)
         var it = repo.observeAll(companyId: f.companyId).makeAsyncIterator()
-        XCTAssertEqual(try await it.next()!.first?.category.costGroup, .material)
+        await XCTAssertEqualAsync(try await it.next()!.first?.category.costGroup, .material)
         await XCTAssertThrowsErrorAsync(try await self.repo.update(id: UUID(), name: "X", costGroup: .other)) { XCTAssertEqual($0 as? DomainError, .notFound) }
     }
 
@@ -76,7 +76,7 @@ final class CustomCategoryRepositoryTests: XCTestCase {
         try await expenses.softDelete(id: expenseId, actor: f.actor)
         try await repo.softDelete(id: c.id)
         var it = repo.observeAll(companyId: f.companyId).makeAsyncIterator()
-        XCTAssertEqual(try await it.next()!.count, 0)
+        await XCTAssertEqualAsync(try await it.next()!.count, 0)
         try await repo.create(category("Scaffolding"))                     // name reusable after delete (partial unique index)
     }
 }
