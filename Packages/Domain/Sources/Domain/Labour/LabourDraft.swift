@@ -45,15 +45,19 @@ public struct LabourDraft: Hashable, Sendable {
         lines[index].dailyRate = rate
     }
 
-    /// ± half a day; never below half a day.
+    /// ± half a day; never below half a day, and "−" never raises a value already at or below that floor.
     public mutating func stepDays(up: Bool) {
+        if !up, let current = days, current <= Self.dayStep { return }
         let next = (days ?? 0) + (up ? Self.dayStep : -Self.dayStep)
         days = max(Self.dayStep, next)
     }
 
-    /// rounded(days × rate): the same single rounding as `LabourEntry.cost`.
+    /// Days as they are shown and stored: 2 decimals, half away from zero (0.333 → 0.33).
+    public var roundedDays: Decimal? { days.map { Money.rounded($0) } }
+
+    /// rounded(days × rate): the same single rounding as `LabourEntry.cost`, on the 2-decimal days.
     public func cost(for employeeId: UUID, currency: CurrencyCode) -> Money? {
-        guard let days, days > 0, let rate = lines.first(where: { $0.employeeId == employeeId })?.dailyRate, Money.rounded(rate) >= 0 else { return nil }
+        guard let days = roundedDays, days > 0, let rate = lines.first(where: { $0.employeeId == employeeId })?.dailyRate, Money.rounded(rate) >= 0 else { return nil }
         return LabourEntry.cost(days: days, dailyRate: Money(rate, currency))
     }
 
@@ -78,7 +82,7 @@ public struct LabourDraft: Hashable, Sendable {
     public var errors: [LabourDraftError] {
         var result: [LabourDraftError] = []
         if lines.isEmpty { result.append(.noCrewSelected) }
-        if let days {
+        if let days = roundedDays {
             if days <= 0 { result.append(.daysNotPositive) }
         } else {
             result.append(.daysMissing)
@@ -92,7 +96,7 @@ public struct LabourDraft: Hashable, Sendable {
     public var canSave: Bool { errors.isEmpty }
 
     public func makeEntries(companyId: UUID, projectId: UUID, currency: CurrencyCode, now: Date, makeId: () -> UUID = { UUID() }) throws -> [LabourEntry] {
-        guard canSave, let days else { throw DomainError.incompleteLabour }
+        guard canSave, let days = roundedDays else { throw DomainError.incompleteLabour }
         let note = Self.clean(notes)
         return lines.map { line in
             LabourEntry(id: makeId(), companyId: companyId, projectId: projectId, employeeId: line.employeeId, workDate: workDate, days: days,
@@ -102,7 +106,7 @@ public struct LabourDraft: Hashable, Sendable {
 
     /// Edit one entry: date, days, rate and notes change; the person never does.
     public func apply(to existing: LabourEntry, now: Date) throws -> LabourEntry {
-        guard canSave, let days, let rate = lines.first(where: { $0.employeeId == existing.employeeId })?.dailyRate else { throw DomainError.incompleteLabour }
+        guard canSave, let days = roundedDays, let rate = lines.first(where: { $0.employeeId == existing.employeeId })?.dailyRate else { throw DomainError.incompleteLabour }
         var entry = existing
         entry.workDate = workDate
         entry.days = days

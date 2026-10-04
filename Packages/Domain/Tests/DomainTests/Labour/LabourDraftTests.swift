@@ -69,6 +69,49 @@ final class LabourDraftTests: XCTestCase {
         XCTAssertEqual(d.days, Decimal(string: "0.5"))
     }
 
+    func testStepDownNeverRaisesBelowFloor() {
+        var d = LabourDraft(workDate: Fx.today)
+        d.days = Decimal(string: "0.25")
+        d.stepDays(up: false)
+        XCTAssertEqual(d.days, Decimal(string: "0.25"))
+        d.days = Decimal(string: "0.5")
+        d.stepDays(up: false)
+        XCTAssertEqual(d.days, Decimal(string: "0.5"))
+        d.days = Decimal(string: "0.75")
+        d.stepDays(up: false)
+        XCTAssertEqual(d.days, Decimal(string: "0.5"))
+        d.days = Decimal(string: "0.25")
+        d.stepDays(up: true)
+        XCTAssertEqual(d.days, Decimal(string: "0.75"))
+    }
+
+    func testDaysRoundedToTwoDecimalsForCostAndEntries() throws {
+        let s = Lab.Seed()
+        var d = LabourDraft(workDate: Fx.today)
+        d.toggle(s.mike)                                                             // 250.00 / day
+        d.days = Decimal(string: "0.333")
+        XCTAssertEqual(d.roundedDays, Decimal(string: "0.33"))
+        XCTAssertEqual(d.cost(for: s.mike.id, currency: .cad), Fx.moneyS("82.50"))   // not 83.25
+        XCTAssertEqual(d.total(currency: .cad), Fx.moneyS("82.50"))
+        let entries = try d.makeEntries(companyId: Fx.companyId, projectId: s.project.id, currency: .cad, now: Fx.now)
+        XCTAssertEqual(entries.map(\.days), [Decimal(string: "0.33")])
+        XCTAssertEqual(entries.map(\.cost), [Fx.moneyS("82.50")])
+        d.days = Decimal(string: "0.125")                                           // half away from zero
+        XCTAssertEqual(d.roundedDays, Decimal(string: "0.13"))
+        d.days = Decimal(string: "0.004")                                           // rounds to 0 → not positive
+        XCTAssertEqual(d.errors, [.daysNotPositive])
+    }
+
+    func testApplyRoundsDays() throws {
+        let s = Lab.Seed()
+        let david = s.entries[2]                                                     // 200.00 / day
+        var d = LabourDraft(editing: david)
+        d.days = Decimal(string: "2.666")
+        let u = try d.apply(to: david, now: Fx.now)
+        XCTAssertEqual(u.days, Decimal(string: "2.67"))
+        XCTAssertEqual(u.cost, Fx.moneyS("534.00"))
+    }
+
     func testMakeEntriesOnePerPerson() throws {
         let s = Lab.Seed()
         var d = LabourDraft(workDate: Fx.today)
