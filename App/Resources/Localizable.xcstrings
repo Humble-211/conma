@@ -8721,6 +8721,22 @@
           }
         }
       }
+    },
+    "gallery.receipts": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Receipts"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Receipt"
+          }
+        }
+      }
     }
   }
 }

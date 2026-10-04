@@ -83,8 +83,18 @@ public struct ComponentGalleryView: View {
                     MoneyField("gallery.contractValue", amount: .constant(Decimal(38_000)), currencyCode: "CAD")
                     DecimalField("gallery.quantity", value: .constant(7.5))
                     IntegerField("gallery.workers", value: .constant(3))
-                    ChoiceChips(options: ["a", "b"], selection: .constant("a")) { _ in "gallery.badge" } // lint:allow-string
+                    ChoiceChips(options: ["a", "b"], selection: .constant("a"), label: { _ in "gallery.badge" }) // lint:allow-string
                     StepHeader(title: "gallery.progress", step: 6, total: 12)
+                }
+                .padding(.horizontal, DSSpacing.lg)
+
+                SectionHeader("gallery.receipts")
+                VStack(spacing: DSSpacing.md) {
+                    HStack {
+                        ReceiptThumbnail(image: Image(systemName: "doc.richtext"), pageNumber: 1)
+                        ReceiptThumbnail(image: nil, pageNumber: 2)
+                    }
+                    ZoomableImage(image: Image(systemName: "doc.richtext")).frame(height: 160)
                 }
                 .padding(.horizontal, DSSpacing.lg)
 

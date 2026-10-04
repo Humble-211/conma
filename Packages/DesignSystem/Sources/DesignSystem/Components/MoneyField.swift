@@ -29,13 +29,14 @@ public struct MoneyField: View {
     private let title: LocalizedStringKey
     @Binding private var amount: Decimal?
     private let currencyCode: String
+    private let autoFocus: Bool
     @Environment(\.locale) private var locale
     @State private var text = ""
     @FocusState private var focused: Bool
 
     /// `amount` is the Decimal value; callers wrap it into their money type with the company currency.
-    public init(_ title: LocalizedStringKey, amount: Binding<Decimal?>, currencyCode: String) {
-        self.title = title; _amount = amount; self.currencyCode = currencyCode
+    public init(_ title: LocalizedStringKey, amount: Binding<Decimal?>, currencyCode: String, autoFocus: Bool = false) {
+        self.title = title; _amount = amount; self.currencyCode = currencyCode; self.autoFocus = autoFocus
     }
 
     public var body: some View {
@@ -49,6 +50,7 @@ public struct MoneyField: View {
                 .onChange(of: text) { _, newValue in amount = LocaleNumberParser.decimal(from: newValue, locale: locale) }
                 .onChange(of: focused) { _, isFocused in if !isFocused, let amount { text = LocaleNumberParser.string(amount, locale: locale, fractionDigits: 2) } }
                 .onChange(of: amount) { _, newValue in if !focused { text = newValue.map { LocaleNumberParser.string($0, locale: locale, fractionDigits: 2) } ?? "" } }
+                .task { if autoFocus { try? await Task.sleep(for: .milliseconds(350)); focused = true } }
                 .onAppear { if let amount { text = LocaleNumberParser.string(amount, locale: locale, fractionDigits: 2) } }
         }
         .frame(minHeight: DSSpacing.minTouch)
