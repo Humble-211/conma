@@ -16,4 +16,20 @@ final class ActivityDescriptionTests: XCTestCase {
         XCTAssertEqual(ActivityDescription.detail(for: entry(.statusChanged, "not json")), .plain(.statusChanged))
         XCTAssertEqual(ActivityDescription.detail(for: entry(.statusChanged, #"{"from":"bogus","to":"inProgress"}"#)), .plain(.statusChanged))
     }
+    func testExpenseAddedWithVendor() {
+        XCTAssertEqual(ActivityDescription.detail(for: entry(.expenseAdded, #"{"category":"materials","categoryName":"","total":"2712.00","vendor":"Home Depot"}"#)),
+                       .expense(action: .expenseAdded, title: .vendor("Home Depot"), total: "2712.00", previousTotal: nil))
+    }
+    func testExpenseDeletedCustomWithoutVendor() {
+        XCTAssertEqual(ActivityDescription.detail(for: entry(.expenseDeleted, #"{"category":"custom","categoryName":"Scaffolding","total":"40.00","vendor":""}"#)),
+                       .expense(action: .expenseDeleted, title: .customCategory("Scaffolding"), total: "40.00", previousTotal: nil))
+    }
+    func testExpenseUpdatedCarriesFrom() {
+        XCTAssertEqual(ActivityDescription.detail(for: entry(.expenseUpdated, #"{"category":"fuel","categoryName":"","from":"250.00","total":"260.00","vendor":""}"#)),
+                       .expense(action: .expenseUpdated, title: .category(.fuel), total: "260.00", previousTotal: "250.00"))
+    }
+    func testExpenseMissingTotalIsPlain() {
+        XCTAssertEqual(ActivityDescription.detail(for: entry(.expenseAdded, #"{"category":"fuel"}"#)), .plain(.expenseAdded))
+        XCTAssertEqual(ActivityDescription.detail(for: entry(.expenseAdded, #"{"category":"bogus","total":"1.00"}"#)), .plain(.expenseAdded))
+    }
 }

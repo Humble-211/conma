@@ -17,6 +17,8 @@ public extension ActivityAction {
         case .customerCreated, .customerChanged: return "person"
         case .scopeChanged: return "doc.text"
         case .timelineChanged: return "calendar"
+        case .expenseUpdated: return "cart.badge.plus"
+        case .expenseDeleted: return "cart.badge.minus"
         }
     }
 
@@ -48,6 +50,8 @@ public extension ActivityDetail {
             return Text("activity.scheduleChanged \(fromText) \(toText)")
         case .customerChanged(let fromName, let toName):
             return Text("activity.customerChanged \(fromName) \(toName)")
+        case .expense(let action, _, _, _):
+            return Text(action.titleKey)
         case .plain(let action):
             return Text(action.titleKey)
         }

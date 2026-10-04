@@ -8146,6 +8146,38 @@
         }
       }
     },
+    "activity.expenseDeleted": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Expense deleted"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đã xóa chi phí"
+          }
+        }
+      }
+    },
+    "activity.expenseUpdated": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Expense updated"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đã sửa chi phí"
+          }
+        }
+      }
+    },
     "activity.paymentReceived": {
       "localizations": {
         "en": {

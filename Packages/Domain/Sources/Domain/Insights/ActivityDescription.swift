@@ -1,5 +1,12 @@
 import Foundation
 
+/// How an expense is named in a sentence: vendor when known, else its category.
+public enum ExpenseTitle: Hashable, Sendable {
+    case vendor(String)
+    case category(ExpenseCategory)
+    case customCategory(String)
+}
+
 public enum ActivityDetail: Hashable, Sendable {
     case statusChanged(from: ProjectStatus, to: ProjectStatus)
     case progressChanged(from: Int?, to: Int?)
@@ -7,6 +14,7 @@ public enum ActivityDetail: Hashable, Sendable {
     case estimateChanged(group: CostGroup?, from: String, to: String)
     case scheduleChanged(from: String, to: String)
     case customerChanged(fromName: String, toName: String)
+    case expense(action: ActivityAction, title: ExpenseTitle, total: String, previousTotal: String?)
     case plain(ActivityAction)
 }
 
@@ -34,6 +42,13 @@ public enum ActivityDescription {
         case .customerChanged:
             guard let f = s("from"), let t = s("to") else { return .plain(entry.action) }
             return .customerChanged(fromName: f, toName: t)
+        case .expenseAdded, .expenseUpdated, .expenseDeleted:
+            guard let total = s("total"), let category = s("category").flatMap(ExpenseCategory.init(rawValue:)) else { return .plain(entry.action) }
+            let title: ExpenseTitle
+            if let vendor = s("vendor"), !vendor.isEmpty { title = .vendor(vendor) }
+            else if category == .custom { title = .customCategory(s("categoryName") ?? "") }
+            else { title = .category(category) }
+            return .expense(action: entry.action, title: title, total: total, previousTotal: entry.action == .expenseUpdated ? s("from") : nil)
         default: return .plain(entry.action)
         }
     }
