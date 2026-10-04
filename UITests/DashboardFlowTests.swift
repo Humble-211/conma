@@ -46,6 +46,10 @@ final class DashboardFlowTests: XCTestCase {
 
     private func openProject(_ app: XCUIApplication, _ address: String, projectsTab: String = "Projects") {
         tapTab(app, projectsTab)
+        // The list defaults to the Active filter when an in-work project exists; show every project.
+        let all = app.descendants(matching: .any)["projects_filter"].buttons.element(boundBy: 0)
+        XCTAssertTrue(all.waitForExistence(timeout: 10))
+        all.tap()
         let card = containing(app, address)
         XCTAssertTrue(card.waitForExistence(timeout: 10), address)
         card.tap()

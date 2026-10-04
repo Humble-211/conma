@@ -30,6 +30,10 @@ final class ScreenshotTests: XCTestCase {
                 app.buttons["more_gallery"].tap()
                 XCTAssertTrue(app.scrollViews["component_gallery"].waitForExistence(timeout: 5))
                 snap(app, "gallery_\(locale)_\(appearance)")
+                // Leave the gallery right away: its looping loading indicator keeps the app from going idle,
+                // which slows later queries on the More tab.
+                app.navigationBars.buttons.element(boundBy: 0).tap()
+                _ = app.buttons["more_customers"].waitForExistence(timeout: 5)
                 if appearance == "light" {
                     app.tabBars.buttons.element(boundBy: 1).tap()
                     app.buttons["projects_add"].tap()
@@ -70,7 +74,12 @@ final class ScreenshotTests: XCTestCase {
                     _ = app.otherElements["detail_header"].waitForExistence(timeout: 5)
                     app.navigationBars.buttons.element(boundBy: 0).tap()
                     app.tabBars.buttons.element(boundBy: 4).tap()
-                    if !app.buttons["more_customers"].waitForExistence(timeout: 2) { app.tabBars.buttons.element(boundBy: 4).tap() }   // gallery is still open: re-tap pops to root
+                    var attempts = 0
+                    while !app.buttons["more_customers"].waitForExistence(timeout: 3) && attempts < 3 {   // something is still pushed: pop to root
+                        let back = app.navigationBars.buttons["BackButton"]
+                        if back.exists { back.tap() } else { app.tabBars.buttons.element(boundBy: 4).tap() }
+                        attempts += 1
+                    }
                     app.buttons["more_customers"].tap()
                     snap(app, "customers_\(locale)")
                     app.cells.firstMatch.tap(); snap(app, "customer_profile_\(locale)")
