@@ -65,8 +65,9 @@ public enum SampleData {
             try item(kitchenProject.id, "schedule.row.deposit", 5000, pct: 20, due: today.adding(days: 7), deposit: true, 0),
         ], deletedIds: [], totalBefore: .zero(.cad), totalAfter: Money(5000, .cad)), actor: actor)
 
-        func employee(_ name: String, _ rate: Int) -> Employee {
-            Employee(id: UUID(), companyId: company.id, name: name, phone: nil, role: nil, trade: nil, hourlyRate: nil, dailyRate: Money(Decimal(rate), .cad),
+        func employee(_ name: String, trade: String, phone: String, _ rate: Int, hourlyCents: Int? = nil) -> Employee {
+            Employee(id: UUID(), companyId: company.id, name: name, phone: phone, role: nil, trade: trade,
+                     hourlyRate: hourlyCents.map { Money(Decimal($0) / 100, .cad) }, dailyRate: Money(Decimal(rate), .cad),
                      certifications: nil, emergencyContact: nil, notes: nil, createdAt: now, updatedAt: now, deletedAt: nil)
         }
         func labour(_ pid: UUID, _ employeeId: UUID, days: Int, rate: Int, on date: CalendarDate) -> LabourEntry {
@@ -82,7 +83,9 @@ public enum SampleData {
             Payment(id: UUID(), companyId: company.id, projectId: pid, scheduleItemId: item, amount: Money(Decimal(amount), .cad), paidOn: date, method: .eTransfer,
                     notes: nil, createdAt: now, updatedAt: now, deletedAt: nil)
         }
-        let mike = employee("Mike", 250), john = employee("John", 220), davidW = employee("David", 200)
+        let mike = employee("Mike", trade: "Carpenter", phone: "416-555-0110", 250, hourlyCents: 3125)
+        let john = employee("John", trade: "Drywall", phone: "647-555-0111", 220)
+        let davidW = employee("David", trade: "Labourer", phone: "905-555-0112", 200)
         let labourEntries = [labour(basementProject.id, mike.id, days: 8, rate: 250, on: today.adding(days: -10)),
                              labour(basementProject.id, john.id, days: 10, rate: 220, on: today.adding(days: -9)),
                              labour(basementProject.id, davidW.id, days: 7, rate: 200, on: today.adding(days: -8))]
@@ -91,11 +94,12 @@ public enum SampleData {
                            expense(basementProject.id, .other, "Dumpster rental", 600, 78, on: today.adding(days: -16))]
         let paymentRows = [payment(basementProject.id, 7600, item: basementDeposit.id, on: today.adding(days: -19)),
                            payment(roofProject.id, 18_500, item: nil, on: today.adding(days: -40))]
-        try await database.writer.write { db in
-            for e in [mike, john, davidW] { try EmployeeRecord(e).insert(db) }
-            for l in labourEntries { try LabourEntryRecord(l).insert(db) }
-            for p in paymentRows { try PaymentRecord(p).insert(db) }
-        }
+        let crewRepository = GRDBEmployeeRepository(database: database, clock: clock)
+        for e in [mike, john, davidW] { try await crewRepository.create(e) }
+        let labourRepository = GRDBLabourRepository(database: database, clock: clock)
+        for l in labourEntries { try await labourRepository.create([l], actor: actor) }        // one log per day, as a contractor would enter them
+        let paymentRepository = GRDBPaymentRepository(database: database, clock: clock)
+        for p in paymentRows { try await paymentRepository.create(p, actor: actor) }
 
         let expenseRepository = GRDBExpenseRepository(database: database, clock: clock, receiptStore: store)
         let pageCounts = [2, 0, 1]                                    // Lumber, Drywall, Dumpster (order of `expenseRows`)

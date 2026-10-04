@@ -84,4 +84,32 @@ final class SampleDataTests: XCTestCase {
         let page = try XCTUnwrap(list.rows[1].expense.receiptImages.first)
         XCTAssertTrue(FileManager.default.fileExists(atPath: store.url(for: page.filePath).path))
     }
+
+    func testSeedRoutesPaymentsAndLabourThroughRepositories() async throws {
+        let db = try AppDatabase.inMemory()
+        let now = Date(timeIntervalSince1970: 1_790_000_000)
+        let today = CalendarDate(storage: "2026-10-03")!
+        let setup = try await SampleData.seedIfEmpty(db, clock: .fixed(now), today: today)
+        let counts = try await db.writer.read { db in
+            try Dictionary(uniqueKeysWithValues: Row.fetchAll(db, sql: "SELECT action, COUNT(*) AS n FROM activity_log WHERE action IN ('paymentReceived', 'labourLogged') GROUP BY action")
+                .map { (row: Row) -> (String, Int) in (row["action"], row["n"]) })
+        }
+        XCTAssertEqual(counts, ["paymentReceived": 2, "labourLogged": 3])
+        let mikeJSON = try await db.writer.read { db in
+            try String.fetchOne(db, sql: "SELECT details_json FROM activity_log WHERE action = 'labourLogged' AND details_json LIKE '%Mike%'")
+        }
+        XCTAssertEqual(mikeJSON, #"{"currency":"CAD","names":"Mike","people":"1","total":"2000.00","workDate":"2026-09-23"}"#)
+        let depositJSON = try await db.writer.read { db in
+            try String.fetchOne(db, sql: "SELECT details_json FROM activity_log WHERE action = 'paymentReceived' AND details_json LIKE '%7600.00%'")
+        }
+        XCTAssertEqual(depositJSON, #"{"amount":"7600.00","currency":"CAD","item":"schedule.row.deposit","method":"eTransfer"}"#)
+        var it = GRDBEmployeeRepository(database: db, clock: .fixed(now)).observeAll(companyId: setup.company.id).makeAsyncIterator()
+        let crew = try await XCTUnwrapAsync(try await it.next())
+        XCTAssertEqual(crew.map(\.name), ["David", "John", "Mike"])
+        XCTAssertEqual(crew.map { $0.trade ?? "" }, ["Labourer", "Drywall", "Carpenter"])
+        XCTAssertEqual(crew.map { $0.dailyRate?.storageString ?? "" }, ["200.00", "220.00", "250.00"])
+        XCTAssertEqual(crew.last?.hourlyRate?.storageString, "31.25")
+        XCTAssertEqual(crew.last?.phone, "416-555-0110")
+        await XCTAssertEqualAsync(try await GRDBPaymentRepository(database: db, clock: .fixed(now)).lastUsedMethod(companyId: setup.company.id), .eTransfer)
+    }
 }
