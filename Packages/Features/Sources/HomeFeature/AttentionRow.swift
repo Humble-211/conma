@@ -6,7 +6,6 @@ import FeatureSupport
 struct AttentionRow: View {
     let item: AttentionItem
     let projectName: String
-    let currency: String
     @Environment(\.locale) private var locale
 
     var body: some View {
@@ -17,8 +16,8 @@ struct AttentionRow: View {
 
     private var subtitle: Text {
         if case .health(_, let status, let reason) = item {
-            return Text(status.titleKey) + Text(verbatim: " · ") + reason.text(currency: currency, locale: locale)
+            return Text(status.titleKey) + Text(verbatim: " · ") + reason.text(locale: locale)
         }
-        return item.text(currency: currency, locale: locale)
+        return item.text(locale: locale)
     }
 }

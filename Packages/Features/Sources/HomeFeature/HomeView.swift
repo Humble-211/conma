@@ -58,7 +58,7 @@ public struct HomeView: View {
             if phase == .active { viewModel.update(today: TodayProvider.today(timeZone: timeZone)) }
         }
         .sheet(isPresented: $showAllAttention) {
-            AttentionListSheet(items: viewModel.dashboard?.attention ?? [], names: names, currency: viewModel.currency) { id in
+            AttentionListSheet(items: viewModel.dashboard?.attention ?? [], names: names) { id in
                 showAllAttention = false
                 pendingDetail = id
             }
@@ -85,7 +85,7 @@ public struct HomeView: View {
                     } else {
                         ForEach(d.attention.prefix(5)) { item in
                             NavigationLink(value: ProjectRoute.detail(item.projectId)) {
-                                AttentionRow(item: item, projectName: names[item.projectId] ?? "", currency: viewModel.currency)
+                                AttentionRow(item: item, projectName: names[item.projectId] ?? "")
                             }
                             .buttonStyle(.plain)
                         }

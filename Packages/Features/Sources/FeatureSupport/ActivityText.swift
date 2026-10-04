@@ -50,8 +50,20 @@ public extension ActivityDetail {
             return Text("activity.scheduleChanged \(fromText) \(toText)")
         case .customerChanged(let fromName, let toName):
             return Text("activity.customerChanged \(fromName) \(toName)")
-        case .expense(let action, _, _, _):
-            return Text(action.titleKey)
+        case .expense(let action, let title, let total, let previous):
+            // A custom category whose name could not be read has an empty title: use the plain sentence.
+            if case .customCategory(let name) = title, name.isEmpty { return Text(action.titleKey) }
+            let titleText = title.text
+            let totalText = money(total)
+            switch action {
+            case .expenseUpdated:
+                let fromText = money(previous ?? total)
+                return Text("activity.expenseUpdated \(titleText) \(fromText) \(totalText)")
+            case .expenseDeleted:
+                return Text("activity.expenseDeleted \(titleText) \(totalText)")
+            default:
+                return Text("activity.expenseAdded \(titleText) \(totalText)")
+            }
         case .plain(let action):
             return Text(action.titleKey)
         }

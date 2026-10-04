@@ -146,7 +146,7 @@ public struct ProjectDetailView: View {
             header(s, insights: insights)
 
             FinancialSummarySection(insights: insights, currency: viewModel.currency, onEditEstimate: { edit(.estimate($0)) })
-            HealthSection(insights: insights, currency: viewModel.currency)
+            HealthSection(insights: insights)
             TimelineSection(insights: insights, project: s.project, today: viewModel.today, onEdit: { edit(.timeline) }, onAdd: { edit(.timeline) })
 
             section("detail.scope", .scope) {

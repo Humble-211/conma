@@ -6,7 +6,6 @@ import FeatureSupport
 /// Health status with its localized reasons; terminal projects are not evaluated.
 struct HealthSection: View {
     let insights: ProjectInsights?
-    let currency: CurrencyCode
     @Environment(\.locale) private var locale
 
     var body: some View {
@@ -20,7 +19,7 @@ struct HealthSection: View {
                         } else {
                             HealthChip(health.status.titleKey, tone: health.status.tone)
                             ForEach(health.reasons, id: \.self) { reason in
-                                Label { reason.text(currency: currency.rawValue, locale: locale) } icon: {
+                                Label { reason.text(locale: locale) } icon: {
                                     Image(systemName: "exclamationmark.circle").foregroundStyle(health.status.tone.foreground)
                                 }
                                 .font(DSTypography.callout)

@@ -30,11 +30,11 @@ public extension CostGroup {
 }
 
 public extension HealthReason {
-    /// Localized sentence with parameters (money formatted with the company currency).
-    func text(currency: String, locale: Locale) -> Text {
+    /// Localized sentence with parameters (money formatted with the amount's own currency).
+    func text(locale: Locale) -> Text {
         switch self {
         case .budgetExceeded(let group, let over):
-            let amount = MoneyFormat.string(over.amount, currencyCode: currency, locale: locale)
+            let amount = MoneyFormat.string(over.amount, currencyCode: over.currency.rawValue, locale: locale)
             return Text("health.reason.budgetExceeded \(Text(group.titleKey)) \(amount)")
         case .paymentOverdue(let count):
             return Text("health.reason.paymentOverdue \(count)")

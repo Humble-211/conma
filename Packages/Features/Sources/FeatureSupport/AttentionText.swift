@@ -23,15 +23,15 @@ public extension AttentionItem {
     }
 
     /// One-line description; the project name is shown separately by the row.
-    func text(currency: String, locale: Locale) -> Text {
+    func text(locale: Locale) -> Text {
         switch self {
         case .health(_, _, let reason):
-            return reason.text(currency: currency, locale: locale)
+            return reason.text(locale: locale)
         case .paymentOverdue(_, _, let label, let remaining, let days):
-            let amount = MoneyFormat.string(remaining.amount, currencyCode: currency, locale: locale)
+            let amount = MoneyFormat.string(remaining.amount, currencyCode: remaining.currency.rawValue, locale: locale)
             return Text("attention.paymentOverdue \(RowLabel.text(label)) \(days) \(amount)")
         case .paymentDueToday(_, _, let label, let remaining):
-            let amount = MoneyFormat.string(remaining.amount, currencyCode: currency, locale: locale)
+            let amount = MoneyFormat.string(remaining.amount, currencyCode: remaining.currency.rawValue, locale: locale)
             return Text("attention.paymentDueToday \(RowLabel.text(label)) \(amount)")
         case .startsToday:
             return Text("attention.startsToday")

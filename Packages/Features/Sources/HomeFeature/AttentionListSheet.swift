@@ -5,7 +5,6 @@ import DesignSystem
 struct AttentionListSheet: View {
     let items: [AttentionItem]
     let names: [UUID: String]
-    let currency: String
     let onSelect: (UUID) -> Void
     @Environment(\.dismiss) private var dismiss
 
@@ -13,7 +12,7 @@ struct AttentionListSheet: View {
         NavigationStack {
             List(items) { item in
                 Button { onSelect(item.projectId) } label: {
-                    AttentionRow(item: item, projectName: names[item.projectId] ?? "", currency: currency)
+                    AttentionRow(item: item, projectName: names[item.projectId] ?? "")
                 }
                 .buttonStyle(.plain)
             }
