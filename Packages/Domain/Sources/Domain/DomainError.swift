@@ -17,4 +17,7 @@ public enum DomainError: Error, Equatable, Sendable {
     case customerDeleted
     case crossCompany
     case notFound
+    case duplicateName
+    case tooManyReceiptPages
+    case incompleteExpense
 }
