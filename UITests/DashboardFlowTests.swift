@@ -70,7 +70,7 @@ final class DashboardFlowTests: XCTestCase {
         let cash = label(app, "home_total_cash")
         XCTAssertTrue(cash.contains("15,415.00"), cash)
         let active = label(app, "home_total_active")
-        XCTAssertTrue(active.hasSuffix("1"), active)
+        XCTAssertNotNil(active.range(of: #"[^0-9]1$"#, options: .regularExpression), active)   // exactly 1, not 11
     }
 
     /// (b) Basement detail: cash position, health, timeline.
@@ -78,7 +78,8 @@ final class DashboardFlowTests: XCTestCase {
         let app = launch()
         openProject(app, "123 Main Street")
         let cash = label(app, "detail_cash")
-        XCTAssertTrue(cash.contains("3,085.00") && (cash.contains("-") || cash.contains("−")), cash)
+        // Negative sign directly in front of the amount (optionally with the currency symbol between): "-CA$3,085.00" / "−3,085.00".
+        XCTAssertNotNil(cash.range(of: #"[-−]\s?(CA\$|\$)?\s?3,085\.00"#, options: .regularExpression), cash)
         let health = label(app, "detail_health")
         XCTAssertTrue(health.contains("Payment risk"), health)
         let timeline = label(app, "detail_timeline")
@@ -89,7 +90,8 @@ final class DashboardFlowTests: XCTestCase {
     func testChangeStatusFromDetail() {
         let app = launch()
         openProject(app, "45 Oak Avenue")
-        app.buttons["detail_status"].tap()
+        let statusButton = app.buttons["detail_status"]
+        XCTAssertTrue(statusButton.waitForExistence(timeout: 10)); statusButton.tap()
         let inProgress = app.buttons["status_inProgress"]
         XCTAssertTrue(inProgress.waitForExistence(timeout: 5))
         inProgress.tap()
@@ -102,7 +104,7 @@ final class DashboardFlowTests: XCTestCase {
         tapTab(app, "Home")
         let active = element(app, "home_total_active")
         XCTAssertTrue(active.waitForExistence(timeout: 10))
-        expectation(for: NSPredicate(format: "label ENDSWITH %@", "2"), evaluatedWith: active)
+        expectation(for: NSPredicate(format: "label MATCHES %@", "(?s).*[^0-9]2"), evaluatedWith: active)   // exactly 2, not 12
         waitForExpectations(timeout: 10)
     }
 
@@ -110,17 +112,28 @@ final class DashboardFlowTests: XCTestCase {
     func testSetProgress() {
         let app = launch()
         openProject(app, "45 Oak Avenue")
-        element(app, "detail_progress").tap()
+        let progressButton = element(app, "detail_progress")
+        XCTAssertTrue(progressButton.waitForExistence(timeout: 10)); progressButton.tap()
         let slider = app.sliders["progress_slider"]
         XCTAssertTrue(slider.waitForExistence(timeout: 5))
+        let value = app.staticTexts["progress_value"]
+        XCTAssertEqual(value.label, "0%")                                            // no manual progress yet
         slider.adjust(toNormalizedSliderPosition: 0.6)
-        let shown = app.staticTexts["progress_value"].label
-        XCTAssertNotEqual(shown, "0%")
+        // The slider lands near 60; correct with the stepper (steps of 5) until it reads exactly 60%.
+        let stepper = app.descendants(matching: .any)["progress_stepper"]
+        let increment = stepper.buttons.matching(NSPredicate(format: "label == %@", "Increment")).firstMatch
+        let decrement = stepper.buttons.matching(NSPredicate(format: "label == %@", "Decrement")).firstMatch
+        var steps = 0
+        while value.label != "60%" && steps < 25 {
+            let current = Int(value.label.dropLast()) ?? 0
+            (current < 60 ? increment : decrement).tap()
+            steps += 1
+        }
+        XCTAssertEqual(value.label, "60%")
         app.buttons["progress_save"].tap()
-        let progress = element(app, "detail_progress")
-        expectation(for: NSPredicate(format: "label CONTAINS %@", shown), evaluatedWith: progress)
+        expectation(for: NSPredicate(format: "label CONTAINS %@", "60%"), evaluatedWith: element(app, "detail_progress"))
         waitForExpectations(timeout: 10)
-        XCTAssertTrue(containing(app, "— → " + shown).waitForExistence(timeout: 10), labels(app))
+        XCTAssertTrue(containing(app, "— → 60%").waitForExistence(timeout: 10), labels(app))
     }
 
     /// (e) Delete project returns to the list and updates Home collected.
@@ -163,11 +176,13 @@ final class DashboardFlowTests: XCTestCase {
     /// (g) Timeline validation blocks Continue (hours per day out of range; the compact DatePicker is not scriptable).
     func testTimelineValidationBlocksContinue() {
         let app = launch()
-        tapTab(app, "Projects"); app.buttons["projects_add"].tap()
+        tapTab(app, "Projects")
+        let add = app.buttons["projects_add"]
+        XCTAssertTrue(add.waitForExistence(timeout: 10)); add.tap()
         app.buttons["wizard_jobtype_kitchen"].tap(); app.buttons["wizard_continue"].tap()
         row(app, "Ann Lee").tap(); app.buttons["wizard_continue"].tap()
         let address = app.textFields["wizard_address_line"]
-        address.tap(); address.typeText("1 Test"); app.buttons["wizard_continue"].tap()
+        XCTAssertTrue(address.waitForExistence(timeout: 5)); address.tap(); address.typeText("1 Test"); app.buttons["wizard_continue"].tap()
         app.buttons["wizard_skip"].tap()                                            // scope → timeline
         let hours = app.textFields["wizard_hours_per_day"]
         XCTAssertTrue(hours.waitForExistence(timeout: 5)); hours.tap(); hours.typeText("30")
