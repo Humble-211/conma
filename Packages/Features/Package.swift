@@ -7,7 +7,7 @@ let package = Package(
     name: "Features",
     platforms: [.iOS(.v17)],
     products: [
-        .library(name: "Features", targets: ["FeatureSupport", "SetupFeature", "HomeFeature", "ProjectsFeature", "CalendarFeature", "ExpensesFeature", "MoreFeature", "CustomersFeature"]),
+        .library(name: "Features", targets: ["FeatureSupport", "SetupFeature", "HomeFeature", "ProjectsFeature", "CalendarFeature", "ExpensesFeature", "PaymentsFeature", "MoreFeature", "CustomersFeature"]),
     ],
     dependencies: [
         .package(path: "../Domain"),
@@ -20,6 +20,7 @@ let package = Package(
         .target(name: "ProjectsFeature", dependencies: featureDeps, path: "Sources/ProjectsFeature"),
         .target(name: "CalendarFeature", dependencies: featureDeps, path: "Sources/CalendarFeature"),
         .target(name: "ExpensesFeature", dependencies: featureDeps, path: "Sources/ExpensesFeature"),
+        .target(name: "PaymentsFeature", dependencies: featureDeps, path: "Sources/PaymentsFeature"),
         .target(name: "MoreFeature", dependencies: featureDeps, path: "Sources/MoreFeature"),
         .target(name: "CustomersFeature", dependencies: featureDeps, path: "Sources/CustomersFeature"),
     ]
