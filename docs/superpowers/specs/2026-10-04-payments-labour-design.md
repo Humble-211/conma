@@ -371,3 +371,8 @@ UI tests (`UITests/PaymentsLabourFlowTests.swift`, launch `--ui-testing --seed-s
 ## 12. Ngoài phạm vi 3b
 
 Invoice/receipt gửi khách, nhắc thanh toán (notification — 4/5), chấm công theo giờ và timesheet, lương/payroll, phân công crew theo ngày (`project_workers`) và cảnh báo trùng lịch (4), số ngày khác nhau cho từng người trong một lô (sửa từng dòng sau), chuyển payment sang project khác, tự phân bổ payment dư sang đợt sau (Foundation cấm), undo xóa, đồng bộ (5), báo cáo/xuất CSV, nhiều currency.
+
+## Errata
+
+- Task 13 (CI): with the eight `PaymentsLabourFlowTests` and the money screenshots, the `ios.yml` UI test step takes ~40.5 min and the job finished 28 s under its 45-minute `timeout-minutes` (run 37223436970). Raised to 60 minutes.
+- Task 13 (screenshots): `detail_payments_<locale>` drags the Payments card from the lower half of the screen towards the top after the swipe loop, because the card already counts as hittable while only its top edge shows under the tab bar.

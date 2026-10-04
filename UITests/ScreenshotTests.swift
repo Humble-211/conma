@@ -49,6 +49,13 @@ final class ScreenshotTests: XCTestCase {
         let payments = app.descendants(matching: .any)["detail_payments"]
         var swipes = 0
         while !(payments.exists && payments.isHittable) && swipes < 4 { app.swipeUp(); swipes += 1 }
+        // Hittable already when only its top edge peeks out under the tab bar: drag it up into view (no fling).
+        var drags = 0
+        while payments.exists && payments.frame.minY > app.frame.height * 0.5 && drags < 3 {
+            app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.8))
+                .press(forDuration: 0.05, thenDragTo: app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.25)))
+            drags += 1
+        }
         snap(app, "detail_payments_\(locale)")
         app.buttons["detail_payments_add"].tap()
         _ = app.buttons["payment_save"].waitForExistence(timeout: 5)
