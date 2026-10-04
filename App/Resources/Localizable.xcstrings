@@ -6658,6 +6658,22 @@
         }
       }
     },
+    "home.totals.spent": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spent"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đã chi"
+          }
+        }
+      }
+    },
     "home.totals.cash": {
       "localizations": {
         "en": {
@@ -6759,7 +6775,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Check your connection and try again."
+            "value": "Couldn't load your data. Try again."
           }
         },
         "vi": {

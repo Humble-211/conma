@@ -12,7 +12,7 @@ public final class HomeViewModel {
     public var currency: String { dashboard?.totals.currency.rawValue ?? "" }
 
     private var snapshot: DashboardInputs.Snapshot?
-    private var today: CalendarDate
+    public private(set) var today: CalendarDate
     private let insightsRepository: any InsightsRepository
     private let companyId: UUID
     private var generation = 0

@@ -50,7 +50,10 @@ public struct HomeView: View {
             }
         }
         .navigationDestination(item: $pendingDetail) { id in makeDetail(id) }
-        .task(id: retryToken) { await viewModel.start() }
+        .task(id: retryToken) {
+            viewModel.update(today: TodayProvider.today(timeZone: timeZone))
+            await viewModel.start()
+        }
         .onChange(of: scenePhase) { _, phase in
             if phase == .active { viewModel.update(today: TodayProvider.today(timeZone: timeZone)) }
         }
@@ -67,7 +70,7 @@ public struct HomeView: View {
         VStack(alignment: .leading, spacing: DSSpacing.lg) {
             VStack(alignment: .leading, spacing: DSSpacing.xs) {
                 Text(verbatim: companyName).font(DSTypography.title)
-                DateLabel(TodayProvider.today(timeZone: timeZone).noonDate(in: timeZone), style: .full)
+                DateLabel(viewModel.today.noonDate(in: timeZone), style: .full)
                     .font(DSTypography.caption).foregroundStyle(DSColor.textSecondary)
                     .accessibilityIdentifier("home_date")
             }

@@ -10,7 +10,7 @@ struct AttentionRow: View {
     @Environment(\.locale) private var locale
 
     var body: some View {
-        ActivityRow(systemImage: item.systemImage, title: Text(verbatim: projectName), subtitle: subtitle)
+        ActivityRow(systemImage: item.systemImage, title: Text(verbatim: projectName), subtitle: subtitle, tint: item.tone.foreground)
             .accessibilityElement(children: .combine)
             .accessibilityIdentifier("attention_\(item.id)")
     }

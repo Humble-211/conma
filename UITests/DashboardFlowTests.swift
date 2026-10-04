@@ -67,6 +67,8 @@ final class DashboardFlowTests: XCTestCase {
         XCTAssertTrue(attention.contains("Starts today"), attention)
         let outstanding = label(app, "home_total_outstanding")
         XCTAssertTrue(outstanding.contains("55,400.00"), outstanding)
+        let spent = label(app, "home_total_spent")
+        XCTAssertTrue(spent.contains("10,685.00"), spent)
         let cash = label(app, "home_total_cash")
         XCTAssertTrue(cash.contains("15,415.00"), cash)
         let active = label(app, "home_total_active")

@@ -11,6 +11,7 @@ public enum DSColor {
     public static let onAccent = dynamic(light: 0xFFFFFF, dark: 0x1A1A1A)
     public static let success = dynamic(light: 0x256B42, dark: 0x4CC38A)
     public static let warning = dynamic(light: 0x7A5800, dark: 0xF0C419)
+    public static let caution = dynamic(light: 0xB45309, dark: 0xFFA040)
     public static let danger = dynamic(light: 0xB71C1C, dark: 0xFF6B6B)
     public static let info = dynamic(light: 0x2A5DB0, dark: 0x6FA0FF)
     public static let border = dynamic(light: 0xE2E2DE, dark: 0x2C2C2E)
@@ -29,7 +30,7 @@ extension UIColor {
 }
 
 public enum DSTone: Sendable, Hashable, CaseIterable {
-    case neutral, info, success, warning, danger, accent
+    case neutral, info, success, warning, caution, danger, accent
 
     public var foreground: Color {
         switch self {
@@ -37,6 +38,7 @@ public enum DSTone: Sendable, Hashable, CaseIterable {
         case .info: return DSColor.info
         case .success: return DSColor.success
         case .warning: return DSColor.warning
+        case .caution: return DSColor.caution
         case .danger: return DSColor.danger
         case .accent: return DSColor.accent
         }

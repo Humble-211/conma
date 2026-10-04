@@ -17,6 +17,8 @@ struct TotalsCard: View {
                         .accessibilityElement(children: .combine).accessibilityIdentifier("home_total_outstanding")
                     SummaryTile("home.totals.collected", value: money(totals.collected))
                         .accessibilityElement(children: .combine).accessibilityIdentifier("home_total_collected")
+                    SummaryTile("home.totals.spent", value: money(totals.spent))
+                        .accessibilityElement(children: .combine).accessibilityIdentifier("home_total_spent")
                     SummaryTile("home.totals.cash", value: money(totals.cashPosition), tone: totals.cashPosition.isNegative ? .danger : .neutral)
                         .accessibilityElement(children: .combine).accessibilityIdentifier("home_total_cash")
                 }

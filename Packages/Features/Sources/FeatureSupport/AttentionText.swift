@@ -6,7 +6,7 @@ public extension AttentionItem {
     var tone: DSTone {
         switch kind {
         case .overBudget, .paymentOverdue, .paymentRisk: return .danger
-        case .delayed, .dueToday: return .warning
+        case .delayed, .dueToday: return .caution
         case .startsToday: return .info
         case .atRisk: return .warning
         }
