@@ -22,6 +22,16 @@ public extension AttentionItem {
         }
     }
 
+    /// VoiceOver label of the row's "Record" button: names the project and the stage, not just "Record".
+    func recordAccessibilityLabel(projectName: String) -> Text {
+        switch self {
+        case .paymentOverdue(_, _, let label, _, _), .paymentDueToday(_, _, let label, _):
+            return Text("attention.record.accessibility \(projectName) \(RowLabel.text(label))")
+        case .health, .startsToday:
+            return Text("attention.record")
+        }
+    }
+
     /// One-line description; the project name is shown separately by the row.
     func text(locale: Locale) -> Text {
         switch self {

@@ -1,6 +1,7 @@
 import SwiftUI
 import Domain
 import DesignSystem
+import FeatureSupport
 
 struct AttentionListSheet: View {
     let items: [AttentionItem]
@@ -18,6 +19,7 @@ struct AttentionListSheet: View {
                     if let onRecord, let itemId = item.scheduleItemId {
                         Button("attention.record") { onRecord(item) }
                             .buttonStyle(.bordered)
+                            .accessibilityLabel(item.recordAccessibilityLabel(projectName: names[item.projectId] ?? ""))
                             .accessibilityIdentifier("attention_record_\(itemId.uuidString)")
                     }
                 }

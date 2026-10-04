@@ -123,6 +123,7 @@ public struct HomeView: View {
                                     }
                                     .buttonStyle(.bordered)
                                     .frame(minHeight: DSSpacing.minTouch)
+                                    .accessibilityLabel(item.recordAccessibilityLabel(projectName: names[item.projectId] ?? ""))
                                     .accessibilityIdentifier("attention_record_\(itemId.uuidString)")
                                 }
                             }
