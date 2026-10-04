@@ -361,3 +361,7 @@ UI tests (`UITests/ExpensesFlowTests.swift`, launch `--ui-testing --seed-sample-
 ## 12. Ngoài phạm vi 3a
 
 Payments, labour/crew, employees (3b); OCR; vendor list/autocomplete; kéo đổi thứ tự trang receipt; xóa vĩnh viễn file receipt (5); đồng bộ thuế mặc định giữa máy (5); chi phí ngoài project; split một receipt cho nhiều project; báo cáo/xuất CSV; nhiều currency; undo xóa.
+
+## Errata
+
+- §5.4 (Task 12): custom categories are listed before the built-in ones (section "Của bạn" above "Có sẵn" in `CategoriesView`).
