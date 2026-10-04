@@ -9,6 +9,7 @@ public struct ProjectLabourSection: View {
     private let makeAll: () -> AnyView
     private let makeForm: (LabourFormRequest) -> AnyView
     @State private var formRequest: LabourFormRequest?
+    @State private var retryToken = 0
     @Environment(\.locale) private var locale
 
     public init(viewModel: ProjectLabourViewModel, makeAll: @escaping () -> AnyView, makeForm: @escaping (LabourFormRequest) -> AnyView) {
@@ -26,7 +27,9 @@ public struct ProjectLabourSection: View {
                         .frame(minHeight: DSSpacing.minTouch)
                         .accessibilityIdentifier("detail_labour_add")
                 }
-                if let list = viewModel.list {
+                if let errorKey = viewModel.errorKey {
+                    LabourLoadError(messageKey: errorKey) { viewModel.retry(); retryToken += 1 }
+                } else if let list = viewModel.list {
                     if list.sections.isEmpty {
                         Text("detail.labour.empty")
                             .font(DSTypography.callout)
@@ -48,7 +51,24 @@ public struct ProjectLabourSection: View {
         }
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("detail_labour")
-        .task { await viewModel.start() }
+        .task(id: retryToken) { await viewModel.start() }
         .sheet(item: $formRequest) { request in makeForm(request) }
+    }
+}
+
+/// Load failure of the project's labour, with a retry (like the other lists).
+struct LabourLoadError: View {
+    let messageKey: LocalizedStringKey
+    let onRetry: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: DSSpacing.sm) {
+            Text(messageKey)
+                .font(DSTypography.callout)
+                .foregroundStyle(DSColor.textSecondary)
+                .accessibilityIdentifier("labour_error")
+            SecondaryButton("labour.retry", action: onRetry)
+                .accessibilityIdentifier("labour_retry")
+        }
     }
 }

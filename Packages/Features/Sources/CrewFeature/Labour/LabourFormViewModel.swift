@@ -64,9 +64,19 @@ public final class LabourFormViewModel {
             return
         }
         do {
-            for try await value in employeeRepository.observeAll(companyId: companyId) { crew = value; isLoaded = true }
+            for try await value in employeeRepository.observeAll(companyId: companyId) { receiveCrew(value); isLoaded = true }
         } catch is CancellationError {
         } catch { alertKey = "labour.error.load" }
+    }
+
+    /// A new live-crew emission: people added in this sheet count as known once the crew contains them, and a selected
+    /// person who has left the live crew is dropped from the draft (they can no longer be shown or saved).
+    func receiveCrew(_ value: [Employee]) {
+        crew = value
+        let live = Set(value.map(\.id))
+        createdCrew.removeAll { live.contains($0.id) }
+        let selectable = live.union(createdCrew.map(\.id))
+        draft.lines.removeAll { !selectable.contains($0.employeeId) }
     }
 
     /// Second `.task` (create only): this project's entries for the "already logged" notice. A failure only hides the notice.

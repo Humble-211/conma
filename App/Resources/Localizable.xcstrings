@@ -11714,6 +11714,22 @@
         }
       }
     },
+    "labour.retry": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Try again"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thử lại"
+          }
+        }
+      }
+    },
     "crew.title": {
       "localizations": {
         "en": {
