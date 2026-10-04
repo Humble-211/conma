@@ -43,12 +43,12 @@ final class ExpensesFlowTests: XCTestCase {
     }
     private func skipScanner(_ app: XCUIApplication) {
         let cancel = app.buttons["scanner_cancel"]
-        XCTAssertTrue(cancel.waitForExistence(timeout: 5))
+        XCTAssertTrue(cancel.waitForExistence(timeout: 5), "scanner_cancel\n" + app.debugDescription)
         cancel.tap()
     }
     private func save(_ app: XCUIApplication) {
         app.buttons["expense_save"].tap()
-        XCTAssertTrue(app.buttons["expense_save"].waitForNonExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["expense_save"].waitForNonExistence(timeout: 5), "form still open\n" + app.debugDescription)
     }
     private func tab(_ app: XCUIApplication, _ label: String) {
         let button = app.tabBars.buttons[label]
@@ -81,7 +81,7 @@ final class ExpensesFlowTests: XCTestCase {
     func testAddExpenseFromHomeUpdatesDashboard() {
         let app = launch()
         let add = app.buttons["home_add_expense"]
-        XCTAssertTrue(add.waitForExistence(timeout: 10))
+        XCTAssertTrue(add.waitForExistence(timeout: 10), "home_add_expense")
         add.tap()
         skipScanner(app)
         waitLabel(app, "expense_project", contains: "Basement Renovation")
@@ -91,7 +91,7 @@ final class ExpensesFlowTests: XCTestCase {
         save(app)
         waitLabel(app, "home_total_spent", contains: "10,935.00")
         waitLabel(app, "home_total_cash", contains: "15,165.00")
-        XCTAssertTrue(containing(app, "Over budget").waitForExistence(timeout: 5))
+        XCTAssertTrue(containing(app, "Over budget").waitForExistence(timeout: 5), "Over budget on Home")
         openProject(app, "123 Main Street")
         waitLabel(app, "detail_health", contains: "Over budget")
         let cash = waitLabel(app, "detail_cash", contains: "3,335.00")
@@ -105,10 +105,10 @@ final class ExpensesFlowTests: XCTestCase {
     func testTaxPercentAndReceiptFromTab() {
         let app = launch()
         tab(app, "Expenses")
-        XCTAssertTrue(app.buttons["expenses_add"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["expenses_add"].waitForExistence(timeout: 5), "expenses_add")
         app.buttons["expenses_add"].tap()
         let capture = app.buttons["scanner_capture"]
-        XCTAssertTrue(capture.waitForExistence(timeout: 5))
+        XCTAssertTrue(capture.waitForExistence(timeout: 5), "scanner_capture\n" + app.debugDescription)
         capture.tap()
         waitLabel(app, "expense_receipt_count", contains: "1/10")
         XCTAssertTrue(element(app, "expense_receipt_thumb_0").exists)
@@ -187,7 +187,7 @@ final class ExpensesFlowTests: XCTestCase {
         XCTAssertTrue(app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@ AND label CONTAINS %@ AND label CONTAINS %@", "category_row_", "Scaffolding", "Materials"))
                         .firstMatch.waitForExistence(timeout: 5))
         tab(app, "Expenses")
-        XCTAssertTrue(app.buttons["expenses_add"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["expenses_add"].waitForExistence(timeout: 5), "expenses_add")
         app.buttons["expenses_add"].tap()
         skipScanner(app)
         type(app, "expense_amount", "40")
@@ -244,7 +244,7 @@ final class ExpensesFlowTests: XCTestCase {
         app.navigationBars.buttons.element(boundBy: 0).tap()
         XCTAssertTrue(app.buttons["more_settings"].waitForExistence(timeout: 5))
         tab(app, "Expenses")
-        XCTAssertTrue(app.buttons["expenses_add"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["expenses_add"].waitForExistence(timeout: 5), "expenses_add")
         app.buttons["expenses_add"].tap()
         skipScanner(app)
         type(app, "expense_amount", "200")
