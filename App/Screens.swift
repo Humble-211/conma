@@ -6,6 +6,8 @@ import HomeFeature
 import ProjectsFeature
 import CustomersFeature
 import ExpensesFeature
+import PaymentsFeature
+import CrewFeature
 
 /// Owns the setup view model so parent re-renders (e.g. language change) don't recreate it.
 struct SetupScreen: View {
@@ -36,7 +38,8 @@ struct HomeScreen: View {
         HomeView(viewModel: viewModel, companyName: setup.company.name,
                  makeDetail: { id in AnyView(ProjectDetailScreen(projectId: id, ready: ready, setup: setup)) },
                  makeActivity: { id in AnyView(ActivityScreen(projectId: id, ready: ready, setup: setup)) },
-                 makeExpenseForm: { request in AnyView(ExpenseFlowScreen(request: request, ready: ready, setup: setup)) })
+                 makeExpenseForm: { request in AnyView(ExpenseFlowScreen(request: request, ready: ready, setup: setup)) },
+                 makePaymentForm: { request in AnyView(PaymentFormScreen(request: request, ready: ready, setup: setup)) })
     }
 }
 
@@ -59,7 +62,9 @@ struct ProjectDetailScreen: View {
         ProjectDetailView(viewModel: viewModel,
                           makeCustomer: { id in AnyView(CustomerProfileScreen(customerId: id, ready: ready, setup: setup)) },
                           makeActivity: { id in AnyView(ActivityScreen(projectId: id, ready: ready, setup: setup)) },
-                          makeExpensesSection: { id in AnyView(ProjectExpensesSectionScreen(projectId: id, ready: ready, setup: setup)) })
+                          makeExpensesSection: { id in AnyView(ProjectExpensesSectionScreen(projectId: id, ready: ready, setup: setup)) },
+                          makeLabourSection: { id in AnyView(ProjectLabourSectionScreen(projectId: id, ready: ready, setup: setup)) },
+                          makePaymentForm: { request in AnyView(PaymentFormScreen(request: request, ready: ready, setup: setup)) })
     }
 }
 
@@ -203,4 +208,77 @@ struct CategoriesScreen: View {
     }
 
     var body: some View { CategoriesView(viewModel: viewModel) }
+}
+
+/// Owns the payment form view model for one create/edit; closes with `dismiss` (presented as a sheet).
+struct PaymentFormScreen: View {
+    @State private var viewModel: PaymentFormViewModel
+    @Environment(\.dismiss) private var dismiss
+
+    init(request: PaymentFormRequest, ready: AppContainer.Ready, setup: CompanySetup) {
+        _viewModel = State(initialValue: PaymentFormViewModel(request: request, companyId: setup.company.id, currency: setup.company.currencyCode,
+                                                              paymentRepository: ready.paymentRepository, insightsRepository: ready.insightsRepository,
+                                                              actor: ActivityActor(userId: setup.owner.id, name: setup.owner.displayName),
+                                                              today: TodayProvider.today(timeZone: .current)))
+    }
+
+    var body: some View { PaymentFormView(viewModel: viewModel, onClose: { dismiss() }) }
+}
+
+struct CrewScreen: View {
+    @State private var viewModel: CrewListViewModel
+
+    init(ready: AppContainer.Ready, setup: CompanySetup) {
+        _viewModel = State(initialValue: CrewListViewModel(employeeRepository: ready.employeeRepository, companyId: setup.company.id, currency: setup.company.currencyCode))
+    }
+
+    var body: some View { CrewListView(viewModel: viewModel) }
+}
+
+struct LabourFormScreen: View {
+    @State private var viewModel: LabourFormViewModel
+    @Environment(\.dismiss) private var dismiss
+
+    init(request: LabourFormRequest, ready: AppContainer.Ready, setup: CompanySetup) {
+        _viewModel = State(initialValue: LabourFormViewModel(request: request, companyId: setup.company.id, currency: setup.company.currencyCode,
+                                                             labourRepository: ready.labourRepository, employeeRepository: ready.employeeRepository,
+                                                             actor: ActivityActor(userId: setup.owner.id, name: setup.owner.displayName),
+                                                             today: TodayProvider.today(timeZone: .current)))
+    }
+
+    var body: some View { LabourFormView(viewModel: viewModel, onClose: { dismiss() }) }
+}
+
+/// Project detail's Labour card (three latest days, "Log labour", "See all").
+struct ProjectLabourSectionScreen: View {
+    @State private var viewModel: ProjectLabourViewModel
+    let projectId: UUID
+    let ready: AppContainer.Ready
+    let setup: CompanySetup
+
+    init(projectId: UUID, ready: AppContainer.Ready, setup: CompanySetup) {
+        _viewModel = State(initialValue: ProjectLabourViewModel(labourRepository: ready.labourRepository, projectId: projectId))
+        self.projectId = projectId; self.ready = ready; self.setup = setup
+    }
+
+    var body: some View {
+        ProjectLabourSection(viewModel: viewModel,
+                             makeAll: { AnyView(ProjectLabourListScreen(projectId: projectId, ready: ready, setup: setup)) },
+                             makeForm: { request in AnyView(LabourFormScreen(request: request, ready: ready, setup: setup)) })
+    }
+}
+
+struct ProjectLabourListScreen: View {
+    @State private var viewModel: ProjectLabourViewModel
+    let ready: AppContainer.Ready
+    let setup: CompanySetup
+
+    init(projectId: UUID, ready: AppContainer.Ready, setup: CompanySetup) {
+        _viewModel = State(initialValue: ProjectLabourViewModel(labourRepository: ready.labourRepository, projectId: projectId))
+        self.ready = ready; self.setup = setup
+    }
+
+    var body: some View {
+        ProjectLabourListView(viewModel: viewModel, makeForm: { request in AnyView(LabourFormScreen(request: request, ready: ready, setup: setup)) })
+    }
 }

@@ -34,6 +34,8 @@ public final class ProjectDetailViewModel {
     public var editing: EditSection?
     public private(set) var insights: ProjectInsights?
     public private(set) var activity: [ActivityLogEntry] = []
+    /// The Payments card: live payments newest first and the not-linked total.
+    public private(set) var payments: ProjectPaymentList?
     /// Failure of a status/progress/customer/delete write; the view shows it as an alert.
     public var actionErrorKey: LocalizedStringKey?
     public private(set) var today: CalendarDate
@@ -72,6 +74,7 @@ public final class ProjectDetailViewModel {
             for try await value in insightsRepository.observeProject(id: projectId) {
                 insightsSnapshot = value
                 insights = value.map { ProjectInsightsComposer.compose($0.with(today: today)) }
+                payments = value.map { ProjectPaymentListComposer.compose(payments: $0.payments, scheduleItems: $0.scheduleItems, currency: currency) }
             }
         } catch is CancellationError {
         } catch { errorKey = "detail.error" }

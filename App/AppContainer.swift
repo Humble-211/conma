@@ -19,6 +19,9 @@ final class AppContainer {
         let draftStore: any DraftStore
         let expenseRepository: any ExpenseRepository
         let categoryRepository: any CustomCategoryRepository
+        let paymentRepository: any PaymentRepository
+        let employeeRepository: any EmployeeRepository
+        let labourRepository: any LabourRepository
         let captureMode: ReceiptCaptureMode
         let settings: AppSettings
         var setup: CompanySetup?
@@ -78,6 +81,9 @@ final class AppContainer {
                               draftStore: FileDraftStore(directory: draftDirectory),
                               expenseRepository: GRDBExpenseRepository(database: database, clock: clock, receiptStore: receiptStore),
                               categoryRepository: GRDBCustomCategoryRepository(database: database, clock: clock),
+                              paymentRepository: GRDBPaymentRepository(database: database, clock: clock),
+                              employeeRepository: GRDBEmployeeRepository(database: database, clock: clock),
+                              labourRepository: GRDBLabourRepository(database: database, clock: clock),
                               captureMode: options.isUITesting && options.fakeScanner ? .fake : .live,
                               settings: settings,
                               setup: nil)

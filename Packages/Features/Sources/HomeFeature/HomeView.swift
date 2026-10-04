@@ -9,18 +9,32 @@ public struct HomeView: View {
     private let makeDetail: (UUID) -> AnyView
     private let makeActivity: (UUID) -> AnyView
     private let makeExpenseForm: ((ExpenseFormRequest) -> AnyView)?
+    private let makePaymentForm: ((PaymentFormRequest) -> AnyView)?
 
     @State private var showAllAttention = false
     @State private var expenseRequest: ExpenseFormRequest?
+    @State private var paymentRequest: PaymentFormRequest?
+    /// A payment chosen in the all-attention sheet; it opens from that sheet's `onDismiss`.
+    @State private var pendingPayment: PaymentFormRequest?
     @State private var pendingDetail: UUID?
     @State private var retryToken = 0
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.timeZone) private var timeZone
 
     public init(viewModel: HomeViewModel, companyName: String = "", makeDetail: @escaping (UUID) -> AnyView, makeActivity: @escaping (UUID) -> AnyView,
-                makeExpenseForm: ((ExpenseFormRequest) -> AnyView)? = nil) {
+                makeExpenseForm: ((ExpenseFormRequest) -> AnyView)? = nil, makePaymentForm: ((PaymentFormRequest) -> AnyView)? = nil) {
         self.viewModel = viewModel; self.companyName = companyName; self.makeDetail = makeDetail; self.makeActivity = makeActivity
-        self.makeExpenseForm = makeExpenseForm
+        self.makeExpenseForm = makeExpenseForm; self.makePaymentForm = makePaymentForm
+    }
+
+    /// "Record" action for the all-attention sheet; nil hides the button when no payment form is wired.
+    private var recordFromSheet: ((AttentionItem) -> Void)? {
+        guard makePaymentForm != nil else { return nil }
+        return { item in
+            guard let itemId = item.scheduleItemId else { return }
+            pendingPayment = .create(projectId: item.projectId, scheduleItemId: itemId)
+            showAllAttention = false
+        }
     }
 
     private var names: [UUID: String] {
@@ -68,12 +82,14 @@ public struct HomeView: View {
         .onChange(of: scenePhase) { _, phase in
             if phase == .active { viewModel.update(today: TodayProvider.today(timeZone: timeZone)) }
         }
-        .sheet(isPresented: $showAllAttention) {
-            AttentionListSheet(items: viewModel.dashboard?.attention ?? [], names: names) { id in
-                showAllAttention = false
-                pendingDetail = id
-            }
+        .sheet(isPresented: $showAllAttention, onDismiss: {
+            if let next = pendingPayment { pendingPayment = nil; paymentRequest = next }
+        }) {
+            AttentionListSheet(items: viewModel.dashboard?.attention ?? [], names: names,
+                               onSelect: { id in showAllAttention = false; pendingDetail = id },
+                               onRecord: recordFromSheet)
         }
+        .sheet(item: $paymentRequest) { request in makePaymentForm?(request) ?? AnyView(EmptyView()) }
         .fullScreenCover(item: $expenseRequest) { request in makeExpenseForm?(request) ?? AnyView(EmptyView()) }
     }
 
@@ -96,10 +112,20 @@ public struct HomeView: View {
                             .foregroundStyle(DSColor.success).accessibilityIdentifier("home_attention_empty")
                     } else {
                         ForEach(d.attention.prefix(5)) { item in
-                            NavigationLink(value: ProjectRoute.detail(item.projectId)) {
-                                AttentionRow(item: item, projectName: names[item.projectId] ?? "")
+                            HStack(spacing: DSSpacing.sm) {
+                                NavigationLink(value: ProjectRoute.detail(item.projectId)) {
+                                    AttentionRow(item: item, projectName: names[item.projectId] ?? "")
+                                }
+                                .buttonStyle(.plain)
+                                if makePaymentForm != nil, let itemId = item.scheduleItemId {
+                                    Button { paymentRequest = .create(projectId: item.projectId, scheduleItemId: itemId) } label: {
+                                        Text("attention.record").font(DSTypography.callout)
+                                    }
+                                    .buttonStyle(.bordered)
+                                    .frame(minHeight: DSSpacing.minTouch)
+                                    .accessibilityIdentifier("attention_record_\(itemId.uuidString)")
+                                }
                             }
-                            .buttonStyle(.plain)
                         }
                         if d.attention.count > 5 {
                             Button("home.attention.more \(d.attention.count)") { showAllAttention = true }

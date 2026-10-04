@@ -12,6 +12,9 @@ public struct ProjectDetailView: View {
     private let makeCustomer: (UUID) -> AnyView
     private let makeActivity: (UUID) -> AnyView
     private let makeExpensesSection: (UUID) -> AnyView
+    private let makeLabourSection: (UUID) -> AnyView
+    private let makePaymentForm: (PaymentFormRequest) -> AnyView
+    @State private var paymentRequest: PaymentFormRequest?
     @State private var editWizard: ProjectWizardViewModel?
     @State private var showStatusPicker = false
     @State private var showProgress = false
@@ -27,8 +30,11 @@ public struct ProjectDetailView: View {
     @Environment(\.dismiss) private var dismiss
 
     public init(viewModel: ProjectDetailViewModel, makeCustomer: @escaping (UUID) -> AnyView, makeActivity: @escaping (UUID) -> AnyView,
-                makeExpensesSection: @escaping (UUID) -> AnyView = { _ in AnyView(EmptyView()) }) {
+                makeExpensesSection: @escaping (UUID) -> AnyView = { _ in AnyView(EmptyView()) },
+                makeLabourSection: @escaping (UUID) -> AnyView = { _ in AnyView(EmptyView()) },
+                makePaymentForm: @escaping (PaymentFormRequest) -> AnyView = { _ in AnyView(EmptyView()) }) {
         self.viewModel = viewModel; self.makeCustomer = makeCustomer; self.makeActivity = makeActivity; self.makeExpensesSection = makeExpensesSection
+        self.makeLabourSection = makeLabourSection; self.makePaymentForm = makePaymentForm
     }
 
     public var body: some View {
@@ -70,6 +76,7 @@ public struct ProjectDetailView: View {
                 EditSectionSheet(section: section, wizard: wizard, onSave: { w in await viewModel.save(w, section: section) }, onCancel: { viewModel.editing = nil })
             }
         }
+        .sheet(item: $paymentRequest) { request in makePaymentForm(request) }
         .sheet(isPresented: $showStatusPicker, onDismiss: runPendingWrite) {
             StatusPickerSheet(current: viewModel.snapshot?.project.status ?? .estimate) { status in
                 pendingWrite = .status(status); showStatusPicker = false
@@ -148,7 +155,11 @@ public struct ProjectDetailView: View {
             header(s, insights: insights)
 
             FinancialSummarySection(insights: insights, currency: viewModel.currency, onEditEstimate: { edit(.estimate($0)) })
+            ProjectPaymentsSection(list: viewModel.payments,
+                                   onAdd: { paymentRequest = .create(projectId: viewModel.projectId, scheduleItemId: nil) },
+                                   onEdit: { paymentRequest = .edit($0) })
             makeExpensesSection(viewModel.projectId)
+            makeLabourSection(viewModel.projectId)
             HealthSection(insights: insights)
             TimelineSection(insights: insights, project: s.project, today: viewModel.today, onEdit: { edit(.timeline) }, onAdd: { edit(.timeline) })
 
@@ -240,21 +251,28 @@ public struct ProjectDetailView: View {
             ForEach(s.scheduleItems) { item in
                 let insight = byItem[item.id]
                 let status = insight?.status ?? PaymentStatusResolver.status(item: item, paidForItem: .zero(currency), today: viewModel.today)
-                HStack {
-                    VStack(alignment: .leading, spacing: 2) {
-                        RowLabel.text(item.label).font(DSTypography.callout)
-                        if let due = item.dueDate { DateLabel(due.noonDate(in: timeZone)).font(DSTypography.caption).foregroundStyle(DSColor.textSecondary) }
-                        if let insight, insight.paid.amount > 0 {
-                            let paid = MoneyFormat.string(insight.paid.amount, currencyCode: currency.rawValue, locale: locale)
-                            let left = MoneyFormat.string(insight.remaining.amount, currencyCode: currency.rawValue, locale: locale)
-                            Text("detail.schedule.paid \(paid) \(left)").font(DSTypography.caption).foregroundStyle(DSColor.textSecondary)
+                Button { paymentRequest = .create(projectId: viewModel.projectId, scheduleItemId: item.id) } label: {
+                    HStack {
+                        VStack(alignment: .leading, spacing: 2) {
+                            RowLabel.text(item.label).font(DSTypography.callout)
+                            if let due = item.dueDate { DateLabel(due.noonDate(in: timeZone)).font(DSTypography.caption).foregroundStyle(DSColor.textSecondary) }
+                            if let insight, insight.paid.amount > 0 {
+                                let paid = MoneyFormat.string(insight.paid.amount, currencyCode: currency.rawValue, locale: locale)
+                                let left = MoneyFormat.string(insight.remaining.amount, currencyCode: currency.rawValue, locale: locale)
+                                Text("detail.schedule.paid \(paid) \(left)").font(DSTypography.caption).foregroundStyle(DSColor.textSecondary)
+                            }
                         }
+                        Spacer()
+                        StatusBadge(status.titleKey, tone: status.tone)
+                        MoneyText(amount: item.amount.amount, currencyCode: currency.rawValue)
+                        Image(systemName: "chevron.right").font(DSTypography.caption).foregroundStyle(DSColor.textSecondary)
                     }
-                    Spacer()
-                    StatusBadge(LocalizedStringKey("payment.status." + status.rawValue), tone: Self.tone(status))
-                    MoneyText(amount: item.amount.amount, currencyCode: currency.rawValue)
+                    .foregroundStyle(DSColor.textPrimary)
+                    .contentShape(Rectangle())
                 }
+                .buttonStyle(.plain)
                 .accessibilityElement(children: .combine)
+                .accessibilityHint(Text("detail.payments.add"))
                 .accessibilityIdentifier("detail_schedule_row_\(item.sortOrder)")
             }
             if s.scheduleItems.isEmpty { Text("detail.empty").foregroundStyle(DSColor.textSecondary) }
@@ -294,15 +312,6 @@ public struct ProjectDetailView: View {
                 }
                 content()
             }
-        }
-    }
-
-    private static func tone(_ status: PaymentStatus) -> DSTone {
-        switch status {
-        case .paid: return .success
-        case .overdue: return .danger
-        case .dueToday, .dueSoon, .partiallyPaid: return .warning
-        case .upcoming: return .neutral
         }
     }
 }

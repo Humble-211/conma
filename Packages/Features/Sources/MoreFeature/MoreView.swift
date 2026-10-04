@@ -9,16 +9,21 @@ public struct MoreView: View {
     private let showsGallery: Bool
 
     private let makeCustomers: () -> AnyView
+    private let makeCrew: () -> AnyView
     private let makeCategories: () -> AnyView
 
-    public init(settings: AppSettings, company: Company, showsGallery: Bool, makeCustomers: @escaping () -> AnyView, makeCategories: @escaping () -> AnyView) {
-        self.settings = settings; self.company = company; self.showsGallery = showsGallery; self.makeCustomers = makeCustomers; self.makeCategories = makeCategories
+    public init(settings: AppSettings, company: Company, showsGallery: Bool, makeCustomers: @escaping () -> AnyView, makeCrew: @escaping () -> AnyView,
+                makeCategories: @escaping () -> AnyView) {
+        self.settings = settings; self.company = company; self.showsGallery = showsGallery; self.makeCustomers = makeCustomers; self.makeCrew = makeCrew
+        self.makeCategories = makeCategories
     }
 
     public var body: some View {
         List {
             NavigationLink { makeCustomers() } label: { Label("more.customers", systemImage: "person.2") }
                 .frame(minHeight: DSSpacing.minTouch).accessibilityIdentifier("more_customers")
+            NavigationLink { makeCrew() } label: { Label("more.crew", systemImage: "person.3") }
+                .frame(minHeight: DSSpacing.minTouch).accessibilityIdentifier("more_crew")
             NavigationLink { makeCategories() } label: { Label("more.categories", systemImage: "tag") }
                 .frame(minHeight: DSSpacing.minTouch).accessibilityIdentifier("more_categories")
             NavigationLink { SettingsView(settings: settings, company: company) } label: {
