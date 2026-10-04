@@ -2,10 +2,11 @@ import Foundation
 import Domain
 
 public enum SampleData {
-    public static func seedIfEmpty(_ database: AppDatabase, clock: Clock, today: CalendarDate) async throws -> CompanySetup {
+    public static func seedIfEmpty(_ database: AppDatabase, clock: Clock, today: CalendarDate, receiptStore: FileReceiptStore? = nil, sampleReceipt: Data? = nil) async throws -> CompanySetup {
         let companies = GRDBCompanyRepository(database: database, clock: clock)
         if let existing = try await companies.current() { return existing }
 
+        let store = receiptStore ?? FileReceiptStore(root: FileManager.default.temporaryDirectory.appendingPathComponent("conma-seed-receipts", isDirectory: true))
         let now = clock.now()
         let company = Company(id: UUID(), name: "Northwind Contracting", currencyCode: .cad, createdAt: now, updatedAt: now, deletedAt: nil)
         let owner = User(id: UUID(), companyId: company.id, displayName: "Duc", email: nil, role: .owner, authUserId: nil, createdAt: now, updatedAt: now, deletedAt: nil)
@@ -86,16 +87,24 @@ public enum SampleData {
                              labour(basementProject.id, john.id, days: 10, rate: 220, on: today.adding(days: -9)),
                              labour(basementProject.id, davidW.id, days: 7, rate: 200, on: today.adding(days: -8))]
         let expenseRows = [expense(basementProject.id, .material, "Lumber — Home Depot", 2400, 312, on: today.adding(days: -15)),
-                           expense(basementProject.id, .material, "Drywall", 1500, 195, on: today.adding(days: -12)),
+                           expense(basementProject.id, .material, "Drywall", 1500, 195, on: today.adding(days: -2)),
                            expense(basementProject.id, .other, "Dumpster rental", 600, 78, on: today.adding(days: -16))]
         let paymentRows = [payment(basementProject.id, 7600, item: basementDeposit.id, on: today.adding(days: -19)),
                            payment(roofProject.id, 18_500, item: nil, on: today.adding(days: -40))]
         try await database.writer.write { db in
             for e in [mike, john, davidW] { try EmployeeRecord(e).insert(db) }
             for l in labourEntries { try LabourEntryRecord(l).insert(db) }
-            for x in expenseRows { try ExpenseRecord(x).insert(db) }
             for p in paymentRows { try PaymentRecord(p).insert(db) }
         }
+
+        let expenseRepository = GRDBExpenseRepository(database: database, clock: clock, receiptStore: store)
+        let pageCounts = [2, 0, 1]                                    // Lumber, Drywall, Dumpster (order of `expenseRows`)
+        for (row, pages) in zip(expenseRows, pageCounts) {
+            let jpegs = sampleReceipt.map { Array(repeating: $0, count: pages) } ?? []
+            try await expenseRepository.create(row, receiptPages: jpegs, actor: actor)
+        }
+        try await GRDBCustomCategoryRepository(database: database, clock: clock)
+            .create(CustomExpenseCategory(id: UUID(), companyId: company.id, name: "Scaffolding", costGroup: .equipment, createdAt: now, updatedAt: now, deletedAt: nil))
 
         guard let setup = try await companies.current() else { throw DataError.notFound }
         return setup

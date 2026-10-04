@@ -1,4 +1,5 @@
 import XCTest
+import GRDB
 import Domain
 @testable import Data
 
@@ -55,5 +56,32 @@ final class SampleDataTests: XCTestCase {
         XCTAssertEqual(snap.labourEntries.count, 3)
         XCTAssertEqual(snap.expenses.count, 3)
         XCTAssertEqual(snap.payments.count, 2)
+    }
+
+    func testSeedExpensesReceiptsAndCategory() async throws {
+        let db = try AppDatabase.inMemory()
+        let now = Date(timeIntervalSince1970: 1_790_000_000)
+        let today = CalendarDate(storage: "2026-10-03")!
+        let store = temporaryReceiptStore()
+        defer { try? FileManager.default.removeItem(at: store.root) }
+        let setup = try await SampleData.seedIfEmpty(db, clock: .fixed(now), today: today, receiptStore: store, sampleReceipt: Data([0xFF, 0xD8, 0xFF, 0xD9]))
+        var it = GRDBExpenseRepository(database: db, clock: .fixed(now), receiptStore: store).observeAll(companyId: setup.company.id).makeAsyncIterator()
+        let snap = try await it.next()!
+        let list = ExpenseListComposer.compose(snap, filter: ExpenseFilter(), today: today)
+        XCTAssertEqual(list.thisMonth, Money(1695, .cad))
+        XCTAssertEqual(list.lastMonth, Money(3390, .cad))
+        XCTAssertEqual(list.sections.map(\.day.storageString), ["2026-10-01", "2026-09-18", "2026-09-17"])
+        XCTAssertEqual(list.rows.compactMap(\.expense.vendorName), ["Drywall", "Lumber — Home Depot", "Dumpster rental"])
+        XCTAssertEqual(list.rows.map(\.receiptCount), [0, 2, 1])
+        XCTAssertEqual(snap.customCategories.map(\.name), ["Scaffolding"])
+        XCTAssertEqual(snap.customCategories.first?.costGroup, .equipment)
+        XCTAssertEqual(CategoryRanking.mostUsed(expenses: snap.expenses, customCategories: snap.customCategories),
+                       [.standard(.materials), .standard(.wasteDisposal), .standard(.fuel), .standard(.toolPurchase), .standard(.equipmentRental), .standard(.subcontractor)])
+        let basementId = snap.projects.first { $0.name == "Basement Renovation" }?.id
+        XCTAssertEqual(ExpenseProjectChoice.defaultProject(expenses: snap.expenses, projects: snap.projects), basementId)
+        let added = try await db.writer.read { db in try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM activity_log WHERE action = 'expenseAdded'") ?? 0 }
+        XCTAssertEqual(added, 3)
+        let page = try XCTUnwrap(list.rows[1].expense.receiptImages.first)
+        XCTAssertTrue(FileManager.default.fileExists(atPath: store.url(for: page.filePath).path))
     }
 }
