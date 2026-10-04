@@ -253,6 +253,25 @@ final class ExpensesFlowTests: XCTestCase {
         waitLabel(app, "expense_total", contains: "226.00")
     }
 
+    /// (g2) An out-of-range default tax is not saved, and its prefix ("100" on the way to "1000") is not saved either.
+    func testInvalidDefaultTaxIsNotSaved() {
+        let app = launch()
+        tab(app, "More")
+        app.buttons["more_settings"].tap()
+        type(app, "settings_default_tax", "1000")
+        waitLabel(app, "settings_default_tax_kept", contains: "No default tax")
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+        XCTAssertTrue(app.buttons["more_settings"].waitForExistence(timeout: 5))
+        tab(app, "Expenses")
+        XCTAssertTrue(app.buttons["expenses_add"].waitForExistence(timeout: 5), "expenses_add")
+        app.buttons["expenses_add"].tap()
+        skipScanner(app)
+        type(app, "expense_amount", "200")
+        doneKeyboard(app)
+        waitLabel(app, "expense_total", contains: "200.00")
+        XCTAssertFalse(element(app, "expense_tax_amount").exists, "no % tax pre-filled")
+    }
+
     /// (h) Vietnamese headers and folded search.
     func testVietnameseHeadersAndSearch() {
         let app = launch(locale: "vi", extra: ["-AppleLocale", "vi_VN"])
