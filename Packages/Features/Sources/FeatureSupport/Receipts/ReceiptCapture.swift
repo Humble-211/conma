@@ -77,6 +77,9 @@ struct FakeReceiptScannerView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(DSColor.background)
             .navigationTitle("scanner.fake.title")
+            // A container element keeps the buttons' own identifiers (scanner_capture / scanner_cancel);
+            // an identifier on a plain stack would replace them.
+            .accessibilityElement(children: .contain)
             .accessibilityIdentifier("fake_scanner")
         }
     }
