@@ -14,6 +14,17 @@ public enum LocaleNumberParser {
         return Decimal(string: trimmed, locale: Locale(identifier: "en_US_POSIX"))
     }
 
+    /// Whether a field showing `text` must be rewritten after its bound value changed to `newValue`.
+    /// Unfocused: always (canonical display). Focused: only when the text means a different value,
+    /// treating an empty field as zero so clearing a field whose binding stores 0 is not undone mid-typing.
+    public static func shouldReplace(_ text: String, with newValue: Decimal?, focused: Bool, locale: Locale) -> Bool {
+        guard focused else { return true }
+        let shown = decimal(from: text, locale: locale)
+        if shown == newValue { return false }
+        if shown == nil, newValue == 0 { return false }
+        return true
+    }
+
     public static func string(_ value: Decimal, locale: Locale, fractionDigits: Int) -> String {
         let formatter = NumberFormatter()
         formatter.locale = locale
@@ -49,7 +60,13 @@ public struct MoneyField: View {
                 .focused($focused)
                 .onChange(of: text) { _, newValue in amount = LocaleNumberParser.decimal(from: newValue, locale: locale) }
                 .onChange(of: focused) { _, isFocused in if !isFocused, let amount { text = LocaleNumberParser.string(amount, locale: locale, fractionDigits: 2) } }
-                .onChange(of: amount) { _, newValue in if !focused { text = newValue.map { LocaleNumberParser.string($0, locale: locale, fractionDigits: 2) } ?? "" } }
+                .onChange(of: amount) { _, newValue in
+                    // Outside changes (a chip, a recompute) must show even while the keyboard is up;
+                    // the user's own in-progress text stays when it already means the same value.
+                    if LocaleNumberParser.shouldReplace(text, with: newValue, focused: focused, locale: locale) {
+                        text = newValue.map { LocaleNumberParser.string($0, locale: locale, fractionDigits: 2) } ?? ""
+                    }
+                }
                 .task { if autoFocus { try? await Task.sleep(for: .milliseconds(350)); focused = true } }
                 .onAppear { if let amount { text = LocaleNumberParser.string(amount, locale: locale, fractionDigits: 2) } }
         }
