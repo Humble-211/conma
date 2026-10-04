@@ -23,13 +23,24 @@ public final class ExpenseFormViewModel {
     public var draft: ExpenseDraft
     public var taxMode: TaxMode { didSet { syncTax() } }
     public var taxValue: Decimal? { didSet { syncTax() } }
-    public private(set) var pages: [ReceiptPage] = []
+    public private(set) var pages: [ReceiptPage] = [] { didSet { refreshThumbnails() } }
+    /// Downsampled tile images, built once per page id off the main actor (never decoded per render).
+    public private(set) var thumbnails: [UUID: Image] = [:]
     public private(set) var snapshot: ExpenseListSnapshot?
     public private(set) var original: Expense?
+    /// Stays true after a successful save/delete so a second tap during the dismissal cannot write again.
     public private(set) var isSaving = false
     public private(set) var showErrors = false
+    /// The edited expense could not be loaded: the form closes after the alert and refuses to save or delete.
+    public private(set) var loadFailed = false
+    /// Photos-picked pages still being loaded/encoded; Save waits for them.
+    public private(set) var pendingPageLoads = 0
     public var alertKey: LocalizedStringKey?
     public var limitNotice = false
+    /// Set while a cover (scanner) is on screen, where an alert cannot be shown; raised by `presentPendingNotices()`.
+    private var pendingLimitNotice = false
+    private var thumbnailsInFlight: Set<UUID> = []
+    private var didFinish = false
 
     public let request: ExpenseFormRequest
     public let currency: CurrencyCode
@@ -59,9 +70,9 @@ public final class ExpenseFormViewModel {
 
     /// Bind to `.task`: loads the edited expense once, then keeps projects/categories/ranking live.
     public func start() async {
-        if case .edit(let id) = request, original == nil {
+        if case .edit(let id) = request, original == nil, !loadFailed {
             do {
-                guard let expense = try await expenseRepository.get(id: id) else { alertKey = "expense.error.gone"; return }
+                guard let expense = try await expenseRepository.get(id: id) else { loadFailed = true; alertKey = "expense.error.gone"; return }
                 original = expense
                 let edited = ExpenseDraft(editing: expense)
                 let fields = Self.taxFields(edited.tax)
@@ -69,7 +80,7 @@ public final class ExpenseFormViewModel {
                 taxMode = fields.mode
                 taxValue = fields.value                      // didSet re-syncs draft.tax from the two fields
                 pages = expense.receiptImages.map(ReceiptPage.saved)
-            } catch { alertKey = "expense.error.saveFailed" }
+            } catch { loadFailed = true; alertKey = "expense.error.saveFailed"; return }
         }
         do {
             for try await value in expenseRepository.observeAll(companyId: companyId) {
@@ -136,22 +147,70 @@ public final class ExpenseFormViewModel {
 
     // MARK: Pages
 
-    /// Appends pages up to the 10-page limit; sets `limitNotice` when some were dropped.
+    public var isAddingPages: Bool { pendingPageLoads > 0 }
+    /// False while an edited expense is loading (or failed to load), while pages are loading, and once saved.
+    public var canSubmit: Bool { !isSaving && !isAddingPages && !(isEditing && original == nil) }
+
+    /// Appends pages up to the 10-page limit. When some were dropped the notice is held until
+    /// `presentPendingNotices()`, because the scanner cover may still be on screen.
     public func addPages(_ jpegs: [Data]) {
         let accepted = ReceiptRules.acceptedCount(existing: pages.count, incoming: jpegs.count)
         pages += jpegs.prefix(accepted).map { ReceiptPage.new(id: UUID(), jpeg: $0) }
-        if accepted < jpegs.count { limitNotice = true }
+        if accepted < jpegs.count { pendingLimitNotice = true }
+    }
+
+    /// Photos path: counts the load as pending (Save is disabled, the strip shows a progress tile) until the pages are added.
+    /// The count is raised synchronously, so a Save tap right after the picker closes already sees it.
+    public func addPages(loading load: @escaping @MainActor () async -> [Data]) {
+        pendingPageLoads += 1
+        Task {
+            let jpegs = await load()
+            pendingPageLoads -= 1
+            guard !didFinish else { return }
+            addPages(jpegs)
+            presentPendingNotices()
+        }
+    }
+
+    /// Shows a held limit notice; call once no cover is on screen (form appeared, scanner cover dismissed).
+    public func presentPendingNotices() {
+        guard pendingLimitNotice else { return }
+        pendingLimitNotice = false
+        limitNotice = true
     }
 
     public func removePage(_ id: UUID) { pages.removeAll { $0.id == id } }
 
+    public func imageSource(for page: ReceiptPage) -> ReceiptImageSource {
+        switch page {
+        case .saved(let image): return .file(fileURL(image))
+        case .new(_, let jpeg): return .data(jpeg)
+        }
+    }
+
+    private func refreshThumbnails() {
+        let ids = Set(pages.map(\.id))
+        if thumbnails.keys.contains(where: { !ids.contains($0) }) { thumbnails = thumbnails.filter { ids.contains($0.key) } }
+        for page in pages where thumbnails[page.id] == nil && !thumbnailsInFlight.contains(page.id) {
+            let id = page.id
+            let source = imageSource(for: page)
+            thumbnailsInFlight.insert(id)
+            Task {
+                let image = await ReceiptImageProcessor.thumbnail(of: source)
+                thumbnailsInFlight.remove(id)
+                guard let image, pages.contains(where: { $0.id == id }) else { return }
+                thumbnails[id] = Image(uiImage: image)
+            }
+        }
+    }
+
     // MARK: Writes
 
     public func save() async -> Bool {
+        guard !(isEditing && original == nil), !isAddingPages, !didFinish else { return false }
         showErrors = true
         guard draft.canSave, !isSaving else { return false }
         isSaving = true
-        defer { isSaving = false }
         let categories = (snapshot?.customCategories ?? []) + createdCategories
         let newPages = pages.compactMap { page -> Data? in if case .new(_, let jpeg) = page { return jpeg } else { return nil } }
         do {
@@ -163,16 +222,27 @@ public final class ExpenseFormViewModel {
                 let expense = try draft.makeExpense(id: UUID(), companyId: companyId, currency: currency, customCategories: categories, now: Date())
                 try await expenseRepository.create(expense, receiptPages: newPages, actor: actor)
             }
+            didFinish = true                                  // isSaving stays true until the form is gone
             return true
         } catch {
+            isSaving = false
             alertKey = Self.key(for: error)
             return false
         }
     }
 
     public func delete() async -> Bool {
-        guard let original else { return false }
-        do { try await expenseRepository.softDelete(id: original.id, actor: actor); return true } catch { alertKey = Self.key(for: error); return false }
+        guard let original, !isSaving, !didFinish else { return false }
+        isSaving = true
+        do {
+            try await expenseRepository.softDelete(id: original.id, actor: actor)
+            didFinish = true
+            return true
+        } catch {
+            isSaving = false
+            alertKey = Self.key(for: error)
+            return false
+        }
     }
 
     /// Creates a custom category from the picker and selects it. Returns an error key, nil on success.

@@ -1,10 +1,36 @@
 import SwiftUI
 import DesignSystem
+import FeatureSupport
 
 public struct ReceiptViewerPage: Identifiable {
     public let id: UUID
-    public let image: Image?
-    public init(id: UUID, image: Image?) { self.id = id; self.image = image }
+    public let source: ReceiptImageSource
+    public init(id: UUID, source: ReceiptImageSource) { self.id = id; self.source = source }
+}
+
+/// Decodes its full-size page only while on screen (the pager keeps just the visible and adjacent pages alive).
+private struct ReceiptViewerPageView: View {
+    let page: ReceiptViewerPage
+    @State private var image: UIImage?
+    @State private var failed = false
+
+    var body: some View {
+        Group {
+            if let image {
+                ZoomableImage(image: Image(uiImage: image))
+            } else if failed {
+                ZoomableImage(image: Image(systemName: "doc.text"))
+            } else {
+                ProgressView().tint(.white).frame(maxWidth: .infinity, maxHeight: .infinity)
+            }
+        }
+        .task(id: page.id) {
+            let loaded = await ReceiptImageProcessor.fullImage(of: page.source)
+            image = loaded
+            failed = loaded == nil
+        }
+        .onDisappear { image = nil; failed = false }
+    }
 }
 
 /// Full-screen pager with pinch zoom; shares the saved pages (unsaved pages are viewable, not shareable).
@@ -23,7 +49,7 @@ public struct ReceiptViewer: View {
         NavigationStack {
             TabView(selection: $index) {
                 ForEach(Array(pages.enumerated()), id: \.element.id) { offset, page in
-                    ZoomableImage(image: page.image ?? Image(systemName: "doc.text"))
+                    ReceiptViewerPageView(page: page)
                         .tag(offset)
                         .accessibilityIdentifier("receipt_page_\(offset)")
                 }

@@ -63,7 +63,7 @@ public struct ExpenseFormView: View {
         .background(DSColor.background)
         .safeAreaInset(edge: .bottom) {
             PrimaryButton("expense.save", systemImage: "checkmark") { Task { if await viewModel.save() { onClose() } } }
-                .disabled(viewModel.isSaving)
+                .disabled(!viewModel.canSubmit)
                 .accessibilityIdentifier("expense_save")
                 .padding(.horizontal, DSSpacing.lg)
                 .padding(.vertical, DSSpacing.sm)
@@ -80,7 +80,10 @@ public struct ExpenseFormView: View {
                 Button("expense.keyboard.done") { KeyboardDismiss.dismiss() }.accessibilityIdentifier("expense_keyboard_done")
             }
         }
-        .task { await viewModel.start() }
+        .task {
+            viewModel.presentPendingNotices()                // a limit hit in the scanner that opened this form
+            await viewModel.start()
+        }
         .onChange(of: viewModel.original?.id) { _, _ in
             if let expense = viewModel.original,
                !(expense.vendorName ?? "").isEmpty || !(expense.notes ?? "").isEmpty || expense.paymentMethod != nil {
@@ -90,21 +93,22 @@ public struct ExpenseFormView: View {
         .photosPicker(isPresented: $showPhotos, selection: $photoItems, maxSelectionCount: max(1, viewModel.remainingPages), matching: .images)
         .onChange(of: photoItems) { _, items in
             guard !items.isEmpty else { return }
-            Task {
-                var raw: [Data] = []
+            photoItems = []
+            // One item at a time: only one raw file and one full-size bitmap are alive at once.
+            viewModel.addPages {
+                var jpegs: [Data] = []
                 for item in items {
-                    if let data = try? await item.loadTransferable(type: Data.self) { raw.append(data) }
+                    guard let data = try? await item.loadTransferable(type: Data.self) else { continue }
+                    if let jpeg = await ReceiptImageProcessor.encode(imageData: data) { jpegs.append(jpeg) }
                 }
-                let jpegs = await ReceiptImageProcessor.jpegs(fromImageData: raw)
-                viewModel.addPages(jpegs)
-                photoItems = []
+                return jpegs
             }
         }
-        .fullScreenCover(isPresented: $showScanner) {
+        .fullScreenCover(isPresented: $showScanner, onDismiss: { viewModel.presentPendingNotices() }) {
             ReceiptScannerView(mode: captureMode, onFinish: { viewModel.addPages($0); showScanner = false }, onCancel: { showScanner = false })
         }
         .fullScreenCover(item: $viewer) { start in
-            ReceiptViewer(pages: viewModel.pages.map { ReceiptViewerPage(id: $0.id, image: image(for: $0)) },
+            ReceiptViewer(pages: viewModel.pages.map { ReceiptViewerPage(id: $0.id, source: viewModel.imageSource(for: $0)) },
                           startIndex: start.index,
                           shareURLs: viewModel.pages.compactMap { page -> URL? in
                               if case .saved(let image) = page { return viewModel.fileURL(image) } else { return nil }
@@ -129,7 +133,7 @@ public struct ExpenseFormView: View {
         }
         .alert(viewModel.alertKey ?? "expense.error.saveFailed",
                isPresented: Binding(get: { viewModel.alertKey != nil }, set: { if !$0 { viewModel.alertKey = nil } })) {
-            Button("sheet.ok") {}
+            Button("sheet.ok") { if viewModel.loadFailed { onClose() } }   // nothing to edit: never leave an empty edit form
         }
         .alert("expense.receipt.limit", isPresented: $viewModel.limitNotice) { Button("sheet.ok") {} }
     }
@@ -152,7 +156,7 @@ public struct ExpenseFormView: View {
                         ForEach(Array(viewModel.pages.enumerated()), id: \.element.id) { index, page in
                             ZStack(alignment: .topTrailing) {
                                 Button { viewer = ViewerStart(index: index) } label: {
-                                    ReceiptThumbnail(image: image(for: page), pageNumber: index + 1)
+                                    ReceiptThumbnail(image: viewModel.thumbnails[page.id], pageNumber: index + 1)
                                 }
                                 .buttonStyle(.plain)
                                 .accessibilityIdentifier("expense_receipt_thumb_\(index)")
@@ -165,6 +169,15 @@ public struct ExpenseFormView: View {
                                 .accessibilityLabel(Text("expense.receipt.remove"))
                                 .accessibilityIdentifier("expense_receipt_remove_\(index)")
                             }
+                        }
+                        if viewModel.isAddingPages {
+                            ProgressView()
+                                .frame(width: 64, height: 88)
+                                .background(DSColor.background, in: RoundedRectangle(cornerRadius: DSSpacing.sm))
+                                .overlay(RoundedRectangle(cornerRadius: DSSpacing.sm).strokeBorder(DSColor.border, lineWidth: 1))
+                                .accessibilityElement(children: .ignore)
+                                .accessibilityLabel(Text("expense.receipt.loading"))
+                                .accessibilityIdentifier("expense_receipt_loading")
                         }
                         if viewModel.remainingPages > 0 {
                             Menu {
@@ -312,14 +325,5 @@ public struct ExpenseFormView: View {
 
     private func moneyText(_ money: Money?) -> String {
         money.map { MoneyFormat.string($0.amount, currencyCode: $0.currency.rawValue, locale: locale) } ?? "—" // lint:allow-string
-    }
-
-    private func image(for page: ReceiptPage) -> Image? {
-        let uiImage: UIImage?
-        switch page {
-        case .saved(let image): uiImage = UIImage(contentsOfFile: viewModel.fileURL(image).path)
-        case .new(_, let jpeg): uiImage = UIImage(data: jpeg)
-        }
-        return uiImage.map { Image(uiImage: $0) }
     }
 }
