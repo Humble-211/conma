@@ -46,4 +46,20 @@ final class ActivityLogRepositoryTests: XCTestCase {
         let all = try await logs.list(projectId: p.id)
         XCTAssertEqual(all.count, 4)
     }
+
+    func testUnknownActionRowIsSkipped() async throws {
+        let p = project(status: .scheduled)
+        try await repo.save(p, actor: actor)                                                // projectCreated
+        let stamp = "2026-10-03T12:00:00.000Z"
+        try await db.writer.write { db in
+            try db.execute(sql: """
+                INSERT INTO activity_log (id, company_id, created_at, updated_at, deleted_at, sync_state, user_id, actor_name, action, entity_type, entity_id, project_id, details_json, occurred_at)
+                VALUES (?, ?, ?, ?, NULL, 'pending', NULL, 'Duc', 'futureAction', 'project', ?, ?, '{}', ?)
+                """, arguments: [UUID().uuidString.lowercased(), self.companyId.uuidString.lowercased(), stamp, stamp, p.id.uuidString.lowercased(), p.id.uuidString.lowercased(), stamp])
+        }
+        let logs = GRDBActivityLogRepository(database: db)
+        var it = logs.observeForProject(projectId: p.id, limit: 5).makeAsyncIterator()
+        XCTAssertEqual(try await it.next()!.map(\.action), [.projectCreated])
+        XCTAssertEqual(try await logs.list(projectId: p.id).map(\.action), [.projectCreated])
+    }
 }

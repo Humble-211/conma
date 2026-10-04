@@ -21,6 +21,9 @@ public final class GRDBActivityLogRepository: ActivityLogRepository {
         var request = ActivityLogRecord.filter(Column("project_id") == projectId && Column("deleted_at") == nil)
             .order(Column("occurred_at").desc, Column.rowID.desc)
         if let limit { request = request.limit(limit) }
-        return try request.fetchAll(db).map { try $0.toDomain() }
+        // Rows written by a newer app version (unknown action code) are skipped instead of failing the whole stream.
+        return try request.fetchAll(db).compactMap { record in
+            ActivityAction(rawValue: record.action) == nil ? nil : try record.toDomain()
+        }
     }
 }

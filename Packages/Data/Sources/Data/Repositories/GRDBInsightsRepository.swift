@@ -9,7 +9,7 @@ public final class GRDBInsightsRepository: InsightsRepository {
     public func observeDashboard(companyId: UUID) -> AsyncThrowingStream<DashboardInputs.Snapshot, Error> {
         let key = companyId.dbKey
         let observation = ValueObservation.tracking { db -> DashboardInputs.Snapshot in
-            guard let companyRecord = try CompanyRecord.filter(Column("id") == key && Column("deleted_at") == nil).fetchOne(db) else { throw DataError.notFound }
+            guard let companyRecord = try CompanyRecord.filter(Column("id") == key && Column("deleted_at") == nil).fetchOne(db) else { throw DomainError.notFound }
             let company = try companyRecord.toDomain()
             let currency = company.currencyCode
             let projectRecords = try ProjectRecord.filter(Column("company_id") == key && Column("deleted_at") == nil).fetchAll(db)

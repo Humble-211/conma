@@ -69,4 +69,9 @@ final class InsightsRepositoryTests: XCTestCase {
         XCTAssertEqual(second.expenses.map(\.id), [e.id])
         XCTAssertEqual(ProjectInsightsComposer.compose(second.with(today: CalendarDate(storage: "2026-10-03")!)).financials?.spentSoFar, Money(250, .cad))
     }
+
+    func testObserveDashboardMissingCompanyThrowsDomainNotFound() async throws {
+        var it = GRDBInsightsRepository(database: db).observeDashboard(companyId: UUID()).makeAsyncIterator()
+        do { _ = try await it.next(); XCTFail("expected error") } catch { XCTAssertEqual(error as? DomainError, .notFound) }
+    }
 }
