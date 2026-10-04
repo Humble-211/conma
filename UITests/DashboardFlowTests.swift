@@ -129,7 +129,9 @@ final class DashboardFlowTests: XCTestCase {
         openProject(app, "9 Birch Court")
         app.buttons["detail_menu"].tap()
         XCTAssertTrue(app.buttons["detail_delete"].waitForExistence(timeout: 5)); app.buttons["detail_delete"].tap()
-        XCTAssertTrue(app.buttons["detail_delete_confirm"].waitForExistence(timeout: 5)); app.buttons["detail_delete_confirm"].tap()
+        // The confirmation dialog exposes its action twice (sheet + popover representation); tap the first.
+        let confirm = app.buttons.matching(identifier: "detail_delete_confirm").firstMatch
+        XCTAssertTrue(confirm.waitForExistence(timeout: 5)); confirm.tap()
         XCTAssertTrue(app.buttons["projects_add"].waitForExistence(timeout: 10))
         let gone = NSPredicate(format: "exists == false")
         expectation(for: gone, evaluatedWith: containing(app, "Roof Replacement"))
