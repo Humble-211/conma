@@ -64,6 +64,13 @@ public enum AttentionItem: Hashable, Sendable, Identifiable {
         case .health(let id, _, _), .paymentOverdue(let id, _, _, _, _), .paymentDueToday(let id, _, _, _), .startsToday(let id): return id
         }
     }
+    /// The schedule item a payment row is about (Home's "Record" button); nil for other rows.
+    public var scheduleItemId: UUID? {
+        switch self {
+        case .paymentOverdue(_, let item, _, _, _), .paymentDueToday(_, let item, _, _): return item
+        case .health, .startsToday: return nil
+        }
+    }
     public var id: String {
         switch self {
         case .paymentOverdue(_, let item, _, _, _), .paymentDueToday(_, let item, _, _): return "\(kind.rawValue):\(projectId.uuidString):\(item.uuidString)"

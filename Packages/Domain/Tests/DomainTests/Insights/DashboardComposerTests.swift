@@ -95,4 +95,11 @@ final class DashboardComposerTests: XCTestCase {
         let inputs = DashboardInputs(company: company, projects: [p], customers: [], estimateLines: [], scheduleItems: [], expenses: [], labourEntries: [], payments: [], today: Fx.today)
         XCTAssertEqual(DashboardComposer.compose(inputs).cards[0].customerName, "")
     }
+
+    func testAttentionScheduleItemId() {
+        let item = UUID(), project = UUID()
+        XCTAssertEqual(AttentionItem.paymentOverdue(projectId: project, itemId: item, label: "x", remaining: Fx.money(1), daysLate: 2).scheduleItemId, item)
+        XCTAssertEqual(AttentionItem.paymentDueToday(projectId: project, itemId: item, label: "x", remaining: Fx.money(1)).scheduleItemId, item)
+        XCTAssertNil(AttentionItem.startsToday(projectId: project).scheduleItemId)
+    }
 }

@@ -20,4 +20,6 @@ public enum DomainError: Error, Equatable, Sendable {
     case duplicateName
     case tooManyReceiptPages
     case incompleteExpense
+    case incompletePayment
+    case incompleteLabour
 }
