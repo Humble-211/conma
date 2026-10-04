@@ -62,6 +62,7 @@ public struct PaymentFormView: View {
                     .accessibilityIdentifier("payment_save")
                     .padding(.horizontal, DSSpacing.lg)
                     .padding(.vertical, DSSpacing.sm)
+                    .keyboardToolbarClearance()
                     .background(DSColor.background)
             }
             .navigationTitle(titleKey)

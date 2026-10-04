@@ -54,6 +54,7 @@ public struct LabourFormView: View {
                     .accessibilityIdentifier("labour_save")
                     .padding(.horizontal, DSSpacing.lg)
                     .padding(.vertical, DSSpacing.sm)
+                    .keyboardToolbarClearance()
                     .background(DSColor.background)
             }
             .navigationTitle(titleKey)
