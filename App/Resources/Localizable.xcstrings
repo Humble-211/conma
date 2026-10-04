@@ -10829,7 +10829,7 @@
         "vi": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nhiều hơn phần còn lại của đợt %@. Đợt sẽ hiện là đã trả; phần dư vẫn tính vào đã thu."
+            "value": "%@ nhiều hơn phần còn lại của đợt. Đợt sẽ hiện là đã trả; phần dư vẫn tính vào đã thu."
           }
         }
       }

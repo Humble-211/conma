@@ -26,6 +26,7 @@ public final class PaymentFormViewModel {
     private let today: CalendarDate
     private var didApplyDefaults = false
     private var methodTouched = false
+    private var itemTouched = false
     private var didFinish = false
 
     public init(request: PaymentFormRequest, companyId: UUID, currency: CurrencyCode, paymentRepository: any PaymentRepository,
@@ -84,9 +85,9 @@ public final class PaymentFormViewModel {
         guard case .create(_, let itemId) = request else { return }
         if let itemId {
             guard let option = options.first(where: { $0.id == itemId }) else { return }   // stage deleted meanwhile: stays unlinked
-            draft.scheduleItemId = itemId
-            if option.remaining.amount > 0 { draft.amount = option.remaining.amount }
-        } else {
+            if !itemTouched { draft.scheduleItemId = itemId }
+            if draft.amount == nil, option.remaining.amount > 0 { draft.amount = option.remaining.amount }
+        } else if !itemTouched {
             draft.scheduleItemId = PaymentFormContext.defaultItemId(options)
         }
     }
@@ -110,7 +111,7 @@ public final class PaymentFormViewModel {
     // MARK: Input
 
     public func selectMethod(_ method: PaymentMethod) { methodTouched = true; draft.method = method }
-    public func selectItem(_ id: UUID?) { draft.scheduleItemId = id }
+    public func selectItem(_ id: UUID?) { itemTouched = true; draft.scheduleItemId = id }
     public func apply(_ suggestion: PaymentSuggestion) { draft.amount = suggestion.money.amount }
 
     // MARK: Writes
