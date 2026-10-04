@@ -12,6 +12,11 @@ final class ProjectsFlowTests: XCTestCase {
     }
     private func tapTab(_ app: XCUIApplication, _ label: String) { app.tabBars.buttons[label].tap() }
     private func type(_ el: XCUIElement, _ text: String) { el.tap(); el.typeText(text) }
+    /// Waits for a wizard button (the next step can still be animating in) before tapping it.
+    private func tapWhenReady(_ el: XCUIElement, file: StaticString = #filePath, line: UInt = #line) {
+        XCTAssertTrue(el.waitForExistence(timeout: 5), "\(el)", file: file, line: line)
+        el.tap()
+    }
     private func row(_ app: XCUIApplication, _ label: String) -> XCUIElement {
         let b = app.buttons.matching(NSPredicate(format: "label == %@", label)).firstMatch
         return b.waitForExistence(timeout: 2) ? b : app.staticTexts.matching(NSPredicate(format: "label == %@", label)).firstMatch
@@ -41,10 +46,12 @@ final class ProjectsFlowTests: XCTestCase {
         app.buttons["wizard_jobtype_roofing"].tap(); app.buttons["wizard_continue"].tap()
         row(app, "Maria Santos").tap(); app.buttons["wizard_continue"].tap()
         type(app.textFields["wizard_address_line"], "9 Pine Road"); app.buttons["wizard_continue"].tap()
-        for _ in 0..<5 { app.buttons["wizard_skip"].tap() }
-        type(app.textFields["wizard_contract_value"], "20000"); app.buttons["wizard_continue"].tap()
-        app.buttons["wizard_skip"].tap()                                     // deposit
-        app.buttons["wizard_template_fourStage"].tap()
+        for _ in 0..<5 { tapWhenReady(app.buttons["wizard_skip"]) }
+        let contract = app.textFields["wizard_contract_value"]
+        XCTAssertTrue(contract.waitForExistence(timeout: 5))
+        type(contract, "20000"); tapWhenReady(app.buttons["wizard_continue"])
+        tapWhenReady(app.buttons["wizard_skip"])                             // deposit
+        tapWhenReady(app.buttons["wizard_template_fourStage"])
         XCTAssertTrue(app.textFields["wizard_schedule_row_3_amount"].waitForExistence(timeout: 3))
         app.buttons["wizard_continue"].tap()
         app.buttons["wizard_continue"].tap()                                 // Create

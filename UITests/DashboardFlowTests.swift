@@ -122,13 +122,21 @@ final class DashboardFlowTests: XCTestCase {
         XCTAssertEqual(value.label, "0%")                                            // no manual progress yet
         slider.adjust(toNormalizedSliderPosition: 0.6)
         // The slider lands near 60; correct with the stepper (steps of 5) until it reads exactly 60%.
+        // Wait for the stepper's buttons (they can appear a beat after the slider settles) and keep them on screen.
         let stepper = app.descendants(matching: .any)["progress_stepper"]
-        let increment = stepper.buttons.matching(NSPredicate(format: "label == %@", "Increment")).firstMatch
-        let decrement = stepper.buttons.matching(NSPredicate(format: "label == %@", "Decrement")).firstMatch
+        XCTAssertTrue(stepper.waitForExistence(timeout: 5), labels(app))
+        let increment = stepper.buttons.matching(NSPredicate(format: "label CONTAINS %@ OR identifier CONTAINS %@", "Increment", "Increment")).firstMatch
+        let decrement = stepper.buttons.matching(NSPredicate(format: "label CONTAINS %@ OR identifier CONTAINS %@", "Decrement", "Decrement")).firstMatch
+        XCTAssertTrue(increment.waitForExistence(timeout: 5), labels(app))
+        XCTAssertTrue(decrement.waitForExistence(timeout: 5), labels(app))
+        var swipes = 0
+        while !(increment.isHittable && decrement.isHittable) && swipes < 3 { value.swipeUp(); swipes += 1 }
         var steps = 0
         while value.label != "60%" && steps < 25 {
             let current = Int(value.label.dropLast()) ?? 0
-            (current < 60 ? increment : decrement).tap()
+            let button = current < 60 ? increment : decrement
+            XCTAssertTrue(button.waitForExistence(timeout: 5), labels(app))
+            button.tap()
             steps += 1
         }
         XCTAssertEqual(value.label, "60%")
