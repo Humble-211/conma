@@ -6,6 +6,7 @@ public enum ActivityAction: String, Codable, Sendable, CaseIterable, Hashable {
     case expenseAdded, paymentReceived
     case estimateChanged, scheduleChanged, customerCreated, scopeChanged, timelineChanged, customerChanged
     case expenseUpdated, expenseDeleted
+    case paymentUpdated, paymentDeleted, labourLogged, labourUpdated, labourDeleted
 }
 
 public struct ActivityLogEntry: CompanyScoped {

@@ -32,4 +32,37 @@ final class ActivityDescriptionTests: XCTestCase {
         XCTAssertEqual(ActivityDescription.detail(for: entry(.expenseAdded, #"{"category":"fuel"}"#)), .plain(.expenseAdded))
         XCTAssertEqual(ActivityDescription.detail(for: entry(.expenseAdded, #"{"category":"bogus","total":"1.00"}"#)), .plain(.expenseAdded))
     }
+
+    func testPaymentReceivedLinked() {
+        XCTAssertEqual(ActivityDescription.detail(for: entry(.paymentReceived, #"{"amount":"7600.00","currency":"CAD","item":"schedule.row.deposit","method":"eTransfer"}"#)),
+                       .payment(action: .paymentReceived, title: .item("schedule.row.deposit"), amount: "7600.00", previousAmount: nil))
+    }
+    func testPaymentUnlinkedUsesMethod() {
+        XCTAssertEqual(ActivityDescription.detail(for: entry(.paymentReceived, #"{"amount":"1000.00","currency":"CAD","item":"","method":"cheque"}"#)),
+                       .payment(action: .paymentReceived, title: .method(.cheque), amount: "1000.00", previousAmount: nil))
+    }
+    func testPaymentUpdatedAndDeleted() {
+        XCTAssertEqual(ActivityDescription.detail(for: entry(.paymentUpdated, #"{"amount":"450.00","currency":"CAD","from":"400.00","item":"","method":"cash"}"#)),
+                       .payment(action: .paymentUpdated, title: .method(.cash), amount: "450.00", previousAmount: "400.00"))
+        XCTAssertEqual(ActivityDescription.detail(for: entry(.paymentDeleted, #"{"amount":"400.00","currency":"CAD","from":"1.00","item":"Deposit","method":"cash"}"#)),
+                       .payment(action: .paymentDeleted, title: .item("Deposit"), amount: "400.00", previousAmount: nil))
+    }
+    func testLabourLoggedAndUpdated() {
+        XCTAssertEqual(ActivityDescription.detail(for: entry(.labourLogged, #"{"currency":"CAD","names":"Mike, John","people":"2","total":"470.00","workDate":"2026-10-03"}"#)),
+                       .labour(action: .labourLogged, names: "Mike, John", total: "470.00", previousTotal: nil))
+        XCTAssertEqual(ActivityDescription.detail(for: entry(.labourUpdated, #"{"currency":"CAD","from":"1400.00","names":"David","people":"1","total":"1600.00","workDate":"2026-09-25"}"#)),
+                       .labour(action: .labourUpdated, names: "David", total: "1600.00", previousTotal: "1400.00"))
+    }
+    func testPaymentAndLabourMissingFieldsArePlain() {
+        XCTAssertEqual(ActivityDescription.detail(for: entry(.paymentReceived, #"{"amount":"1.00"}"#)), .plain(.paymentReceived))
+        XCTAssertEqual(ActivityDescription.detail(for: entry(.paymentReceived, #"{"amount":"1.00","method":"bitcoin"}"#)), .plain(.paymentReceived))
+        XCTAssertEqual(ActivityDescription.detail(for: entry(.labourDeleted, #"{"names":"","total":"1.00"}"#)), .plain(.labourDeleted))
+        XCTAssertEqual(ActivityDescription.detail(for: entry(.labourLogged, "not json")), .plain(.labourLogged))
+    }
+    func testCurrencyFromDetails() {
+        XCTAssertEqual(ActivityDescription.currency(for: entry(.paymentReceived, #"{"amount":"1.00","currency":"USD","item":"","method":"cash"}"#)), .usd)
+        XCTAssertNil(ActivityDescription.currency(for: entry(.expenseAdded, #"{"category":"fuel","total":"1.00"}"#)))
+        XCTAssertNil(ActivityDescription.currency(for: entry(.paymentReceived, "not json")))
+        XCTAssertEqual(ActivityAction.allCases.count, 20)
+    }
 }

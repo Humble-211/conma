@@ -19,6 +19,10 @@ public extension ActivityAction {
         case .timelineChanged: return "calendar"
         case .expenseUpdated: return "cart.badge.plus"
         case .expenseDeleted: return "cart.badge.minus"
+        case .paymentUpdated: return "banknote"
+        case .paymentDeleted: return "minus.circle"
+        case .labourLogged, .labourUpdated: return "person.badge.clock"
+        case .labourDeleted: return "person.badge.minus"
         }
     }
 
@@ -64,6 +68,10 @@ public extension ActivityDetail {
             default:
                 return Text("activity.expenseAdded \(titleText) \(totalText)")
             }
+        case .payment(let action, _, _, _):
+            return Text(action.titleKey)
+        case .labour(let action, _, _, _):
+            return Text(action.titleKey)
         case .plain(let action):
             return Text(action.titleKey)
         }
