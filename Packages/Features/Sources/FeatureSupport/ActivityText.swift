@@ -73,7 +73,9 @@ public extension ActivityDetail {
             let amountText = money(amount)
             switch action {
             case .paymentUpdated:
-                let fromText = money(previous ?? amount)
+                // No "from": the amount did not change (stage, method, date or notes did).
+                guard let previous else { return Text("activity.paymentEdited \(amountText) \(titleText)") }
+                let fromText = money(previous)
                 return Text("activity.paymentUpdated \(titleText) \(fromText) \(amountText)")
             case .paymentDeleted:
                 return Text("activity.paymentDeleted \(amountText) \(titleText)")
@@ -84,7 +86,9 @@ public extension ActivityDetail {
             let totalText = money(total)
             switch action {
             case .labourUpdated:
-                let fromText = money(previous ?? total)
+                // No "from": the cost did not change (date or notes did).
+                guard let previous else { return Text("activity.labourEdited \(names) \(totalText)") }
+                let fromText = money(previous)
                 return Text("activity.labourUpdated \(names) \(fromText) \(totalText)")
             case .labourDeleted:
                 return Text("activity.labourDeleted \(names) \(totalText)")

@@ -53,6 +53,17 @@ final class ActivityDescriptionTests: XCTestCase {
         XCTAssertEqual(ActivityDescription.detail(for: entry(.labourUpdated, #"{"currency":"CAD","from":"1400.00","names":"David","people":"1","total":"1600.00","workDate":"2026-09-25"}"#)),
                        .labour(action: .labourUpdated, names: "David", total: "1600.00", previousTotal: "1400.00"))
     }
+    func testUpdatesWithoutMoneyChangeHaveNoPrevious() {
+        // New rows omit "from"; older rows wrote "from" equal to the new value — both read as a plain update.
+        XCTAssertEqual(ActivityDescription.detail(for: entry(.paymentUpdated, #"{"amount":"400.00","currency":"CAD","item":"","method":"cash"}"#)),
+                       .payment(action: .paymentUpdated, title: .method(.cash), amount: "400.00", previousAmount: nil))
+        XCTAssertEqual(ActivityDescription.detail(for: entry(.paymentUpdated, #"{"amount":"400.00","currency":"CAD","from":"400.00","item":"Deposit","method":"cash"}"#)),
+                       .payment(action: .paymentUpdated, title: .item("Deposit"), amount: "400.00", previousAmount: nil))
+        XCTAssertEqual(ActivityDescription.detail(for: entry(.labourUpdated, #"{"currency":"CAD","names":"David","people":"1","total":"1600.00","workDate":"2026-09-25"}"#)),
+                       .labour(action: .labourUpdated, names: "David", total: "1600.00", previousTotal: nil))
+        XCTAssertEqual(ActivityDescription.detail(for: entry(.labourUpdated, #"{"currency":"CAD","from":"1600.00","names":"David","people":"1","total":"1600.00","workDate":"2026-09-25"}"#)),
+                       .labour(action: .labourUpdated, names: "David", total: "1600.00", previousTotal: nil))
+    }
     func testPaymentAndLabourMissingFieldsArePlain() {
         XCTAssertEqual(ActivityDescription.detail(for: entry(.paymentReceived, #"{"amount":"1.00"}"#)), .plain(.paymentReceived))
         XCTAssertEqual(ActivityDescription.detail(for: entry(.paymentReceived, #"{"amount":"1.00","method":"bitcoin"}"#)), .plain(.paymentReceived))

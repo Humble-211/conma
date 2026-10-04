@@ -12241,6 +12241,54 @@
           }
         }
       }
+    },
+    "activity.paymentEdited %@ %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Payment updated: %1$@ — %2$@"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đã sửa thanh toán: %1$@ — %2$@"
+          }
+        }
+      }
+    },
+    "attention.record.accessibility %@ %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Record payment, %1$@, %2$@"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ghi nhận thanh toán, %1$@, %2$@"
+          }
+        }
+      }
+    },
+    "activity.labourEdited %@ %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Labour updated: %1$@ — %2$@"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đã sửa Labour: %1$@ — %2$@"
+          }
+        }
+      }
     }
   }
 }

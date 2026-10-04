@@ -102,6 +102,18 @@ final class PaymentRepositoryTests: XCTestCase {
         await XCTAssertEqualAsync(try await self.activities().count, 0)
     }
 
+    func testUpdateWithoutAmountChangeOmitsFrom() async throws {
+        let p = payment("400.00", item: deposit.id)
+        try await repo.create(p, actor: f.actor)
+        var changed = try await XCTUnwrapAsync(try await repo.get(id: p.id))
+        changed.method = .cash
+        changed.scheduleItemId = nil
+        try await GRDBPaymentRepository(database: db, clock: .fixed(now.addingTimeInterval(60))).update(changed, actor: f.actor)
+        let a = try await activities()
+        XCTAssertEqual(a.map(\.action), ["paymentReceived", "paymentUpdated"])
+        XCTAssertEqual(a[1].details, #"{"amount":"400.00","currency":"CAD","item":"","method":"cash"}"#)
+    }
+
     func testUpdateNoOpAmountChangeAndScope() async throws {
         let p = payment("400.00", item: deposit.id)
         try await repo.create(p, actor: f.actor)

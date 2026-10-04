@@ -60,7 +60,8 @@ public final class GRDBPaymentRepository: PaymentRepository {
             row.updatedAt = now
             try PaymentRecord(row).update(db)
             var details = try Self.details(db, row)
-            details["from"] = previous.amount.storageString
+            // "from" only when the amount changed; a stage/method/date/notes edit reads as a plain update.
+            if previous.amount != row.amount { details["from"] = previous.amount.storageString }
             try ActivityLogRecord.append(db, companyId: row.companyId, actor: actor, action: .paymentUpdated, entityType: "payment", entityId: row.id,
                                          projectId: row.projectId, details: details, at: now)
         }

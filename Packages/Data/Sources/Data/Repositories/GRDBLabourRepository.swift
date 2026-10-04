@@ -78,7 +78,8 @@ public final class GRDBLabourRepository: LabourRepository {
             row.updatedAt = now
             try LabourEntryRecord(row).update(db)
             var details = try Self.details(db, row, currency: currency)
-            details["from"] = previous.cost.storageString
+            // "from" only when the cost changed; a date/notes edit reads as a plain update.
+            if previous.cost != row.cost { details["from"] = previous.cost.storageString }
             try ActivityLogRecord.append(db, companyId: row.companyId, actor: actor, action: .labourUpdated, entityType: "labour_entry", entityId: row.id,
                                          projectId: row.projectId, details: details, at: now)
         }

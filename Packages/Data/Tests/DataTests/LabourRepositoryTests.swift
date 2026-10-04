@@ -106,6 +106,17 @@ final class LabourRepositoryTests: XCTestCase {
         await XCTAssertThrowsErrorAsync(try await self.repo.update(swapped, actor: self.f.actor)) { XCTAssertEqual($0 as? DataError, .scopeMismatch) }
     }
 
+    func testUpdateWithoutCostChangeOmitsFrom() async throws {
+        let e = entry(mike, days: "1", rate: "250.00")
+        try await repo.create([e], actor: f.actor)
+        var noted = try await XCTUnwrapAsync(try await repo.get(id: e.id))
+        noted.notes = "framing"
+        try await GRDBLabourRepository(database: db, clock: .fixed(now.addingTimeInterval(60))).update(noted, actor: f.actor)
+        let a = try await activities()
+        XCTAssertEqual(a.map(\.action), ["labourLogged", "labourUpdated"])
+        XCTAssertEqual(a[1].details, #"{"currency":"CAD","names":"Mike","people":"1","total":"250.00","workDate":"2026-10-03"}"#)
+    }
+
     func testEmployeeRateChangeKeepsEntrySnapshot() async throws {
         let e = entry(mike, days: "2", rate: "250.00")
         try await repo.create([e], actor: f.actor)

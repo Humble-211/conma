@@ -61,12 +61,19 @@ public enum ActivityDescription {
             guard let amount = s("amount"), let method = s("method").flatMap(PaymentMethod.init(rawValue:)) else { return .plain(entry.action) }
             let item = s("item") ?? ""
             return .payment(action: entry.action, title: item.isEmpty ? .method(method) : .item(item), amount: amount,
-                            previousAmount: entry.action == .paymentUpdated ? s("from") : nil)
+                            previousAmount: entry.action == .paymentUpdated ? changed(from: s("from"), to: amount) : nil)
         case .labourLogged, .labourUpdated, .labourDeleted:
             guard let total = s("total"), let names = s("names"), !names.isEmpty else { return .plain(entry.action) }
-            return .labour(action: entry.action, names: names, total: total, previousTotal: entry.action == .labourUpdated ? s("from") : nil)
+            return .labour(action: entry.action, names: names, total: total,
+                           previousTotal: entry.action == .labourUpdated ? changed(from: s("from"), to: total) : nil)
         default: return .plain(entry.action)
         }
+    }
+
+    /// The previous money value only when it differs: an edit of stage/method/date/notes reads as a plain "updated" sentence, not "X → X".
+    static func changed(from previous: String?, to current: String) -> String? {
+        guard let previous, previous != current else { return nil }
+        return previous
     }
 
     /// The currency written with the row (3b money rows); nil for older rows, which fall back to the company currency.
