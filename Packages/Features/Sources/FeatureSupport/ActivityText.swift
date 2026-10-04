@@ -68,12 +68,39 @@ public extension ActivityDetail {
             default:
                 return Text("activity.expenseAdded \(titleText) \(totalText)")
             }
-        case .payment(let action, _, _, _):
-            return Text(action.titleKey)
-        case .labour(let action, _, _, _):
-            return Text(action.titleKey)
+        case .payment(let action, let title, let amount, let previous):
+            let titleText = title.text
+            let amountText = money(amount)
+            switch action {
+            case .paymentUpdated:
+                let fromText = money(previous ?? amount)
+                return Text("activity.paymentUpdated \(titleText) \(fromText) \(amountText)")
+            case .paymentDeleted:
+                return Text("activity.paymentDeleted \(amountText) \(titleText)")
+            default:
+                return Text("activity.paymentReceived \(amountText) \(titleText)")
+            }
+        case .labour(let action, let names, let total, let previous):
+            let totalText = money(total)
+            switch action {
+            case .labourUpdated:
+                let fromText = money(previous ?? total)
+                return Text("activity.labourUpdated \(names) \(fromText) \(totalText)")
+            case .labourDeleted:
+                return Text("activity.labourDeleted \(names) \(totalText)")
+            default:
+                return Text("activity.labourLogged \(names) \(totalText)")
+            }
         case .plain(let action):
             return Text(action.titleKey)
         }
+    }
+}
+
+public extension ActivityLogEntry {
+    /// The localized sentence; amounts use the currency written with the row (3b money rows), else `fallbackCurrency`.
+    func sentence(fallbackCurrency: CurrencyCode, locale: Locale) -> Text {
+        let currency = ActivityDescription.currency(for: self) ?? fallbackCurrency
+        return ActivityDescription.detail(for: self).text(currency: currency.rawValue, locale: locale)
     }
 }

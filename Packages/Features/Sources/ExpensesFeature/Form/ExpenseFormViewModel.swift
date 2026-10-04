@@ -80,6 +80,8 @@ public final class ExpenseFormViewModel {
                 taxMode = fields.mode
                 taxValue = fields.value                      // didSet re-syncs draft.tax from the two fields
                 pages = expense.receiptImages.map(ReceiptPage.saved)
+            } catch is CancellationError {
+                return                                           // the task was cancelled (form closing): no alert, no loadFailed
             } catch { loadFailed = true; alertKey = "expense.error.saveFailed"; return }
         }
         do {

@@ -145,6 +145,9 @@ def main() -> int:
         if name != "custom": generated.add(f"expenseCategory.{name}")
     for name in enum_cases(DOMAIN / "Entities/Enums.swift", "PaymentMethod"): generated.add(f"paymentMethod.{name}")
     for name in enum_cases(DOMAIN / "Expenses/ExpenseDraft.swift", "ExpenseDraftError"): generated.add(f"expense.error.{name}")
+    for name in enum_cases(DOMAIN / "Payments/PaymentDraft.swift", "PaymentDraftError"): generated.add(f"payment.error.{name}")
+    for name in enum_cases(DOMAIN / "Labour/LabourDraft.swift", "LabourDraftError"): generated.add(f"labour.error.{name}")
+    for name in enum_cases(DOMAIN / "Crew/EmployeeDraft.swift", "EmployeeDraftError"): generated.add(f"crew.error.{name}")
     # Parameterised families: the catalog key carries placeholders ("health.reason.paymentOverdue %lld").
     families: set[str] = set()
     for name in enum_cases(DOMAIN / "Health/ProjectHealthEvaluator.swift", "HealthReason"): families.add(f"health.reason.{name}")

@@ -41,7 +41,7 @@ struct ActivityEntryRow: View {
 
     var body: some View {
         ActivityRow(systemImage: entry.action.systemImage,
-                    title: ActivityDescription.detail(for: entry).text(currency: currency.rawValue, locale: locale),
+                    title: entry.sentence(fallbackCurrency: currency, locale: locale),
                     subtitle: Text(verbatim: Self.relative(entry.occurredAt, locale: locale)))
             .accessibilityElement(children: .combine)
     }
