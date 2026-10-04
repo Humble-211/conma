@@ -9378,6 +9378,22 @@
         }
       }
     },
+    "expense.receipt.loading": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Loading receipt…"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đang tải receipt…"
+          }
+        }
+      }
+    },
     "expense.receipt.remove": {
       "localizations": {
         "en": {
@@ -10238,6 +10254,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "Tự điền thuế cho chi phí mới. Để trống nếu không dùng."
+          }
+        }
+      }
+    },
+    "settings.defaultTax.kept %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not saved. The saved default is still %@."
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chưa lưu. Mặc định đã lưu vẫn là %@."
+          }
+        }
+      }
+    },
+    "settings.defaultTax.keptNone": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not saved. No default tax is set."
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chưa lưu. Chưa có thuế mặc định."
           }
         }
       }
