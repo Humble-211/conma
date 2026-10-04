@@ -16,13 +16,19 @@ public enum LocaleNumberParser {
 
     /// Whether a field showing `text` must be rewritten after its bound value changed to `newValue`.
     /// Unfocused: always (canonical display). Focused: only when the text means a different value,
-    /// treating an empty field as zero so clearing a field whose binding stores 0 is not undone mid-typing.
+    /// treating empty and zero as the same value both ways: clearing a field whose binding stores 0 is not
+    /// refilled with "0", and zero-valued text ("0.", "0.0") is not wiped by a binding that maps 0 to nil.
     public static func shouldReplace(_ text: String, with newValue: Decimal?, focused: Bool, locale: Locale) -> Bool {
         guard focused else { return true }
-        let shown = decimal(from: text, locale: locale)
-        if shown == newValue { return false }
-        if shown == nil, newValue == 0 { return false }
-        return true
+        return !sameWhileTyping(decimal(from: text, locale: locale), newValue)
+    }
+
+    /// Equal, or one is nil and the other is zero (shared with `IntegerField`).
+    public static func sameWhileTyping<T: Equatable & ExpressibleByIntegerLiteral>(_ shown: T?, _ value: T?) -> Bool {
+        if shown == value { return true }
+        if shown == nil, value == 0 { return true }
+        if shown == 0, value == nil { return true }
+        return false
     }
 
     public static func string(_ value: Decimal, locale: Locale, fractionDigits: Int) -> String {

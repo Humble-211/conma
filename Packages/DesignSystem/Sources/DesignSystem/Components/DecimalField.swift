@@ -47,8 +47,7 @@ public struct IntegerField: View {
             .focused($focused)
             .onChange(of: value) { _, newValue in
                 // Same rule as `LocaleNumberParser.shouldReplace`: outside changes show even while focused.
-                let shown = Int(text.filter(\.isNumber))
-                if !focused || (shown != newValue && !(shown == nil && newValue == 0)) { text = newValue.map { String($0) } ?? "" }
+                if !focused || !LocaleNumberParser.sameWhileTyping(Int(text.filter(\.isNumber)), newValue) { text = newValue.map { String($0) } ?? "" }
             }
             .onChange(of: text) { _, newValue in value = Int(newValue.filter(\.isNumber)) }
             .onAppear { if let value { text = String(value) } }
