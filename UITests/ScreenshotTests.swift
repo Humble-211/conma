@@ -3,7 +3,7 @@ import XCTest
 final class ScreenshotTests: XCTestCase {
     private func launch(locale: String, appearance: String) -> XCUIApplication {
         let app = XCUIApplication()
-        app.launchArguments = ["--ui-testing", "--seed-sample-data", "--locale", locale, "--appearance", appearance, "--today", "2026-10-03"]
+        app.launchArguments = ["--ui-testing", "--seed-sample-data", "--locale", locale, "--appearance", appearance, "--today", "2026-10-03", "--fake-scanner"]
         app.launch()
         return app
     }
@@ -13,6 +13,33 @@ final class ScreenshotTests: XCTestCase {
         attachment.name = name
         attachment.lifetime = .keepAlways
         add(attachment)
+    }
+
+    private func captureExpenseScreens(_ app: XCUIApplication, locale: String) {
+        app.tabBars.buttons.element(boundBy: 3).tap()
+        let lumber = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@ AND label CONTAINS %@", "expense_row_", "Lumber")).firstMatch
+        guard lumber.waitForExistence(timeout: 5) else { return XCTFail("no Lumber row") }
+        lumber.tap()
+        _ = app.textFields["expense_amount"].waitForExistence(timeout: 5)
+        snap(app, "expense_form_\(locale)")
+        app.descendants(matching: .any)["expense_receipt_thumb_0"].tap()
+        _ = app.descendants(matching: .any)["receipt_viewer"].waitForExistence(timeout: 5)
+        snap(app, "receipt_viewer_\(locale)")
+        app.buttons["receipt_close"].tap()
+        app.buttons["expense_cancel"].tap()
+        app.tabBars.buttons.element(boundBy: 4).tap()
+        app.buttons["more_categories"].tap()
+        _ = app.buttons["categories_add"].waitForExistence(timeout: 5)
+        snap(app, "categories_\(locale)")
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+        app.tabBars.buttons.element(boundBy: 1).tap()
+        app.descendants(matching: .any).matching(NSPredicate(format: "label CONTAINS %@", "123 Main Street")).firstMatch.tap()
+        _ = app.otherElements["detail_header"].waitForExistence(timeout: 5)
+        let section = app.descendants(matching: .any)["detail_expenses"]
+        var swipes = 0
+        while !(section.exists && section.isHittable) && swipes < 3 { app.swipeUp(); swipes += 1 }
+        snap(app, "detail_expenses_\(locale)")
+        app.navigationBars.buttons.element(boundBy: 0).tap()
     }
 
     func testCaptureAllScreens() {
@@ -35,6 +62,7 @@ final class ScreenshotTests: XCTestCase {
                 app.navigationBars.buttons.element(boundBy: 0).tap()
                 _ = app.buttons["more_customers"].waitForExistence(timeout: 5)
                 if appearance == "light" {
+                    captureExpenseScreens(app, locale: locale)
                     app.tabBars.buttons.element(boundBy: 1).tap()
                     app.buttons["projects_add"].tap()
                     let steps = ["jobType", "customer", "location", "scope", "timeline", "labour", "material", "other", "price", "deposit", "schedule", "review"]
