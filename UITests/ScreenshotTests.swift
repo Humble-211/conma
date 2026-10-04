@@ -37,9 +37,38 @@ final class ScreenshotTests: XCTestCase {
         _ = app.otherElements["detail_header"].waitForExistence(timeout: 5)
         let section = app.descendants(matching: .any)["detail_expenses"]
         var swipes = 0
-        while !(section.exists && section.isHittable) && swipes < 3 { app.swipeUp(); swipes += 1 }
+        while !(section.exists && section.isHittable) && swipes < 5 { app.swipeUp(); swipes += 1 }
         snap(app, "detail_expenses_\(locale)")
         app.navigationBars.buttons.element(boundBy: 0).tap()
+    }
+
+    private func captureMoneyScreens(_ app: XCUIApplication, locale: String) {
+        app.tabBars.buttons.element(boundBy: 1).tap()
+        app.descendants(matching: .any).matching(NSPredicate(format: "label CONTAINS %@", "123 Main Street")).firstMatch.tap()
+        _ = app.otherElements["detail_header"].waitForExistence(timeout: 5)
+        let payments = app.descendants(matching: .any)["detail_payments"]
+        var swipes = 0
+        while !(payments.exists && payments.isHittable) && swipes < 4 { app.swipeUp(); swipes += 1 }
+        snap(app, "detail_payments_\(locale)")
+        app.buttons["detail_payments_add"].tap()
+        _ = app.buttons["payment_save"].waitForExistence(timeout: 5)
+        snap(app, "payment_form_\(locale)")
+        app.buttons["payment_cancel"].tap()
+        let labour = app.descendants(matching: .any)["detail_labour"]
+        swipes = 0
+        while !(labour.exists && labour.isHittable) && swipes < 5 { app.swipeUp(); swipes += 1 }
+        snap(app, "detail_labour_\(locale)")
+        app.buttons["detail_labour_add"].tap()
+        _ = app.buttons["labour_save"].waitForExistence(timeout: 5)
+        snap(app, "labour_form_\(locale)")
+        app.buttons["labour_cancel"].tap()
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+        app.tabBars.buttons.element(boundBy: 4).tap()
+        app.buttons["more_crew"].tap()
+        _ = app.buttons["crew_add"].waitForExistence(timeout: 5)
+        snap(app, "crew_\(locale)")
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+        app.tabBars.buttons.element(boundBy: 1).tap()
     }
 
     func testCaptureAllScreens() {
@@ -63,6 +92,7 @@ final class ScreenshotTests: XCTestCase {
                 _ = app.buttons["more_customers"].waitForExistence(timeout: 5)
                 if appearance == "light" {
                     captureExpenseScreens(app, locale: locale)
+                    captureMoneyScreens(app, locale: locale)
                     app.tabBars.buttons.element(boundBy: 1).tap()
                     app.buttons["projects_add"].tap()
                     let steps = ["jobType", "customer", "location", "scope", "timeline", "labour", "material", "other", "price", "deposit", "schedule", "review"]
@@ -94,7 +124,7 @@ final class ScreenshotTests: XCTestCase {
                     snap(app, "detail_full_\(locale)")
                     let allActivity = app.buttons["detail_activity_all"]
                     var swipes = 0
-                    while !(allActivity.exists && allActivity.isHittable) && swipes < 4 { app.swipeUp(); swipes += 1 }
+                    while !(allActivity.exists && allActivity.isHittable) && swipes < 8 { app.swipeUp(); swipes += 1 }
                     allActivity.tap()
                     _ = app.descendants(matching: .any)["activity_list"].waitForExistence(timeout: 5)
                     snap(app, "activity_\(locale)")
