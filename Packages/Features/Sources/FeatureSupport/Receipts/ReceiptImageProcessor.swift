@@ -17,4 +17,14 @@ public enum ReceiptImageProcessor {
         let resized = UIGraphicsImageRenderer(size: target, format: format).image { _ in image.draw(in: CGRect(origin: .zero, size: target)) }
         return resized.jpegData(compressionQuality: quality)
     }
+
+    /// Encodes several pages off the main actor (non-isolated async runs on the global executor); pages that fail are dropped.
+    public static func jpegs(from images: [UIImage]) async -> [Data] {
+        images.compactMap { jpeg(from: $0) }
+    }
+
+    /// Photos-picker variant: decodes the raw file data, then encodes like `jpeg(from:)`, off the main actor.
+    public static func jpegs(fromImageData items: [Data]) async -> [Data] {
+        items.compactMap { UIImage(data: $0).flatMap { jpeg(from: $0) } }
+    }
 }

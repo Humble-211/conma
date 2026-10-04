@@ -45,7 +45,14 @@ struct DocumentCameraView: UIViewControllerRepresentable {
         init(onFinish: @escaping ([Data]) -> Void, onCancel: @escaping () -> Void) { self.onFinish = onFinish; self.onCancel = onCancel }
 
         func documentCameraViewController(_ controller: VNDocumentCameraViewController, didFinishWith scan: VNDocumentCameraScan) {
-            onFinish((0..<scan.pageCount).compactMap { ReceiptImageProcessor.jpeg(from: scan.imageOfPage(at: $0)) })
+            // Grab the page images here (the scan object stays on the main thread), resize/encode them in the background,
+            // then hand the JPEGs back on the main actor so a multi-page scan does not freeze the UI.
+            let images = (0..<scan.pageCount).map { scan.imageOfPage(at: $0) }
+            let onFinish = self.onFinish
+            Task { @MainActor in
+                let jpegs = await ReceiptImageProcessor.jpegs(from: images)
+                onFinish(jpegs)
+            }
         }
         func documentCameraViewControllerDidCancel(_ controller: VNDocumentCameraViewController) { onCancel() }
         func documentCameraViewController(_ controller: VNDocumentCameraViewController, didFailWithError error: Error) { onCancel() }
