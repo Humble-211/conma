@@ -2,7 +2,7 @@ import Foundation
 import GRDB
 import Domain
 
-struct ExpenseRecord: Codable, FetchableRecord, PersistableRecord {
+struct ExpenseRecord: Codable, FetchableRecord, PersistableRecord, Equatable {
     static let databaseTableName = "expenses"
     static let databaseColumnDecodingStrategy = DatabaseColumnDecodingStrategy.convertFromSnakeCase
     static let databaseColumnEncodingStrategy = DatabaseColumnEncodingStrategy.convertToSnakeCase
@@ -33,7 +33,7 @@ struct ExpenseRecord: Codable, FetchableRecord, PersistableRecord {
         paymentMethod = e.paymentMethod?.rawValue; notes = e.notes
     }
 
-    func toDomain(currency: CurrencyCode) throws -> Expense {
+    func toDomain(currency: CurrencyCode, receipts: [ReceiptImage] = []) throws -> Expense {
         let t = Self.databaseTableName
         guard let cat = ExpenseCategory(rawValue: category) else { throw DataError.corruptRow(table: t, id: id, column: "category") }
         guard let group = CostGroup(rawValue: costGroup) else { throw DataError.corruptRow(table: t, id: id, column: "cost_group") }
@@ -48,7 +48,7 @@ struct ExpenseRecord: Codable, FetchableRecord, PersistableRecord {
                        amount: try RecordSupport.money(amount, currency: currency, table: t, id: id, column: "amount"),
                        tax: try RecordSupport.money(tax, currency: currency, table: t, id: id, column: "tax"),
                        spentOn: try RecordSupport.requiredCalendarDate(spentOn, table: t, id: id, column: "spent_on"),
-                       paymentMethod: method, notes: notes, receiptImages: [],
+                       paymentMethod: method, notes: notes, receiptImages: receipts,
                        createdAt: try RecordSupport.date(createdAt, table: t, id: id, column: "created_at"),
                        updatedAt: try RecordSupport.date(updatedAt, table: t, id: id, column: "updated_at"),
                        deletedAt: try RecordSupport.date(deletedAt, table: t, id: id, column: "deleted_at"))
