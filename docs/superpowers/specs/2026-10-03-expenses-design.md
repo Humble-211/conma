@@ -365,3 +365,5 @@ Payments, labour/crew, employees (3b); OCR; vendor list/autocomplete; kéo đổ
 ## Errata
 
 - §5.4 (Task 12): custom categories are listed before the built-in ones (section "Của bạn" above "Có sẵn" in `CategoriesView`).
+- §10 UI tests (Task 14): Kitchen is hidden under the Projects list's default In-work filter, so tests open projects via the 2b helper (tap the "All" filter first); the delete confirmation is tapped as the first `expense_delete_confirm` match (the dialog exposes it twice); (g) pops Settings with the back button before switching tab (the decimal keyboard covers the tab bar); (e) scrolls the category picker until the custom "Dump runs" row exists (13 built-ins come first in a lazy list).
+- §10 (Task 14): the fake scanner's container identifier `fake_scanner` replaced its buttons' identifiers; it is now a `.contain` accessibility container so `scanner_capture` / `scanner_cancel` are reachable.
