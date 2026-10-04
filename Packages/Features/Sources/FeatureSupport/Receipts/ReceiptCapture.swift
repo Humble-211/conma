@@ -42,15 +42,22 @@ struct DocumentCameraView: UIViewControllerRepresentable {
     final class Coordinator: NSObject, VNDocumentCameraViewControllerDelegate {
         let onFinish: ([Data]) -> Void
         let onCancel: () -> Void
+        /// VisionKit can call `didFinishWith` again (e.g. a second tap on Save); only the first scan is used.
+        private var didFinish = false
         init(onFinish: @escaping ([Data]) -> Void, onCancel: @escaping () -> Void) { self.onFinish = onFinish; self.onCancel = onCancel }
 
         func documentCameraViewController(_ controller: VNDocumentCameraViewController, didFinishWith scan: VNDocumentCameraScan) {
-            // Grab the page images here (the scan object stays on the main thread), resize/encode them in the background,
-            // then hand the JPEGs back on the main actor so a multi-page scan does not freeze the UI.
-            let images = (0..<scan.pageCount).map { scan.imageOfPage(at: $0) }
+            guard !didFinish else { return }
+            didFinish = true
+            // One page at a time: fetch it on the main thread (the scan object stays there), encode it in the background,
+            // and release its full-resolution image before fetching the next, so a 10-page scan never holds 10 bitmaps.
             let onFinish = self.onFinish
             Task { @MainActor in
-                let jpegs = await ReceiptImageProcessor.jpegs(from: images)
+                var jpegs: [Data] = []
+                for index in 0..<scan.pageCount {
+                    let page = autoreleasepool { scan.imageOfPage(at: index) }
+                    if let jpeg = await ReceiptImageProcessor.encode(page) { jpegs.append(jpeg) }
+                }
                 onFinish(jpegs)
             }
         }
