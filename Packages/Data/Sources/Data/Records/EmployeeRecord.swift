@@ -2,7 +2,7 @@ import Foundation
 import GRDB
 import Domain
 
-struct EmployeeRecord: Codable, FetchableRecord, PersistableRecord {
+struct EmployeeRecord: Codable, FetchableRecord, PersistableRecord, Equatable {
     static let databaseTableName = "employees"
     static let databaseColumnDecodingStrategy = DatabaseColumnDecodingStrategy.convertFromSnakeCase
     static let databaseColumnEncodingStrategy = DatabaseColumnEncodingStrategy.convertToSnakeCase
@@ -43,6 +43,11 @@ struct EmployeeRecord: Codable, FetchableRecord, PersistableRecord {
                         createdAt: try RecordSupport.date(createdAt, table: t, id: id, column: "created_at"),
                         updatedAt: try RecordSupport.date(updatedAt, table: t, id: id, column: "updated_at"),
                         deletedAt: try RecordSupport.date(deletedAt, table: t, id: id, column: "deleted_at"))
+    }
+
+    /// Every employee of the company, deleted ones included (labour history names).
+    static func fetchAll(_ db: Database, companyId: String, currency: CurrencyCode) throws -> [Employee] {
+        try EmployeeRecord.filter(Column("company_id") == companyId).order(Column("name")).fetchAll(db).map { try $0.toDomain(currency: currency) }
     }
 
     static func fetchLive(_ db: Database, companyId: String, currency: CurrencyCode) throws -> [Employee] {

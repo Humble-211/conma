@@ -2,7 +2,7 @@ import Foundation
 import GRDB
 import Domain
 
-struct LabourEntryRecord: Codable, FetchableRecord, PersistableRecord {
+struct LabourEntryRecord: Codable, FetchableRecord, PersistableRecord, Equatable {
     static let databaseTableName = "labour_entries"
     static let databaseColumnDecodingStrategy = DatabaseColumnDecodingStrategy.convertFromSnakeCase
     static let databaseColumnEncodingStrategy = DatabaseColumnEncodingStrategy.convertToSnakeCase
