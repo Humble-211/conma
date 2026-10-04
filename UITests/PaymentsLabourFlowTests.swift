@@ -235,6 +235,50 @@ final class PaymentsLabourFlowTests: XCTestCase {
         waitLabel(app, "home_total_spent", contains: "10,885.00")
     }
 
+    private func waitValue(_ field: XCUIElement, contains text: String, timeout: TimeInterval = 5) {
+        let done = expectation(for: NSPredicate(format: "value CONTAINS %@", text), evaluatedWith: field)
+        XCTAssertEqual(XCTWaiter().wait(for: [done], timeout: timeout), .completed, "'\(String(describing: field.value))' lacks '\(text)'")
+    }
+
+    /// (i) The "Remaining" chip tapped while the amount field has the keyboard: the field shows what Save will record.
+    func testRemainingChipFillsFocusedAmount() {
+        let app = launch()
+        openProject(app, "123 Main Street")
+        let add = app.buttons["detail_payments_add"]
+        scrollTo(app, add)
+        add.tap()
+        let amount = app.textFields["payment_amount"]
+        XCTAssertTrue(amount.waitForExistence(timeout: 5))
+        amount.tap()
+        XCTAssertTrue(app.keyboards.firstMatch.waitForExistence(timeout: 5), "keyboard")
+        let chip = app.buttons["payment_chip_remaining"]
+        XCTAssertTrue(chip.waitForExistence(timeout: 5))
+        XCTAssertTrue(chip.label.contains("11,400.00"), chip.label)
+        chip.tap()
+        waitValue(amount, contains: "11400")
+        XCTAssertTrue(app.keyboards.firstMatch.exists, "the field kept focus")
+        app.buttons["payment_cancel"].tap()
+        XCTAssertTrue(app.buttons["payment_save"].waitForNonExistence(timeout: 5))
+    }
+
+    /// (j) Typing 8 days then "+" while the field is focused: the field shows 8.5, as costed.
+    func testDaysStepperUpdatesFocusedField() {
+        let app = launch()
+        openProject(app, "123 Main Street")
+        let david = button(app, prefix: "labour_row_", containing: "David")
+        scrollTo(app, david)
+        david.tap()
+        let days = app.textFields["labour_days"]
+        XCTAssertTrue(days.waitForExistence(timeout: 5))
+        replace(app, "labour_days", with: "8")
+        waitValue(days, contains: "8")
+        app.buttons["labour_days_plus"].tap()
+        waitValue(days, contains: "8.5")
+        waitLabel(app, "labour_total", contains: "1,700.00")
+        app.buttons["labour_cancel"].tap()
+        XCTAssertTrue(app.buttons["labour_save"].waitForNonExistence(timeout: 5))
+    }
+
     /// (h) Vietnamese smoke: Payments/Labour cards and the crew list.
     func testVietnameseSmoke() {
         let app = launch(locale: "vi", extra: ["-AppleLocale", "vi_VN"])
